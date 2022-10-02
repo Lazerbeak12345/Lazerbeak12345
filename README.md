@@ -20,7 +20,7 @@ Here are some ideas to get you started:
 I'm making use of an approach introduced to me by [kalkayan and their dotfiles](https://github.com/kalkayan/dotfiles).
 
 ```bash
-git clone --bare https://github.com/Lazerbeak12345/dotfiles.git $HOME/.dotfiles
+git clone --bare git@github.com:Lazerbeak12345/Lazerbeak12345 $HOME/.dotfiles
 ```
 
 There's a lot of reasons why this approach is awesome, and perhaps the biggest one is its simplicity.
