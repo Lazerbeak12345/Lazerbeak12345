@@ -136,7 +136,6 @@ cmp.setup{
 		end,
 	},
 	mapping = {
-		-- TODO these mappings are sorta stupid
 		['<C-d>'] = cmp.mapping(cmp.mapping.scroll_docs(-4), { 'i', 'c' }),
 		['<C-f>'] = cmp.mapping(cmp.mapping.scroll_docs(4), { 'i', 'c' }),
 		['<C-Space>'] = cmp.mapping(cmp.mapping.complete(), { 'i', 'c' }),
@@ -145,7 +144,7 @@ cmp.setup{
 			i = cmp.mapping.abort(),
 			c = cmp.mapping.close(),
 		},
-		['<CR>'] = cmp.mapping.confirm{ select = true },
+		['<Tab>'] = cmp.mapping.confirm{ select = true },
 		--[[ TODO this is what some of it was before:
 		--  Use keyboard shortcuts to change to the next or previous sources
 		vim.keymap.set('i', '<c-j>', '<Plug>(completion_next_source)')
@@ -436,60 +435,90 @@ vim.o.autoread = true
 -- Allow for syntax checking in racket. The catches: Security(?) and lag.
 -- NOTE: LSP is better
 --vim.g.syntastic_enable_racket_racket_checker = 1 -- I want it to check racket file syntax
-EOF
-au TextYankPost * silent! lua vim.highlight.on_yank()
-au BufNewFile,BufRead *.rkt
-    \ set tabstop=2 |
-    \ set softtabstop=2 |
-    \ set shiftwidth=2 |
-    \ set textwidth=79 |
-    \ set expandtab |
-    \ set autoindent |
-    \ set fileformat=unix |
-    \ set lisp
-
-" Highlight bad whitespace
-"au BufRead,BufNewFile *.py,*.pyw,*.c,*.h,*.js,*.ts,*.html,*.htm,.vimrc,*.vim match BadWhitespace /\s\+$/
-
-" (failed) Attempt to disable numbers on terminal only.
-"au TermOpen * set nonumber
-"au TermOpen * set norelativenumber
-
-" Popup windows tend to be unreadable with a pink background
-highlight Pmenu ctermbg=Black guibg=Black ctermfg=White guifg=White
-function! LightlineVisualSelection() abort
-	let mode = mode()
-	let lines = abs(line("v") - line(".")) + 1
-	let lines_str = '↕' . lines
-	let cols = abs(col("v") - col(".")) + 1
-	let cols_str = '↔' . cols
-	if mode ==# 'v' || mode ==# 's'
-		return lines == 1 ? cols_str : lines_str
-	elseif mode ==# 'V' || mode ==# 'S'
+vim.api.nvim_create_autocmd("TextYankPost", {
+	pattern = "*",
+	callback = function()
+		vim.highlight.on_yank()
+	end
+})
+vim.api.nvim_create_autocmd({ "BufNewFile", "BufRead" }, {
+	pattern = "*.rkt",
+	callback = function()
+		vim.o.tabstop = 2
+		vim.o.softtabstop = 2
+		vim.o.shiftwidth = 2
+		vim.o.textwidth = 79
+		vim.o.expandtab = true
+		vim.o.autoindent = true
+		vim.o.fileformat = "unix"
+		vim.o.lisp = true
+	end
+})
+--[[ Highlight bad whitespace
+vim.api.nvim_create_autocmd({"BufRead","BufNewFile"},{
+	pattern = {"*.py","*.pyw","*.c","*.h","*.js","*.ts","*.html","*.htm",".vimrc","*.vim"},
+	-- TODO convert this
+	command = "match BadWhitespace /\s\+$/"
+})]]
+--[[ (failed) Attempt to disable numbers on terminal only.
+vim.api.nvim_create_autocmd({ "TermOpen " }, {
+	pattern = "*",
+	callback = function()
+		vim.o.number = false
+		vim.o.relativenumber = false
+	end
+})]]
+function _G.lightline_visual_selection()
+	local mode = vim.fn.mode()
+	local lines = vim.fn.abs(vim.fn.line("v") - vim.fn.line(".")) + 1
+	local lines_str = '↕' .. lines
+	local cols = vim.fn.abs(vim.fn.col("v") - vim.fn.col(".")) + 1
+	local cols_str = '↔' .. cols
+	if mode == 'v' or mode == 's' then
+		if lines == 1 then
+			return cols_str
+		else
+			return lines_str
+		end
+	elseif mode == 'V' or mode == 'S' then
 		return lines_str
-	elseif mode ==# "\<C-v>"
-		return lines_str . cols_str
+	elseif mode == "<C-v>" then
+		return lines_str .. cols_str
 	else
 		return ''
-	endif
-endfunction
-function! CustomFugitiveHead() abort
-	let result =FugitiveHead()
-	if ""==result
+	end
+end
+function _G.lightline_visual_selection_cond()
+	local mode = vim.fn.mode()
+	return mode == 'v' or
+		mode == 's' or
+		mode == 'V' or
+		mode == 'S' or
+		mode == "<C-v>"
+end
+function _G.custom_fugitive_head()
+	local result = vim.api.nvim_eval("FugitiveHead()")
+	if result == "" then
 		return ""
-	endif
-	return " ".result
-endfunction
+	end
+	return " " ..  result
+end
+function _G.custom_fugitive_head_cond()
+	return "" ~= vim.api.nvim_eval("FugitiveHead()")
+end
+EOF
+" Popup windows tend to be unreadable with a pink background
+highlight Pmenu ctermbg=Black guibg=Black ctermfg=White guifg=White
 " top: 
  	"\ 'colorscheme': 'powerline',
 "   inside component:
- 	"\   'fugitive': '%{exists("*FugitiveHead")?" ".FugitiveHead():""}',
 	"\   'fileencoding': "%{winwidth(0) > 70 ? (&fileencoding !=# '' ? &fileencoding : 'no enc') : ''}",
 	"\   'filetype': "%{winwidth(0) > 70 ? (&filetype !=# '' ? &filetype : 'no ft') : ''}",
 "   inside component_visible_condidtion:
  	"\   'fugitive': '(exists("*FugitiveHead") && ""!=FugitiveHead())',
 " 	inside componenet_function:
 	"\   'fugitive': 'FugitiveHead',
+	"\   'visual_selection': 'LightlineVisualSelection',
 "	at bottom
  	"\ 'separator': { 'left': '🙽 ', 'right': '🙼 ' },
  	"\ 'separator': { 'left': '🙿 ', 'right': '🙾 ' }
@@ -509,19 +538,20 @@ let g:lightline = {
 	\   'fileencoding': "%{winwidth(0) > 70 ? &fileencoding : ''}",
 	\   'filetype': "%{winwidth(0) > 70 ? &filetype : ''}",
 	\   'lsp-status': "%{v:lua.LspStatus()}",
+	\   'visual_selection': '%{v:lua.lightline_visual_selection()}',
+	\   'fugitive': '%{v:lua.custom_fugitive_head()}'
  	\ },
  	\ 'component_visible_condition': {
  	\   'readonly': '(&filetype!="help"&& &readonly)',
  	\   'modified': '(&filetype!="help"&&(&modified||!&modifiable))',
- 	\   'lsp-status': 'v:lua.LspStatus_getVisible()',
 	\   'fileformat': '(winwidth(0) > 70)',
 	\   'fileencoding': '(winwidth(0) > 70 && &fileencoding !=# "")',
-	\   'filetype': '(winwidth(0) > 70 && &filetype !=# "")'
+	\   'filetype': '(winwidth(0) > 70 && &filetype !=# "")',
+ 	\   'lsp-status': 'v:lua.LspStatus_getVisible()',
+	\   'visual_selection': 'v:lua.lightline_visual_selection_cond()',
+	\   'fugitive': 'v:lua.custom_fugitive_head_cond()'
  	\ },
-	\ 'component_function': {
-	\   'visual_selection': 'LightlineVisualSelection',
-	\   'fugitive': 'CustomFugitiveHead',
-	\ },
+	\ 'component_function': { },
  	\ 'separator': { 'left': '', 'right': '' },
  	\ 'subseparator': { 'left': '', 'right': '' }
  	\ }
