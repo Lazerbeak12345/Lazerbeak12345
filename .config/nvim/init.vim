@@ -506,53 +506,45 @@ end
 function _G.custom_fugitive_head_cond()
 	return "" ~= vim.api.nvim_eval("FugitiveHead()")
 end
+-- Popup windows tend to be unreadable with a pink background
+vim.api.nvim_set_hl(0, "Pmenu", {})
+--  	"\ 'separator': { 'left': '🙽 ', 'right': '🙼 ' },
+--  	"\ 'separator': { 'left': '🙿 ', 'right': '🙾 ' }
+-- "                                  
+-- "█
+-- TODO this is actually slightly broken. look at https://github.com/nvim-lualine/lualine.nvim to fix it
+vim.g.lightline = {
+	active = {
+		left = {
+			{ 'mode', 'paste' },
+			{ 'fugitive', 'readonly', 'filename', 'modified', 'visual_selection' },
+			{ 'lsp_status' }
+		}
+	},
+	component = {
+	  readonly= '%{&filetype=="help"?"":&readonly?"":""}',
+	  modified= '%{&filetype=="help"?"":&modified?"+":&modifiable?"":"-"}',
+	  lineinfo= " %3l:%-2c",
+	  fileformat= "%{winwidth(0) > 70 ? &fileformat : ''}",
+	  fileencoding= "%{winwidth(0) > 70 ? &fileencoding : ''}",
+	  filetype= "%{winwidth(0) > 70 ? &filetype : ''}",
+	  lsp_status= "%{v:lua.LspStatus()}",
+	  visual_selection= '%{v:lua.lightline_visual_selection()}',
+	  fugitive= '%{v:lua.custom_fugitive_head()}'
+	},
+	component_visible_condition= {
+	  readonly= '(&filetype!="help"&& &readonly)',
+	  modified= '(&filetype!="help"&&(&modified||!&modifiable))',
+	  fileformat= '(winwidth(0) > 70)',
+	  fileencoding= '(winwidth(0) > 70 && &fileencoding !=# "")',
+	  filetype= '(winwidth(0) > 70 && &filetype !=# "")',
+	  lsp_status= 'v:lua.LspStatus_getVisible()',
+	  visual_selection= 'v:lua.lightline_visual_selection_cond()',
+	  fugitive= 'v:lua.custom_fugitive_head_cond()'
+	},
+	component_function = vim.empty_dict(),
+	separator= { left= '', right= '' },
+	subseparator= { left= '', right= '' }
+}
 EOF
-" Popup windows tend to be unreadable with a pink background
-highlight Pmenu ctermbg=Black guibg=Black ctermfg=White guifg=White
-" top: 
- 	"\ 'colorscheme': 'powerline',
-"   inside component:
-	"\   'fileencoding': "%{winwidth(0) > 70 ? (&fileencoding !=# '' ? &fileencoding : 'no enc') : ''}",
-	"\   'filetype': "%{winwidth(0) > 70 ? (&filetype !=# '' ? &filetype : 'no ft') : ''}",
-"   inside component_visible_condidtion:
- 	"\   'fugitive': '(exists("*FugitiveHead") && ""!=FugitiveHead())',
-" 	inside componenet_function:
-	"\   'fugitive': 'FugitiveHead',
-	"\   'visual_selection': 'LightlineVisualSelection',
-"	at bottom
- 	"\ 'separator': { 'left': '🙽 ', 'right': '🙼 ' },
- 	"\ 'separator': { 'left': '🙿 ', 'right': '🙾 ' }
-"                                  
-"█
-let g:lightline = {
-	\ 'active': {
- 	\   'left': [ [ 'mode', 'paste' ],
- 	\             [ 'fugitive', 'readonly', 'filename', 'modified', 'visual_selection' ],
-    \             [ 'lsp-status' ] ],
- 	\ },
- 	\ 'component': {
- 	\   'readonly': '%{&filetype=="help"?"":&readonly?"":""}',
- 	\   'modified': '%{&filetype=="help"?"":&modified?"+":&modifiable?"":"-"}',
-	\   'lineinfo': " %3l:%-2c",
-	\   'fileformat': "%{winwidth(0) > 70 ? &fileformat : ''}",
-	\   'fileencoding': "%{winwidth(0) > 70 ? &fileencoding : ''}",
-	\   'filetype': "%{winwidth(0) > 70 ? &filetype : ''}",
-	\   'lsp-status': "%{v:lua.LspStatus()}",
-	\   'visual_selection': '%{v:lua.lightline_visual_selection()}',
-	\   'fugitive': '%{v:lua.custom_fugitive_head()}'
- 	\ },
- 	\ 'component_visible_condition': {
- 	\   'readonly': '(&filetype!="help"&& &readonly)',
- 	\   'modified': '(&filetype!="help"&&(&modified||!&modifiable))',
-	\   'fileformat': '(winwidth(0) > 70)',
-	\   'fileencoding': '(winwidth(0) > 70 && &fileencoding !=# "")',
-	\   'filetype': '(winwidth(0) > 70 && &filetype !=# "")',
- 	\   'lsp-status': 'v:lua.LspStatus_getVisible()',
-	\   'visual_selection': 'v:lua.lightline_visual_selection_cond()',
-	\   'fugitive': 'v:lua.custom_fugitive_head_cond()'
- 	\ },
-	\ 'component_function': { },
- 	\ 'separator': { 'left': '', 'right': '' },
- 	\ 'subseparator': { 'left': '', 'right': '' }
- 	\ }
-"set ambiwidth=double " use this if the arrows are cut off
+" set ambiwidth=double " use this if the arrows are cut off
