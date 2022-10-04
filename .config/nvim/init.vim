@@ -1,15 +1,30 @@
-if empty(glob('~/.config/nvim/autoload/plug.vim'))
-	echo "Downloading Vim Plug and all plugins!"
-	silent execute "!curl -fLo ~/.config/nvim/autoload/plug.vim --create-dirs https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim"
-	autocmd VimEnter * PlugInstall
-endif
-if exists('$VIMRUNNING') && ! has('gui_running')
-	echo "dummy! read before running!"
-	sleep
-	qall!
+lua <<EOF
+if vim.fn.empty(vim.fn.glob('~/.config/nvim/autoload/plug.vim')) == 1 then
+	print("Downloading Vim Plug and all plugins!")
+	vim.cmd(table.concat{
+		"!",
+		"curl",
+		" -fLo ~/.config/nvim/autoload/plug.vim",
+		" --create-dirs",
+		" https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim"
+	})
+	vim.api.nvim_create_autocmd("VimEnter", {
+		pattern = "*",
+		command = "PlugInstall"
+	})
+end
+if vim.env.VIMRUNNING == "1" then
+	print("dummy! read before running (override by unsetting $VIMRUNNING)")
+	vim.cmd([[
+		" Lua never sleeps
+		sleep
+		" and isn't a quitter
+		qall!
+	]]) -- So vim has to take care of it.
 else
-    let $VIMRUNNING = 1
-endif
+	vim.env.VIMRUNNING = 1
+end
+EOF
 call plug#begin()
 " Commenting
 "Plug 'tpope/vim-commentary'
@@ -360,14 +375,18 @@ vim.g.SimpylFold_docstring_preview = 1
 vim.g.rooter_change_directory_for_non_project_files = 'current'
 -- vim.g.rooter_patterns = ['.git', 'mod.conf', 'modpack.conf','game.conf','texture_pack.conf']
 
+local function t(str)
+	return vim.api.nvim_replace_termcodes(str, true, true, true)
+end
+
 -- TODO fix
 -- nvim_lsp completeion settings
 --  Use <Tab> and <S-Tab> to navigate through popup menu
 vim.keymap.set('i', '<Tab>', function()
-	return vim.fn.pumvisible() == 1 and '<C-n>' or '<Tab>'
+	return vim.fn.pumvisible() == 1 and t'<C-n>' or t'<Tab>'
 end, {expr = true})
 vim.keymap.set('i', '<S-Tab>', function()
-	return vim.fn.pumvisible() == 1 and '<C-p>' or '<S-Tab>'
+	return vim.fn.pumvisible() == 1 and t'<C-p>' or t'<S-Tab>'
 end, {expr = true})
 
 vim.keymap.set('n', '<Leader>d', vim.diagnostic.goto_next)
@@ -546,5 +565,5 @@ vim.g.lightline = {
 	separator= { left= '', right= '' },
 	subseparator= { left= '', right= '' }
 }
+-- vim.o.ambiwidth="double" -- use this if the arrows are cut off
 EOF
-" set ambiwidth=double " use this if the arrows are cut off
