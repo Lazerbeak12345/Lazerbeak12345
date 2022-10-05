@@ -1,4 +1,3 @@
-lua <<EOF
 if vim.fn.empty(vim.fn.glob('~/.config/nvim/autoload/plug.vim')) == 1 then
 	print("Downloading Vim Plug and all plugins!")
 	vim.cmd(table.concat{
@@ -24,7 +23,7 @@ if vim.env.VIMRUNNING == "1" then
 else
 	vim.env.VIMRUNNING = 1
 end
-EOF
+vim.cmd([[
 call plug#begin()
 " Commenting
 "Plug 'tpope/vim-commentary'
@@ -132,7 +131,7 @@ Plug 'uga-rosa/cmp-dictionary'
 
 " All of your Plugins must be added before the following line
 call plug#end()
-lua <<EOF
+]])
 --TODO once this whole file is in the lua block, look into https://github.com/wbthomason/packer.nvim
 --nvim-cmp setup
 -- In the meantime refer to https://github.com/nanotee/nvim-lua-guide
@@ -566,4 +565,3 @@ vim.g.lightline = {
 	subseparator= { left= '', right= '' }
 }
 -- vim.o.ambiwidth="double" -- use this if the arrows are cut off
-EOF
