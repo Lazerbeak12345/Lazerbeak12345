@@ -276,7 +276,7 @@ require"cmp_dictionary".setup{
         ["*"] = "/usr/share/dict/words",
         --["markdown"] = { "path/to/mddict", "path/to/mddict2" },
         --["javascript,typescript"] = { "path/to/jsdict" },
-    }, 
+    },
     -- The following are default values, so you don't need to write them if you don't want to change them
     --exact = 2,
     --async = true,
@@ -291,7 +291,7 @@ lsp_status.config{
 	kind_labels = lspkind.symbol_map
 }
 lsp_status.register_progress()
-function my_on_attach(...)
+local function my_on_attach(...)
 	--[[
 	TODO
 	[LSP] Accessing client.resolved_capabilities is deprecated, update your plugins
