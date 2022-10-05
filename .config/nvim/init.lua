@@ -14,124 +14,124 @@ if vim.fn.empty(vim.fn.glob('~/.config/nvim/autoload/plug.vim')) == 1 then
 end
 if vim.env.VIMRUNNING == "1" then
 	print("dummy! read before running (override by unsetting $VIMRUNNING)")
-	vim.cmd([[
-		" Lua never sleeps
-		sleep
-		" and isn't a quitter
-		qall!
-	]]) -- So vim has to take care of it.
+	-- Lua never sleeps
+	vim.cmd.sleep()
+	-- and isn't a quitter
+	vim.cmd.qall{ bang = true }
+	-- So vim has to take care of it.
 else
 	vim.env.VIMRUNNING = 1
 end
-vim.cmd([[
-call plug#begin()
-" Commenting
-"Plug 'tpope/vim-commentary'
-" The looks of Powerline, but faster
+local function Plug(path)
+	vim.cmd.Plug{ args = { '"' .. path .. '"' } }
+end
+vim.fn["plug#begin"]()
+-- Commenting
+--Plug 'tpope/vim-commentary'
+-- The looks of Powerline, but faster
 Plug 'itchyny/lightline.vim'
-" Indent lines
+-- Indent lines
 Plug 'thaerkh/vim-indentguides'
 
-" Git integration
-"  Genral use
+-- Git integration
+--  Genral use
 Plug 'tpope/vim-fugitive'
-"  Line-per-line indicators and chunk selection
+--  Line-per-line indicators and chunk selection
 Plug 'airblade/vim-gitgutter'
-" Nicer file management
+-- Nicer file management
 Plug 'preservim/nerdtree'
 Plug 'tiagofumo/vim-nerdtree-syntax-highlight'
-"Plug 'jistr/vim-nerdtree-tabs'
+--Plug 'jistr/vim-nerdtree-tabs'
 Plug 'Xuyuanp/nerdtree-git-plugin'
-" Icons
+-- Icons
 Plug 'ryanoasis/vim-devicons'
 
-"  This should work on all files (it's python support ain't great)
-"Plug 'khzaw/vim-conceal'
-"Plug 'jamestomasino-forks/vim-conceal' " This one has better javascript support
-"Plug 'Lazerbeak12345/vim-conceal' " This is my blend of a bunch of stuff (my
-"    fork of above)
-" Ease of use
+--  This should work on all files (it's python support ain't great)
+--Plug 'khzaw/vim-conceal'
+--Plug 'jamestomasino-forks/vim-conceal' " This one has better javascript support
+--Plug 'Lazerbeak12345/vim-conceal' " This is my blend of a bunch of stuff (my
+--    fork of above)
+-- Ease of use
 Plug 'vimlab/split-term.vim'
 Plug 'airblade/vim-rooter'
-"  Start Screen
+--  Start Screen
 Plug 'mhinz/vim-startify'
-" common dependancies of many nvim plugins
+-- common dependancies of many nvim plugins
 Plug 'nvim-lua/plenary.nvim'
 Plug 'jose-elias-alvarez/null-ls.nvim'
-" Interactive eval
+-- Interactive eval
 Plug 'Olical/conjure'
 
-" Specific file type compat
-" CSV
+-- Specific file type compat
+-- CSV
 Plug 'chrisbra/csv.vim'
-" Racket
+-- Racket
 Plug 'wlangstroth/vim-racket'
-" Eww's configuration language, yuck
+-- Eww's configuration language, yuck
 Plug 'elkowar/yuck.vim'
-" Anything with parens as well as html
+-- Anything with parens as well as html
 Plug 'luochen1990/rainbow'
 
-" Language-server protocol
-" Must be after language specific things
+-- Language-server protocol
+-- Must be after language specific things
 Plug 'neovim/nvim-lspconfig'
 Plug 'nvim-lua/lsp-status.nvim'
-"Automate installing some language-servers
+--Automate installing some language-servers
 Plug 'williamboman/nvim-lsp-installer'
-" LSP breakdown icons and stuff
+-- LSP breakdown icons and stuff
 Plug 'onsails/lspkind-nvim'
-" Better folding
+-- Better folding
 Plug 'pierreglaser/folding-nvim'
 
-" Completion details (uses LSP)
+-- Completion details (uses LSP)
 Plug 'hrsh7th/cmp-nvim-lsp'
 Plug 'hrsh7th/cmp-buffer'
 Plug 'hrsh7th/cmp-path'
 Plug 'hrsh7th/nvim-cmp'
-" Lower the text sorting of completions starting with _
+-- Lower the text sorting of completions starting with _
 Plug 'lukas-reineke/cmp-under-comparator'
-" cmdline source
+-- cmdline source
 Plug 'hrsh7th/cmp-cmdline'
-" Snippet source
-"  For vsnip users.
+-- Snippet source
+--  For vsnip users.
 Plug 'hrsh7th/cmp-vsnip'
 Plug 'hrsh7th/vim-vsnip'
-"  For luasnip users.
-"Plug 'L3MON4D3/LuaSnip'
-"Plug 'saadparwaiz1/cmp_luasnip'
-"  For ultisnips users.
-"Plug 'SirVer/ultisnips'
-"Plug 'quangnguyen30192/cmp-nvim-ultisnips'
-"  For snippy users.
-"Plug 'dcampos/nvim-snippy'
-"Plug 'dcampos/cmp-snippy'
-" Git completion source
+--  For luasnip users.
+--Plug 'L3MON4D3/LuaSnip'
+--Plug 'saadparwaiz1/cmp_luasnip'
+--  For ultisnips users.
+--Plug 'SirVer/ultisnips'
+--Plug 'quangnguyen30192/cmp-nvim-ultisnips'
+--  For snippy users.
+--Plug 'dcampos/nvim-snippy'
+--Plug 'dcampos/cmp-snippy'
+-- Git completion source
 Plug 'petertriho/cmp-git'
-" crates.io completion source
+-- crates.io completion source
 Plug 'saecki/crates.nvim'
-" package.json completion source
+-- package.json completion source
 Plug 'David-Kunz/cmp-npm'
-" latex symbol completion support (allows for inserting unicode)
+-- latex symbol completion support (allows for inserting unicode)
 Plug 'kdheepak/cmp-latex-symbols'
-" Emoji completion support
+-- Emoji completion support
 Plug 'hrsh7th/cmp-emoji'
-" Pandoc completion
+-- Pandoc completion
 Plug 'jc-doyle/cmp-pandoc-references'
-" cmdline history completion
-"Plug 'dmitmel/cmp-cmdline-history'
-" Fish completion
+-- cmdline history completion
+--Plug 'dmitmel/cmp-cmdline-history'
+-- Fish completion
 Plug 'mtoohey31/cmp-fish'
-" conjure intractive eval completion
+-- conjure intractive eval completion
 Plug 'PaterJason/cmp-conjure'
-" Use LSP symbols for buffer-style search
+-- Use LSP symbols for buffer-style search
 Plug 'hrsh7th/cmp-nvim-lsp-document-symbol'
-" Completion on the vim.lsp apis
+-- Completion on the vim.lsp apis
 Plug 'hrsh7th/cmp-nvim-lua'
-" Use /usr/share/dict/words for completion
+-- Use /usr/share/dict/words for completion
 Plug 'uga-rosa/cmp-dictionary'
 
-" All of your Plugins must be added before the following line
-call plug#end()
-]])
+-- All of your Plugins must be added before the following line
+vim.fn["plug#end"]()
 --TODO once this whole file is in the lua block, look into https://github.com/wbthomason/packer.nvim
 --nvim-cmp setup
 -- In the meantime refer to https://github.com/nanotee/nvim-lua-guide
