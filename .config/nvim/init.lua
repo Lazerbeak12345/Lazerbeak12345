@@ -164,10 +164,7 @@ end
 local packer_bootstrap = ensure_packer()
 
 return require'packer'.startup(function(use)
-	use 'wbthomason/packer.nvim'
-	-- My plugins here
-	-- use 'foo1/bar1.nvim'
-	-- use 'foo2/bar2.nvim'
+	use 'wbthomason/packer.nvim' -- Self-manage the package manager.
 
 	-- Commenting
 	--Plug 'tpope/vim-commentary'
@@ -189,15 +186,15 @@ return require'packer'.startup(function(use)
 	-- Git integration
 	--  Genral use
 	use 'tpope/vim-fugitive'
-	----  Line-per-line indicators and chunk selection
-	--Plug 'airblade/vim-gitgutter'
-	---- Nicer file management
-	--Plug 'preservim/nerdtree'
-	--Plug 'tiagofumo/vim-nerdtree-syntax-highlight'
-	----Plug 'jistr/vim-nerdtree-tabs'
-	--Plug 'Xuyuanp/nerdtree-git-plugin'
-	---- Icons
-	--Plug 'ryanoasis/vim-devicons'
+----  Line-per-line indicators and chunk selection
+--Plug 'airblade/vim-gitgutter'
+---- Nicer file management
+--Plug 'preservim/nerdtree'
+--Plug 'tiagofumo/vim-nerdtree-syntax-highlight'
+----Plug 'jistr/vim-nerdtree-tabs'
+--Plug 'Xuyuanp/nerdtree-git-plugin'
+---- Icons
+--Plug 'ryanoasis/vim-devicons'
 
 	--  This should work on all files (it's python support ain't great)
 	--Plug 'khzaw/vim-conceal'
@@ -301,7 +298,6 @@ return require'packer'.startup(function(use)
 
 -- TODO where'd my config go eh?
 
-----TODO once this whole file is in the lua block, look into https://github.com/wbthomason/packer.nvim
 ----nvim-cmp setup
 ---- In the meantime refer to https://github.com/nanotee/nvim-lua-guide
 --local cmp = require'cmp'
