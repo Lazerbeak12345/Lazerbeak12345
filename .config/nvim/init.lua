@@ -62,6 +62,17 @@ local function configure_lightline()
 	function _G.custom_fugitive_head_cond()
 		return "" ~= vim.api.nvim_eval("FugitiveHead()")
 	end
+	-- TODO there's a native way to do this now.
+	function _G.LspStatus_getVisible()
+		return vim.fn.winwidth(0) > 60 and #vim.lsp.buf_get_clients() > 0
+	end
+	function _G.LspStatus()
+		if LspStatus_getVisible() then
+			return require'lsp-status'.status()
+		else
+			return ''
+		end
+	end
 	--  	"\ 'separator': { 'left': '🙽 ', 'right': '🙼 ' },
 	--  	"\ 'separator': { 'left': '🙿 ', 'right': '🙾 ' }
 	-- "                                  
@@ -432,18 +443,6 @@ return require'packer'.startup(function(use)
 --		]]
 --    }
 --}
---
----- TODO there's a native way to do this now.
---function _G.LspStatus_getVisible()
---	return vim.fn.winwidth(0) > 60 and #vim.lsp.buf_get_clients() > 0
---end
---function _G.LspStatus()
---	if LspStatus_getVisible() then
---		return lsp_status.status()
---	else
---		return ''
---	end
---end
 --
 --vim.g.indentguides_spacechar = '⍿'
 --vim.g.indentguides_tabchar = '⟼'
