@@ -5,7 +5,6 @@ local ensure_packer = function()
 	if fn.empty(fn.glob(install_path)) > 0 then
 		fn.system{'git', 'clone', '--depth', '1', 'https://github.com/wbthomason/packer.nvim', install_path}
 		vim.cmd [[packadd packer.nvim]]
-		print("had to bootsrap!")
 		return true
 	end
 	return false
@@ -20,6 +19,47 @@ if vim.env.VIMRUNNING == "1" then
 	-- So vim has to take care of it.
 else
 	vim.env.VIMRUNNING = 1
+end
+
+local function configuire_lspconfig()
+	local lspconfig=require'lspconfig'
+	-- Confirmed to have been used
+	lspconfig.racket_langserver.setup(default_args)
+	lspconfig.clangd.setup(default_args)
+end
+
+local function configure_null_ls()
+	local null_ls = require"null-ls"
+	null_ls.setup{
+	    sources = {
+			--[[ TODO was super laggy, and duplicative in nature
+			null_ls.builtins.code_actions.eslint,
+			null_ls.builtins.diagnostics.eslint,
+			null_ls.builtins.formatting.eslint,
+			null_ls.builtins.completion.vsnip,
+			null_ls.builtins.diagnostics.fish,
+			null_ls.builtins.formatting.fish_indent,
+			null_ls.builtins.diagnostics.standardjs,
+			null_ls.builtins.formatting.standardjs,
+			null_ls.builtins.diagnostics.tsc,
+			null_ls.builtins.hover.dictionary
+			]]
+	    }
+	}
+end
+
+local function configure_indentguides()
+	vim.g.indentguides_spacechar = '⍿'
+	vim.g.indentguides_tabchar = '⟼'
+	vim.g.indentguides_concealcursor_unaltered = 'nonempty value'
+	--|‖⃒⃓⍿⎸⎹⁞⸾⼁︳︴｜¦❘❙❚⟊⟾⤠⟼
+	--|‖⃒⃓⍿⎸⎹⁞⸾⼁︳︴｜¦❘❙❚⟊⟾⤠⟼
+end
+
+local function configure_rainbow()
+	-- TODO do this automatically for lisp languages?
+	-- vim.g.rainbow_active = 1 -- set to 0 if you want to enable it later via :RainbowToggle
+	vim.g.rainbow_active = 0
 end
 
 local function configure_vim_rooter()
@@ -71,7 +111,7 @@ local function configure_lightline()
 	function _G.custom_fugitive_head_cond()
 		return "" ~= vim.api.nvim_eval("FugitiveHead()")
 	end
-	-- TODO there's a native way to do this now.
+	-- TODO there's a native way to do the width thing now.
 	function _G.LspStatus_getVisible()
 		return vim.fn.winwidth(0) > 60 and #vim.lsp.buf_get_clients() > 0
 	end
@@ -140,8 +180,11 @@ return require'packer'.startup(function(use)
 			'lsp-status.nvim'
 		}
 	}
-	---- Indent lines
-	--Plug 'thaerkh/vim-indentguides'
+	-- Indent lines
+	use{
+		'thaerkh/vim-indentguides',
+		after = configure_indentguides
+	}
 	
 	-- Git integration
 	--  Genral use
@@ -171,7 +214,10 @@ return require'packer'.startup(function(use)
 --Plug 'mhinz/vim-startify'
 ---- common dependancies of many nvim plugins
 --Plug 'nvim-lua/plenary.nvim'
---Plug 'jose-elias-alvarez/null-ls.nvim'
+	use {
+		'jose-elias-alvarez/null-ls.nvim',
+		config = configure_null_ls
+	}
 ---- Interactive eval
 --Plug 'Olical/conjure'
 --
@@ -182,12 +228,18 @@ return require'packer'.startup(function(use)
 --Plug 'wlangstroth/vim-racket'
 ---- Eww's configuration language, yuck
 --Plug 'elkowar/yuck.vim'
----- Anything with parens as well as html
---Plug 'luochen1990/rainbow'
+	-- Anything with parens as well as html
+	use {
+		'luochen1990/rainbow',
+		config = configuire_rainbow
+	}
 	
 	-- Language-server protocol
 	-- Must be after language specific things
-	use 'neovim/nvim-lspconfig'
+	use{
+		'neovim/nvim-lspconfig',
+		config = configuire_lspconfig
+	}
 	use{
 		'nvim-lua/lsp-status.nvim',
 		after = 'nvim-lspconfig' 
@@ -433,35 +485,10 @@ return require'packer'.startup(function(use)
 --    -- Refer to https://github.com/neovim/nvim-lspconfig/blob/master/doc/server_configurations.md
 --    server:setup(default_args)
 --end)
---local lspconfig=require'lspconfig'
----- Confirmed to have been used
---lspconfig.racket_langserver.setup(default_args)
---lspconfig.clangd.setup(default_args)
-----vim.lsp.set_log_level("debug")
---local null_ls = require"null-ls"
---null_ls.setup{
---    sources = {
---		--[[ TODO was super laggy, and duplicative in nature
---		null_ls.builtins.code_actions.eslint,
---		null_ls.builtins.diagnostics.eslint,
---		null_ls.builtins.formatting.eslint,
---		null_ls.builtins.completion.vsnip,
---		null_ls.builtins.diagnostics.fish,
---		null_ls.builtins.formatting.fish_indent,
---		null_ls.builtins.diagnostics.standardjs,
---		null_ls.builtins.formatting.standardjs,
---		null_ls.builtins.diagnostics.tsc,
---		null_ls.builtins.hover.dictionary
---		]]
---    }
---}
---
---vim.g.indentguides_spacechar = '⍿'
---vim.g.indentguides_tabchar = '⟼'
---vim.g.indentguides_concealcursor_unaltered = 'nonempty value'
-----|‖⃒⃓⍿⎸⎹⁞⸾⼁︳︴｜¦❘❙❚⟊⟾⤠⟼
-----|‖⃒⃓⍿⎸⎹⁞⸾⼁︳︴｜¦❘❙❚⟊⟾⤠⟼
---vim.g.vimsyn_embed = 'l'
+	--vim.lsp.set_log_level("debug")
+
+	-- Which syntaxes would you like to enable highlighting for in vim files?
+	vim.g.vimsyn_embed = 'l'
 
 	-- Inline diagnostic alerts
 	vim.diagnostic.config{
@@ -470,9 +497,6 @@ return require'packer'.startup(function(use)
 			prefix = '🛈'
 		}
 	}
-
----- vim.g.rainbow_active = 1 -- set to 0 if you want to enable it later via :RainbowToggle
---vim.g.rainbow_active = 0
 
 	-- see the docstrings for folded code
 	vim.g.SimpylFold_docstring_preview = 1
@@ -594,7 +618,7 @@ return require'packer'.startup(function(use)
 	-- Automatically set up your configuration after cloning packer.nvim
 	-- Put this at the end after all plugins
 	if packer_bootstrap then
-	require('packer').sync()
+		require('packer').sync()
 	end
 end)
 -- vim.o.ambiwidth="double" -- use this if the arrows are cut off
