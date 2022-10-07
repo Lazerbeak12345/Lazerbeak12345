@@ -62,8 +62,6 @@ local function configure_lightline()
 	function _G.custom_fugitive_head_cond()
 		return "" ~= vim.api.nvim_eval("FugitiveHead()")
 	end
-	-- Popup windows tend to be unreadable with a pink background
-	vim.api.nvim_set_hl(0, "Pmenu", {})
 	--  	"\ 'separator': { 'left': '🙽 ', 'right': '🙼 ' },
 	--  	"\ 'separator': { 'left': '🙿 ', 'right': '🙾 ' }
 	-- "                                  
@@ -72,7 +70,7 @@ local function configure_lightline()
 		active = {
 			left = {
 				{ 'mode', 'paste' },
-				{ --[['fugitive',]] 'readonly', 'filename', 'modified', 'visual_selection' },
+				{ 'fugitive', 'readonly', 'filename', 'modified', 'visual_selection' },
 				--{ 'lsp_status' }
 			}
 		},
@@ -85,7 +83,7 @@ local function configure_lightline()
 		  filetype= "%{winwidth(0) > 70 ? &filetype : ''}",
 		  lsp_status= "%{v:lua.LspStatus()}",
 		  visual_selection= '%{v:lua.lightline_visual_selection()}',
-		  --fugitive= '%{v:lua.custom_fugitive_head()}'
+		  fugitive= '%{v:lua.custom_fugitive_head()}'
 		},
 		component_visible_condition= {
 		  readonly= '(&filetype!="help"&& &readonly)',
@@ -95,7 +93,7 @@ local function configure_lightline()
 		  filetype= '(winwidth(0) > 70 && &filetype !=# "")',
 		  --lsp_status= 'v:lua.LspStatus_getVisible()',
 		  visual_selection= 'v:lua.lightline_visual_selection_cond()',
-		  --fugitive= 'v:lua.custom_fugitive_head_cond()'
+		  fugitive= 'v:lua.custom_fugitive_head_cond()'
 		},
 		component_function = vim.empty_dict(),
 		separator= { left= '', right= '' },
@@ -117,22 +115,23 @@ return require'packer'.startup(function(use)
 	use{
 		'itchyny/lightline.vim',
 		config = configure_lightline,
+		after = 'vim-fugitive'
 	}
 	---- Indent lines
 	--Plug 'thaerkh/vim-indentguides'
---
----- Git integration
-----  Genral use
---Plug 'tpope/vim-fugitive'
-----  Line-per-line indicators and chunk selection
---Plug 'airblade/vim-gitgutter'
----- Nicer file management
---Plug 'preservim/nerdtree'
---Plug 'tiagofumo/vim-nerdtree-syntax-highlight'
-----Plug 'jistr/vim-nerdtree-tabs'
---Plug 'Xuyuanp/nerdtree-git-plugin'
----- Icons
---Plug 'ryanoasis/vim-devicons'
+	
+	-- Git integration
+	--  Genral use
+	use 'tpope/vim-fugitive'
+	----  Line-per-line indicators and chunk selection
+	--Plug 'airblade/vim-gitgutter'
+	---- Nicer file management
+	--Plug 'preservim/nerdtree'
+	--Plug 'tiagofumo/vim-nerdtree-syntax-highlight'
+	----Plug 'jistr/vim-nerdtree-tabs'
+	--Plug 'Xuyuanp/nerdtree-git-plugin'
+	---- Icons
+	--Plug 'ryanoasis/vim-devicons'
 --
 ----  This should work on all files (it's python support ain't great)
 ----Plug 'khzaw/vim-conceal'
@@ -579,6 +578,8 @@ return require'packer'.startup(function(use)
 --		vim.o.relativenumber = false
 --	end
 --})]]
+---- Popup windows tend to be unreadable with a pink background
+--vim.api.nvim_set_hl(0, "Pmenu", {})
 
   -- Automatically set up your configuration after cloning packer.nvim
   -- Put this at the end after all plugins
