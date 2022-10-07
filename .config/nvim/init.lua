@@ -71,7 +71,7 @@ local function configure_lightline()
 			left = {
 				{ 'mode', 'paste' },
 				{ 'fugitive', 'readonly', 'filename', 'modified', 'visual_selection' },
-				--{ 'lsp_status' }
+				{ 'lsp_status' }
 			}
 		},
 		component = {
@@ -91,7 +91,7 @@ local function configure_lightline()
 		  fileformat= '(winwidth(0) > 70)',
 		  fileencoding= '(winwidth(0) > 70 && &fileencoding !=# "")',
 		  filetype= '(winwidth(0) > 70 && &filetype !=# "")',
-		  --lsp_status= 'v:lua.LspStatus_getVisible()',
+		  lsp_status= 'v:lua.LspStatus_getVisible()',
 		  visual_selection= 'v:lua.lightline_visual_selection_cond()',
 		  fugitive= 'v:lua.custom_fugitive_head_cond()'
 		},
@@ -115,7 +115,10 @@ return require'packer'.startup(function(use)
 	use{
 		'itchyny/lightline.vim',
 		config = configure_lightline,
-		after = 'vim-fugitive'
+		after = {
+			'vim-fugitive',
+			'lsp-status.nvim'
+		}
 	}
 	---- Indent lines
 	--Plug 'thaerkh/vim-indentguides'
@@ -161,8 +164,11 @@ return require'packer'.startup(function(use)
 --
 ---- Language-server protocol
 ---- Must be after language specific things
---Plug 'neovim/nvim-lspconfig'
---Plug 'nvim-lua/lsp-status.nvim'
+	use 'neovim/nvim-lspconfig'
+	use{
+		'nvim-lua/lsp-status.nvim',
+		after = 'nvim-lspconfig' 
+	}
 ----Automate installing some language-servers
 --Plug 'williamboman/nvim-lsp-installer'
 ---- LSP breakdown icons and stuff
