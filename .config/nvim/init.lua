@@ -172,9 +172,9 @@ return require'packer'.startup(function(use)
 --Plug 'elkowar/yuck.vim'
 ---- Anything with parens as well as html
 --Plug 'luochen1990/rainbow'
---
----- Language-server protocol
----- Must be after language specific things
+	
+	-- Language-server protocol
+	-- Must be after language specific things
 	use 'neovim/nvim-lspconfig'
 	use{
 		'nvim-lua/lsp-status.nvim',
@@ -450,20 +450,20 @@ return require'packer'.startup(function(use)
 ----|‖⃒⃓⍿⎸⎹⁞⸾⼁︳︴｜¦❘❙❚⟊⟾⤠⟼
 ----|‖⃒⃓⍿⎸⎹⁞⸾⼁︳︴｜¦❘❙❚⟊⟾⤠⟼
 --vim.g.vimsyn_embed = 'l'
---
----- Inline diagnostic alerts
---vim.diagnostic.config{
---	severity_sort = true,
---	virtual_text = {
---		prefix = '🛈'
---	}
---}
---
+
+	-- Inline diagnostic alerts
+	vim.diagnostic.config{
+		severity_sort = true,
+		virtual_text = {
+			prefix = '🛈'
+		}
+	}
+
 ---- vim.g.rainbow_active = 1 -- set to 0 if you want to enable it later via :RainbowToggle
 --vim.g.rainbow_active = 0
---
----- see the docstrings for folded code
---vim.g.SimpylFold_docstring_preview = 1
+
+	-- see the docstrings for folded code
+	vim.g.SimpylFold_docstring_preview = 1
 --
 --vim.g.rooter_change_directory_for_non_project_files = 'current'
 ---- vim.g.rooter_patterns = ['.git', 'mod.conf', 'modpack.conf','game.conf','texture_pack.conf']
@@ -471,125 +471,125 @@ return require'packer'.startup(function(use)
 --local function t(str)
 --	return vim.api.nvim_replace_termcodes(str, true, true, true)
 --end
---
----- TODO fix
----- nvim_lsp completeion settings
-----  Use <Tab> and <S-Tab> to navigate through popup menu
---vim.keymap.set('i', '<Tab>', function()
---	return vim.fn.pumvisible() == 1 and t'<C-n>' or t'<Tab>'
---end, {expr = true})
---vim.keymap.set('i', '<S-Tab>', function()
---	return vim.fn.pumvisible() == 1 and t'<C-p>' or t'<S-Tab>'
---end, {expr = true})
---
---vim.keymap.set('n', '<Leader>d', vim.diagnostic.goto_next)
---
----- Enable folding with the spacebar
---vim.keymap.set('n', '<space>', 'za')
---
----- Go back one file in current buffer
---vim.keymap.set('n', '<Leader><Leader>', '<c-^>')
---
----- Map <Esc> to exit terminal-mode (stolen from nvim's :help terminal-input then modified for lua)
---vim.keymap.set('t', '<Esc>', '<C-\\><C-n>')
---
+
+	-- TODO fix
+	-- nvim_lsp completeion settings
+	--  Use <Tab> and <S-Tab> to navigate through popup menu
+	vim.keymap.set('i', '<Tab>', function()
+		return vim.fn.pumvisible() == 1 and t'<C-n>' or t'<Tab>'
+	end, {expr = true})
+	vim.keymap.set('i', '<S-Tab>', function()
+		return vim.fn.pumvisible() == 1 and t'<C-p>' or t'<S-Tab>'
+	end, {expr = true})
+	
+	vim.keymap.set('n', '<Leader>d', vim.diagnostic.goto_next)
+	
+	-- Enable folding with the spacebar
+	vim.keymap.set('n', '<space>', 'za')
+	
+	-- Go back one file in current buffer
+	vim.keymap.set('n', '<Leader><Leader>', '<c-^>')
+	
+	-- Map <Esc> to exit terminal-mode (stolen from nvim's :help terminal-input then modified for lua)
+	vim.keymap.set('t', '<Esc>', '<C-\\><C-n>')
+	
 ---- Keyboard shortcut to open nerd tree
 --vim.keymap.set('', '<Leader>n', '<Plug>NERDTreeTabsToggle<CR>')
---
----- Make it a tad easier to change the terminal back to a buffer
---vim.keymap.set('', '<Leader>]', '<C-\\><C-n>')
---
----- Reccomended settings for nvim-cmp
---vim.o.completeopt = 'menu,menuone,noselect'
---
---vim.o.showmode = false -- Hide the default mode text (e.g. -- INSERT -- below the statusline)
----- print options
----- set printoptions=paper:letter
---
----- display line numbers
---vim.o.number = true --  If this is used with [[relativenumber]], then it shows the current lineno on the current line (as opposed to `0`)
---vim.o.relativenumber = true
---
---vim.o.tabstop = 4
---vim.o.shiftwidth = 4
---vim.o.backspace = 'indent,eol,start'
---
----- Use sys clipboard
---vim.o.clipboard = 'unnamedplus'
---
----- Title magic.
---vim.o.title = true
---
----- I don't like presssing more most of the time
---vim.o.more = false
---
----- This is the global vim refresh interval. Multiple tools, such as
----- gitgutter and coc reccomend turning this number down. It's measured in
----- milliseconds, and defaults to 4000
---vim.o.updatetime = 1000
---
----- Enable folding
---vim.o.foldmethod = 'syntax'
-----vim.o.foldmethod = 'indent'
---vim.o.foldlevel=99
---vim.o.foldminlines = 3
---
----- Load file automatically when changes happen
---vim.o.autoread = true
---
-----enable syntax highlighting (optimised for dark backgrounds)
-----vim.o.background='dark'
---
----- TODO broken
----- Always underline the current line
----- change cursor on insert mode. doesn't always work
----- below two lines work in konsole
-----vim.o.t_SI = "\\e[3 q" -- insert
-----vim.o.t_EI = "\\e[1 q" -- command
---
----- Allow for syntax checking in racket. The catches: Security(?) and lag.
----- NOTE: LSP is better
-----vim.g.syntastic_enable_racket_racket_checker = 1 -- I want it to check racket file syntax
---vim.api.nvim_create_autocmd("TextYankPost", {
---	pattern = "*",
---	callback = function()
---		vim.highlight.on_yank()
---	end
---})
---vim.api.nvim_create_autocmd({ "BufNewFile", "BufRead" }, {
---	pattern = "*.rkt",
---	callback = function()
---		vim.o.tabstop = 2
---		vim.o.softtabstop = 2
---		vim.o.shiftwidth = 2
---		vim.o.textwidth = 79
---		vim.o.expandtab = true
---		vim.o.autoindent = true
---		vim.o.fileformat = "unix"
---		vim.o.lisp = true
---	end
---})
-----[[ Highlight bad whitespace
---vim.api.nvim_create_autocmd({"BufRead","BufNewFile"},{
---	pattern = {"*.py","*.pyw","*.c","*.h","*.js","*.ts","*.html","*.htm",".vimrc","*.vim"},
---	-- TODO convert this
---	command = "match BadWhitespace /\s\+$/"
---})]]
-----[[ (failed) Attempt to disable numbers on terminal only.
---vim.api.nvim_create_autocmd({ "TermOpen " }, {
---	pattern = "*",
---	callback = function()
---		vim.o.number = false
---		vim.o.relativenumber = false
---	end
---})]]
----- Popup windows tend to be unreadable with a pink background
---vim.api.nvim_set_hl(0, "Pmenu", {})
+	
+	-- Make it a tad easier to change the terminal back to a buffer
+	vim.keymap.set('', '<Leader>]', '<C-\\><C-n>')
+	
+	-- Reccomended settings for nvim-cmp
+	vim.o.completeopt = 'menu,menuone,noselect'
+	
+	vim.o.showmode = false -- Hide the default mode text (e.g. -- INSERT -- below the statusline)
+	-- print options
+	-- set printoptions=paper:letter
+	
+	-- display line numbers
+	vim.o.number = true --  If this is used with [[relativenumber]], then it shows the current lineno on the current line (as opposed to `0`)
+	vim.o.relativenumber = true
+	
+	vim.o.tabstop = 4
+	vim.o.shiftwidth = 4
+	vim.o.backspace = 'indent,eol,start'
+	
+	-- Use sys clipboard
+	vim.o.clipboard = 'unnamedplus'
+	
+	-- Title magic.
+	vim.o.title = true
 
-  -- Automatically set up your configuration after cloning packer.nvim
-  -- Put this at the end after all plugins
-  if packer_bootstrap then
-    require('packer').sync()
-  end
+	-- I don't like presssing more most of the time
+	vim.o.more = false
+
+	-- This is the global vim refresh interval. Multiple tools, such as
+	-- gitgutter and coc reccomend turning this number down. It's measured in
+	-- milliseconds, and defaults to 4000
+	vim.o.updatetime = 1000
+
+	-- Enable folding
+	vim.o.foldmethod = 'syntax'
+	--vim.o.foldmethod = 'indent'
+	vim.o.foldlevel=99
+	vim.o.foldminlines = 3
+
+	-- Load file automatically when changes happen
+	vim.o.autoread = true
+
+	--enable syntax highlighting (optimised for dark backgrounds)
+	--vim.o.background='dark'
+
+	-- TODO broken
+	-- Always underline the current line
+	-- change cursor on insert mode. doesn't always work
+	-- below two lines work in konsole
+	--vim.o.t_SI = "\\e[3 q" -- insert
+	--vim.o.t_EI = "\\e[1 q" -- command
+
+	vim.api.nvim_create_autocmd("TextYankPost", {
+		pattern = "*",
+		callback = function()
+			vim.highlight.on_yank()
+		end
+	})
+	-- Allow for syntax checking in racket. The catches: Security(?) and lag.
+	-- NOTE: LSP is better
+	--vim.g.syntastic_enable_racket_racket_checker = 1 -- I want it to check racket file syntax
+	vim.api.nvim_create_autocmd({ "BufNewFile", "BufRead" }, {
+		pattern = "*.rkt",
+		callback = function()
+			vim.o.tabstop = 2
+			vim.o.softtabstop = 2
+			vim.o.shiftwidth = 2
+			vim.o.textwidth = 79
+			vim.o.expandtab = true
+			vim.o.autoindent = true
+			vim.o.fileformat = "unix"
+			vim.o.lisp = true
+		end
+	})
+	--[[ Highlight bad whitespace
+	vim.api.nvim_create_autocmd({"BufRead","BufNewFile"},{
+		pattern = {"*.py","*.pyw","*.c","*.h","*.js","*.ts","*.html","*.htm",".vimrc","*.vim"},
+		-- TODO convert this
+		command = "match BadWhitespace /\s\+$/"
+	})]]
+	--[[ (failed) Attempt to disable numbers on terminal only.
+	vim.api.nvim_create_autocmd({ "TermOpen " }, {
+		pattern = "*",
+		callback = function()
+			vim.o.number = false
+			vim.o.relativenumber = false
+		end
+	})]]
+	-- Popup windows tend to be unreadable with a pink background
+	vim.api.nvim_set_hl(0, "Pmenu", {})
+
+	-- Automatically set up your configuration after cloning packer.nvim
+	-- Put this at the end after all plugins
+	if packer_bootstrap then
+	require('packer').sync()
+	end
 end)
 -- vim.o.ambiwidth="double" -- use this if the arrows are cut off
