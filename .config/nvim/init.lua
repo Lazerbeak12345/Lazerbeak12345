@@ -22,6 +22,15 @@ else
 	vim.env.VIMRUNNING = 1
 end
 
+local function configure_vim_rooter()
+	vim.g.rooter_change_directory_for_non_project_files = 'current'
+	-- vim.g.rooter_patterns = ['.git', 'mod.conf', 'modpack.conf','game.conf','texture_pack.conf']
+	
+	local function t(str)
+		return vim.api.nvim_replace_termcodes(str, true, true, true)
+	end
+end
+
 local function configure_lightline()
 	-- TODO this is actually slightly broken. look at https://github.com/nvim-lualine/lualine.nvim to fix it
 	function _G.lightline_visual_selection()
@@ -146,15 +155,18 @@ return require'packer'.startup(function(use)
 	--Plug 'Xuyuanp/nerdtree-git-plugin'
 	---- Icons
 	--Plug 'ryanoasis/vim-devicons'
---
-----  This should work on all files (it's python support ain't great)
-----Plug 'khzaw/vim-conceal'
-----Plug 'jamestomasino-forks/vim-conceal' " This one has better javascript support
-----Plug 'Lazerbeak12345/vim-conceal' " This is my blend of a bunch of stuff (my
-----    fork of above)
----- Ease of use
---Plug 'vimlab/split-term.vim'
---Plug 'airblade/vim-rooter'
+
+	--  This should work on all files (it's python support ain't great)
+	--Plug 'khzaw/vim-conceal'
+	--Plug 'jamestomasino-forks/vim-conceal' " This one has better javascript support
+	--Plug 'Lazerbeak12345/vim-conceal' " This is my blend of a bunch of stuff (my
+	--    fork of above)
+	-- Ease of use
+	use 'vimlab/split-term.vim'
+	use {
+		'airblade/vim-rooter',
+		config = configure_vim_rooter
+	}
 ----  Start Screen
 --Plug 'mhinz/vim-startify'
 ---- common dependancies of many nvim plugins
@@ -464,13 +476,6 @@ return require'packer'.startup(function(use)
 
 	-- see the docstrings for folded code
 	vim.g.SimpylFold_docstring_preview = 1
---
---vim.g.rooter_change_directory_for_non_project_files = 'current'
----- vim.g.rooter_patterns = ['.git', 'mod.conf', 'modpack.conf','game.conf','texture_pack.conf']
---
---local function t(str)
---	return vim.api.nvim_replace_termcodes(str, true, true, true)
---end
 
 	-- TODO fix
 	-- nvim_lsp completeion settings
@@ -493,8 +498,8 @@ return require'packer'.startup(function(use)
 	-- Map <Esc> to exit terminal-mode (stolen from nvim's :help terminal-input then modified for lua)
 	vim.keymap.set('t', '<Esc>', '<C-\\><C-n>')
 	
----- Keyboard shortcut to open nerd tree
---vim.keymap.set('', '<Leader>n', '<Plug>NERDTreeTabsToggle<CR>')
+	-- Keyboard shortcut to open nerd tree via currently disabled mod
+	--vim.keymap.set('', '<Leader>n', '<Plug>NERDTreeTabsToggle<CR>')
 	
 	-- Make it a tad easier to change the terminal back to a buffer
 	vim.keymap.set('', '<Leader>]', '<C-\\><C-n>')
