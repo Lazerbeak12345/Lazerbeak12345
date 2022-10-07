@@ -339,6 +339,7 @@ null_ls.setup{
     }
 }
 
+-- TODO there's a native way to do this now.
 function _G.LspStatus_getVisible()
 	return vim.fn.winwidth(0) > 60 and #vim.lsp.buf_get_clients() > 0
 end
@@ -357,11 +358,11 @@ vim.g.indentguides_concealcursor_unaltered = 'nonempty value'
 --|‖⃒⃓⍿⎸⎹⁞⸾⼁︳︴｜¦❘❙❚⟊⟾⤠⟼
 vim.g.vimsyn_embed = 'l'
 
--- Inline diagnostic alerts 
+-- Inline diagnostic alerts
 vim.diagnostic.config{
 	severity_sort = true,
 	virtual_text = {
-		prefix = ' '
+		prefix = '🛈'
 	}
 }
 
@@ -423,6 +424,12 @@ vim.o.backspace = 'indent,eol,start'
 -- Use sys clipboard
 vim.o.clipboard = 'unnamedplus'
 
+-- Title magic.
+vim.o.title = true
+
+-- I don't like presssing more most of the time
+vim.o.more = false
+
 -- This is the global vim refresh interval. Multiple tools, such as
 -- gitgutter and coc reccomend turning this number down. It's measured in
 -- milliseconds, and defaults to 4000
@@ -439,9 +446,6 @@ vim.o.autoread = true
 
 --enable syntax highlighting (optimised for dark backgrounds)
 --vim.o.background='dark'
-
--- Show the Leader key (apparently?)
---vim.o.showcmd = true
 
 -- TODO broken
 -- Always underline the current line
