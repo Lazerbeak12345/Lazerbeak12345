@@ -1,5 +1,5 @@
 -- This new bootstrapping code was copied from https://github.com/wbthomason/packer.nvim#bootstrapping
-local ensure_packer = function()
+local function ensure_packer()
 	local fn = vim.fn
 	local install_path = fn.stdpath('data')..'/site/pack/packer/start/packer.nvim'
 	if fn.empty(fn.glob(install_path)) > 0 then
@@ -11,18 +11,33 @@ local ensure_packer = function()
 end
 
 if vim.env.VIMRUNNING == "1" then
-	print("dummy! read before running (override by unsetting $VIMRUNNING)")
+	print("dummy! read before running (override by setting $VIMRUNNING to \"2\")")
 	-- Lua never sleeps
 	vim.cmd.sleep()
 	-- and isn't a quitter
 	vim.cmd.qall{ bang = true }
 	-- So vim has to take care of it.
-else
+elseif vim.env.VIMRUNNING ~= "2" then
 	vim.env.VIMRUNNING = 1
 end
 
 local function configuire_lspconfig()
 	local lspconfig=require'lspconfig'
+	local function my_on_attach(...)
+		--[[
+		TODO
+		[LSP] Accessing client.resolved_capabilities is deprecated, update your plugins
+		or configuration to access client.server_capabilities instead.The new key/value
+		pairs in server_capabilities directly match those defined in the language server
+		protocol
+		]]
+		--lsp_status.on_attach(...)
+		--require'folding'.on_attach(...)
+	end
+	local default_args={
+		on_attach=my_on_attach,
+		--capabilities=require'cmp_nvim_lsp'.update_capabilities(lsp_status.capabilities)
+	}
 	-- Confirmed to have been used
 	lspconfig.racket_langserver.setup(default_args)
 	lspconfig.clangd.setup(default_args)
@@ -180,7 +195,7 @@ return require'packer'.startup(function(use)
 	-- Indent lines
 	use{
 		'thaerkh/vim-indentguides',
-		after = configure_indentguides
+		config = configure_indentguides
 	}
 	
 	-- Git integration
@@ -235,12 +250,11 @@ return require'packer'.startup(function(use)
 	-- Must be after language specific things
 	use{
 		'neovim/nvim-lspconfig',
-		config = configuire_lspconfig
+		config = configuire_lspconfig,
+		-- The config function for this requires these to be present. It's a two way dependancy.
+		after = 'lsp-status.nvim'
 	}
-	use{
-		'nvim-lua/lsp-status.nvim',
-		after = 'nvim-lspconfig' 
-	}
+	use 'nvim-lua/lsp-status.nvim'
 ----Automate installing some language-servers
 --Plug 'williamboman/nvim-lsp-installer'
 ---- LSP breakdown icons and stuff
@@ -456,21 +470,6 @@ return require'packer'.startup(function(use)
 --	kind_labels = lspkind.symbol_map
 --}
 --lsp_status.register_progress()
---local function my_on_attach(...)
---	--[[
---	TODO
---	[LSP] Accessing client.resolved_capabilities is deprecated, update your plugins
---	or configuration to access client.server_capabilities instead.The new key/value
---	pairs in server_capabilities directly match those defined in the language server
---	protocol
---	]]
---	lsp_status.on_attach(...)
---	require'folding'.on_attach(...)
---end
---local default_args={
---	on_attach=my_on_attach,
---	capabilities=require'cmp_nvim_lsp'.update_capabilities(lsp_status.capabilities)
---}
 --require"nvim-lsp-installer".on_server_ready(function(server)
 --    -- (optional) Customize the options passed to the server
 --    -- if server.name == "tsserver" then
