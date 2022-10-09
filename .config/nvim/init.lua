@@ -189,16 +189,27 @@ local function configuire_lspconfig()
 	local lspconfig=require'lspconfig'
 	-- Confirmed to have been used
 	lspconfig.racket_langserver.setup(default_args)
-	lspconfig.clangd.setup(default_args)
+	lspconfig.clangd.setup(vim.tbl_extend('keep',default_args,{
+		-- lsp_status supports some extensions
+		handlers = lsp_status.extensions.clangd.setup(),
+		init_options = {
+			clangdFileStatus = true
+		}
+	}))
 	-- Must be here to access `default_args`
 	require"nvim-lsp-installer".on_server_ready(function(server)
+		local options = default_args
 	    -- (optional) Customize the options passed to the server
-	    -- if server.name == "tsserver" then
-	    --     options.root_dir = function() ... end
-	    -- end
+	    if server.name == "pyls_ms" then
+			options = vim.tbl_extend('keep',default_args,{
+				-- lsp_status supports some extensions
+				handlers = lsp_status.extensions.pyls_ms.setup(),
+				settings = { python = { workspaceSymbols = { enabled = true }}},
+			})
+	    end
 	    -- This setup() function is exactly the same as lspconfig's setup function.
 	    -- Refer to https://github.com/neovim/nvim-lspconfig/blob/master/doc/server_configurations.md
-	    server:setup(default_args)
+	    server:setup(options)
 	end)
 end
 
