@@ -22,6 +22,143 @@ elseif vim.env.VIMRUNNING ~= "2" then
 	vim.env.VIMRUNNING = 1
 end
 
+local function configure_nvim_cmp()
+	local cmp = require'cmp'
+	local lspkind = require'lspkind'
+	--local cmp_under_comparator = require"cmp-under-comparator" TODO
+	cmp.setup{
+		--Defaults:https://github.com/hrsh7th/nvim-cmp/blob/main/lua/cmp/config/default.lua
+		snippet = {
+			-- REQUIRED - you must specify a snippet engine
+			expand = function(args)
+				vim.fn["vsnip#anonymous"](args.body) -- For `vsnip` users.
+				-- require('luasnip').lsp_expand(args.body) -- For `luasnip` users.
+				-- vim.fn["UltiSnips#Anon"](args.body) -- For `ultisnips` users.
+				-- require'snippy'.expand_snippet(args.body) -- For `snippy` users.
+			end,
+		},
+		mapping = {
+			['<C-d>'] = cmp.mapping(cmp.mapping.scroll_docs(-4), { 'i', 'c' }),
+			['<C-f>'] = cmp.mapping(cmp.mapping.scroll_docs(4), { 'i', 'c' }),
+			['<C-Space>'] = cmp.mapping(cmp.mapping.complete(), { 'i', 'c' }),
+			['<C-y>'] = cmp.config.disable, -- Specify `cmp.config.disable` if you want to remove the default `<C-y>` mapping.
+			['<C-e>'] = cmp.mapping{
+				i = cmp.mapping.abort(),
+				c = cmp.mapping.close(),
+			},
+			['<Tab>'] = cmp.mapping(cmp.mapping.confirm{ select = true }, { 'i', 'c' })
+			--[[ TODO this is what some of it was before:
+			--  Use keyboard shortcuts to change to the next or previous sources
+			vim.keymap.set('i', '<c-j>', '<Plug>(completion_next_source)')
+			vim.keymap.set('i', '<c-k>', '<Plug>(completion_prev_source)')
+			]]
+		},
+		sources = cmp.config.sources({
+			{ name = 'nvim_lsp' },
+			{ name = 'vsnip' }, -- For vsnip users.
+			-- { name = 'luasnip' }, -- For luasnip users.
+			-- { name = 'ultisnips' }, -- For ultisnips users.
+			-- { name = 'snippy' }, -- For snippy users.
+			{ name = 'latex_symbols' },
+			{ name = 'emoji', insert = true },
+		--}, {
+			{ name = "git" },
+			{ name = "crates" },
+			{ name = 'npm', keyword_length = 4 },
+			{ name = 'pandoc_references' },
+			{ name = 'nvim_lsp_document_symbol' },
+			{ name = "fish" },
+			{ name = "path" },
+		}, {
+			{
+				name = "dictionary",
+				keyword_length = 2,
+			},
+			{ name = 'nvim_lua' },
+			{ name = 'buffer' },
+			{ name = 'cmdline' },
+		}--[[, {
+			{ name = 'cmdline_history', options = { history_type = ':' } },
+		}]]),
+		sorting = {
+	        comparators = {
+	            cmp.config.compare.offset,
+	            cmp.config.compare.exact,
+	            cmp.config.compare.score,
+	            cmp.config.compare.recently_used,
+	            --cmp_under_comparator.under,
+	            cmp.config.compare.kind,
+	            cmp.config.compare.sort_text,
+	            cmp.config.compare.length,
+	            cmp.config.compare.order,
+	        },
+	    },
+		formatting = {
+			format = lspkind.cmp_format{
+				with_text = true,
+				--[[
+				symbol_map = {
+					-- Also effects anything else using lspkind
+					Constructor = '🏗 ',
+					Variable = lspkind.presets.default.Field,
+					File = '🗎',
+					Unit = '🞕',
+					Reference = '►',
+					Constant = 'π',
+					Struct = 'ﱖ',
+				},]]
+				menu = {
+					buffer                   = "[Buffer]",
+					nvim_lsp                 = "[LSP]",
+					nvim_lua                 = "[Lua]",
+					latex_symbols            = "[Latex]",
+					vsnip                    = "[VSnip]",
+					--luasnip                  = "[LuaSnip]",
+					--ultisnips                = "[UltiSnips]",
+					--snippy                   = "[Snippy]",
+					emoji                    = "[Emoji]",
+					git                      = "[Git]",
+					crates                   = "[Crates]",
+					npm                      = "[NPM]",
+					pandoc_references        = "[Pandoc]",
+					fish                     = "[Fish]",
+					path                     = "[Path]",
+					cmdline_history          = "[CmdHistory]",
+					cmdline                  = "[Cmd]",
+					nvim_lsp_document_symbol = "[LSPSymbol]",
+					dictionary               = "[Dict]",
+				}
+			},
+		},
+	}
+	-- Use buffer source (then history) for `/` and `?` (if you enabled `native_menu`, this won't work anymore).
+	for _, cmd_type in ipairs{'/', '?'} do
+		cmp.setup.cmdline(cmd_type, {
+		  sources = {
+			{ name = 'buffer' },
+		  }, {
+			{ name = 'cmdline_history' },
+		  }
+		})
+	end
+	-- Use cmdline & path source for ':' (if you enabled `native_menu`, this won't work anymore).
+	cmp.setup.cmdline(':', {
+	  sources = cmp.config.sources({
+	    { name = 'path' },
+	  }, {
+	    { name = 'cmdline' },
+		{ name = 'cmdline_history' },
+	  })
+	})
+	for _, cmd_type in ipairs{'@', '='} do
+	  cmp.setup.cmdline(cmd_type, {
+	    sources = {
+	      { name = 'cmdline_history' },
+	    },
+	  })
+	end
+end
+
 local function configure_lsp_status()
 	local lsp_status = require'lsp-status'
 	lsp_status.config{
@@ -295,7 +432,11 @@ return require'packer'.startup(function(use)
 	}
 --Plug 'hrsh7th/cmp-buffer'
 --Plug 'hrsh7th/cmp-path'
-	use 'hrsh7th/nvim-cmp'
+	use{
+		'hrsh7th/nvim-cmp',
+		config = configure_nvim_cmp,
+		after = 'lspkind-nvim'
+	}
 ---- Lower the text sorting of completions starting with _
 --Plug 'lukas-reineke/cmp-under-comparator'
 ---- cmdline source
@@ -344,139 +485,7 @@ return require'packer'.startup(function(use)
 ----nvim-cmp setup
 ---- In the meantime refer to https://github.com/nanotee/nvim-lua-guide
 --local cmp = require'cmp'
---local lspkind = require"lspkind"
---require'cmp-npm'.setup{}
---cmp.setup{
---	--Defaults:https://github.com/hrsh7th/nvim-cmp/blob/main/lua/cmp/config/default.lua
---	snippet = {
---		-- REQUIRED - you must specify a snippet engine
---		expand = function(args)
---			vim.fn["vsnip#anonymous"](args.body) -- For `vsnip` users.
---			-- require('luasnip').lsp_expand(args.body) -- For `luasnip` users.
---			-- vim.fn["UltiSnips#Anon"](args.body) -- For `ultisnips` users.
---			-- require'snippy'.expand_snippet(args.body) -- For `snippy` users.
---		end,
---	},
---	mapping = {
---		['<C-d>'] = cmp.mapping(cmp.mapping.scroll_docs(-4), { 'i', 'c' }),
---		['<C-f>'] = cmp.mapping(cmp.mapping.scroll_docs(4), { 'i', 'c' }),
---		['<C-Space>'] = cmp.mapping(cmp.mapping.complete(), { 'i', 'c' }),
---		['<C-y>'] = cmp.config.disable, -- Specify `cmp.config.disable` if you want to remove the default `<C-y>` mapping.
---		['<C-e>'] = cmp.mapping{
---			i = cmp.mapping.abort(),
---			c = cmp.mapping.close(),
---		},
---		['<Tab>'] = cmp.mapping.confirm{ select = true },
---		--[[ TODO this is what some of it was before:
---		--  Use keyboard shortcuts to change to the next or previous sources
---		vim.keymap.set('i', '<c-j>', '<Plug>(completion_next_source)')
---		vim.keymap.set('i', '<c-k>', '<Plug>(completion_prev_source)')
---		]]
---	},
---	sources = cmp.config.sources({
---		{ name = 'nvim_lsp' },
---		{ name = 'vsnip' }, -- For vsnip users.
---		-- { name = 'luasnip' }, -- For luasnip users.
---		-- { name = 'ultisnips' }, -- For ultisnips users.
---		-- { name = 'snippy' }, -- For snippy users.
---		{ name = 'latex_symbols' },
---		{ name = 'emoji', insert = true },
---	--}, {
---		{ name = "git" },
---		{ name = "crates" },
---		{ name = 'npm', keyword_length = 4 },
---		{ name = 'pandoc_references' },
---		{ name = 'nvim_lsp_document_symbol' },
---		{ name = "fish" },
---		{ name = "path" },
---	}, {
---		{
---			name = "dictionary",
---			keyword_length = 2,
---		},
---		{ name = 'nvim_lua' },
---		{ name = 'buffer' },
---		{ name = 'cmdline' },
---	}--[[, {
---		{ name = 'cmdline_history', options = { history_type = ':' } },
---	}]]),
---	sorting = {
---        comparators = {
---            cmp.config.compare.offset,
---            cmp.config.compare.exact,
---            cmp.config.compare.score,
---            cmp.config.compare.recently_used,
---            require"cmp-under-comparator".under,
---            cmp.config.compare.kind,
---            cmp.config.compare.sort_text,
---            cmp.config.compare.length,
---            cmp.config.compare.order,
---        },
---    },
---	formatting = {
---		format = lspkind.cmp_format{
---			with_text = true,
---			--[[
---			symbol_map = {
---				-- Also effects anything else using lspkind
---				Constructor = '🏗 ',
---				Variable = lspkind.presets.default.Field,
---				File = '🗎',
---				Unit = '🞕',
---				Reference = '►',
---				Constant = 'π',
---				Struct = 'ﱖ',
---			},]]
---			menu = {
---				buffer                   = "[Buffer]",
---				nvim_lsp                 = "[LSP]",
---				nvim_lua                 = "[Lua]",
---				latex_symbols            = "[Latex]",
---				vsnip                    = "[VSnip]",
---				--luasnip                  = "[LuaSnip]",
---				--ultisnips                = "[UltiSnips]",
---				--snippy                   = "[Snippy]",
---				emoji                    = "[Emoji]",
---				git                      = "[Git]",
---				crates                   = "[Crates]",
---				npm                      = "[NPM]",
---				pandoc_references        = "[Pandoc]",
---				fish                     = "[Fish]",
---				path                     = "[Path]",
---				cmdline_history          = "[CmdHistory]",
---				cmdline                  = "[Cmd]",
---				nvim_lsp_document_symbol = "[LSPSymbol]",
---				dictionary               = "[Dict]",
---			}
---		},
---	},
---}
----- Use buffer source (then history) for `/` and `?` (if you enabled `native_menu`, this won't work anymore).
---for _, cmd_type in ipairs{'/', '?'} do
---	cmp.setup.cmdline(cmd_type, {
---	  sources = {
---		{ name = 'buffer' },
---	  }, {
---		{ name = 'cmdline_history' },
---	  }
---	})
---end
----- Use cmdline & path source for ':' (if you enabled `native_menu`, this won't work anymore).
---cmp.setup.cmdline(':', {
---  sources = cmp.config.sources({
---    { name = 'path' },
---  }, {
---    { name = 'cmdline' },
---	{ name = 'cmdline_history' },
---  })
---})
---for _, cmd_type in ipairs{'@', '='} do
---  cmp.setup.cmdline(cmd_type, {
---    sources = {
---      { name = 'cmdline_history' },
---    },
---  })
---end
+--require'cmp-npm'.setup{} TODO see docs for this one. It was odd.
 --require"cmp_git".setup()
 --require'crates'.setup()
 --require"cmp_dictionary".setup{
