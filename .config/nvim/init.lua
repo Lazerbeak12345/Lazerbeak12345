@@ -26,7 +26,7 @@ local function configure_lsp_status()
 	lsp_status.config{
 		status_symbol = '', -- The default V breaks some layout stuff
 		show_filename = false, -- Takes up too much space
-		--kind_labels = lspkind.symbol_map TODO
+		kind_labels = require'lspkind'.symbol_map
 	}
 	lsp_status.register_progress()
 end
@@ -46,8 +46,7 @@ local function configuire_lspconfig()
 	end
 	local default_args={
 		on_attach=my_on_attach,
-		--capabilities=require'cmp_nvim_lsp'.update_capabilities(lsp_status.capabilities) TODO
-		capabilities = lsp_status.capabilities
+		capabilities=require'cmp_nvim_lsp'.update_capabilities(lsp_status.capabilities)
 	}
 	local lspconfig=require'lspconfig'
 	-- Confirmed to have been used
@@ -261,30 +260,34 @@ return require'packer'.startup(function(use)
 	-- Must be after language specific things
 	use{
 		'neovim/nvim-lspconfig',
-		disable = true,
 		config = configuire_lspconfig,
 		-- The config function for this requires these to be present. It's a two way dependancy.
 		after = {
 			'lsp-status.nvim',
-			'folding-nvim'
+			'folding-nvim',
+			'cmp-nvim-lsp'
 		}
 	}
 	use{
 		'nvim-lua/lsp-status.nvim',
-		config = configure_lsp_status
+		config = configure_lsp_status,
+		after = 'lspkind-nvim'
 	}
 ----Automate installing some language-servers
 --Plug 'williamboman/nvim-lsp-installer'
----- LSP breakdown icons and stuff
---Plug 'onsails/lspkind-nvim'
+	-- LSP breakdown icons and stuff
+	use 'onsails/lspkind-nvim'
 	-- Better folding
 	use 'pierreglaser/folding-nvim'
 --
 ---- Completion details (uses LSP)
---Plug 'hrsh7th/cmp-nvim-lsp'
+	use{
+		'hrsh7th/cmp-nvim-lsp',
+		after = 'nvim-cmp'
+	}
 --Plug 'hrsh7th/cmp-buffer'
 --Plug 'hrsh7th/cmp-path'
---Plug 'hrsh7th/nvim-cmp'
+	use 'hrsh7th/nvim-cmp'
 ---- Lower the text sorting of completions starting with _
 --Plug 'lukas-reineke/cmp-under-comparator'
 ---- cmdline source
