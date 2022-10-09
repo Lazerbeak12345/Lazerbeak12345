@@ -1,3 +1,4 @@
+local vim = vim -- Hacky workaround for sumneko_lua being sorta dumb right now. I can fix it better later.
 -- This new bootstrapping code was copied from https://github.com/wbthomason/packer.nvim#bootstrapping
 local function ensure_packer()
 	local fn = vim.fn
@@ -52,6 +53,16 @@ local function configuire_lspconfig()
 	-- Confirmed to have been used
 	lspconfig.racket_langserver.setup(default_args)
 	lspconfig.clangd.setup(default_args)
+	-- Must be here to access `default_args`
+	require"nvim-lsp-installer".on_server_ready(function(server)
+	    -- (optional) Customize the options passed to the server
+	    -- if server.name == "tsserver" then
+	    --     options.root_dir = function() ... end
+	    -- end
+	    -- This setup() function is exactly the same as lspconfig's setup function.
+	    -- Refer to https://github.com/neovim/nvim-lspconfig/blob/master/doc/server_configurations.md
+	    server:setup(default_args)
+	end)
 end
 
 local function configure_null_ls()
@@ -90,10 +101,6 @@ end
 local function configure_vim_rooter()
 	vim.g.rooter_change_directory_for_non_project_files = 'current'
 	-- vim.g.rooter_patterns = ['.git', 'mod.conf', 'modpack.conf','game.conf','texture_pack.conf']
-	
-	local function t(str)
-		return vim.api.nvim_replace_termcodes(str, true, true, true)
-	end
 end
 
 local function configure_lightline()
@@ -207,7 +214,7 @@ return require'packer'.startup(function(use)
 		'thaerkh/vim-indentguides',
 		config = configure_indentguides
 	}
-	
+
 	-- Git integration
 	--  Genral use
 	use 'tpope/vim-fugitive'
@@ -253,9 +260,9 @@ return require'packer'.startup(function(use)
 	-- Anything with parens as well as html
 	use {
 		'luochen1990/rainbow',
-		config = configuire_rainbow
+		config = configure_rainbow
 	}
-	
+
 	-- Language-server protocol
 	-- Must be after language specific things
 	use{
@@ -265,7 +272,8 @@ return require'packer'.startup(function(use)
 		after = {
 			'lsp-status.nvim',
 			'folding-nvim',
-			'cmp-nvim-lsp'
+			'cmp-nvim-lsp',
+			'nvim-lsp-installer'
 		}
 	}
 	use{
@@ -273,14 +281,14 @@ return require'packer'.startup(function(use)
 		config = configure_lsp_status,
 		after = 'lspkind-nvim'
 	}
-----Automate installing some language-servers
---Plug 'williamboman/nvim-lsp-installer'
+	--Automate installing some language-servers
+	use 'williamboman/nvim-lsp-installer'
 	-- LSP breakdown icons and stuff
 	use 'onsails/lspkind-nvim'
 	-- Better folding
 	use 'pierreglaser/folding-nvim'
---
----- Completion details (uses LSP)
+
+	-- Completion details (uses LSP)
 	use{
 		'hrsh7th/cmp-nvim-lsp',
 		after = 'nvim-cmp'
@@ -483,17 +491,6 @@ return require'packer'.startup(function(use)
 --    --capacity = 5,
 --    --debug = false, 
 --}
-----lsp setup
---require"nvim-lsp-installer".on_server_ready(function(server)
---    -- (optional) Customize the options passed to the server
---    -- if server.name == "tsserver" then
---    --     options.root_dir = function() ... end
---    -- end
---
---    -- This setup() function is exactly the same as lspconfig's setup function.
---    -- Refer to https://github.com/neovim/nvim-lspconfig/blob/master/doc/server_configurations.md
---    server:setup(default_args)
---end)
 	--vim.lsp.set_log_level("debug")
 
 	-- Which syntaxes would you like to enable highlighting for in vim files?
@@ -510,6 +507,10 @@ return require'packer'.startup(function(use)
 	-- see the docstrings for folded code
 	vim.g.SimpylFold_docstring_preview = 1
 
+	local function t(str)
+		return vim.api.nvim_replace_termcodes(str, true, true, true)
+	end
+
 	-- TODO fix
 	-- nvim_lsp completeion settings
 	--  Use <Tab> and <S-Tab> to navigate through popup menu
@@ -519,42 +520,42 @@ return require'packer'.startup(function(use)
 	vim.keymap.set('i', '<S-Tab>', function()
 		return vim.fn.pumvisible() == 1 and t'<C-p>' or t'<S-Tab>'
 	end, {expr = true})
-	
+
 	vim.keymap.set('n', '<Leader>d', vim.diagnostic.goto_next)
-	
+
 	-- Enable folding with the spacebar
 	vim.keymap.set('n', '<space>', 'za')
-	
+
 	-- Go back one file in current buffer
 	vim.keymap.set('n', '<Leader><Leader>', '<c-^>')
-	
+
 	-- Map <Esc> to exit terminal-mode (stolen from nvim's :help terminal-input then modified for lua)
 	vim.keymap.set('t', '<Esc>', '<C-\\><C-n>')
-	
+
 	-- Keyboard shortcut to open nerd tree via currently disabled mod
 	--vim.keymap.set('', '<Leader>n', '<Plug>NERDTreeTabsToggle<CR>')
-	
+
 	-- Make it a tad easier to change the terminal back to a buffer
 	vim.keymap.set('', '<Leader>]', '<C-\\><C-n>')
-	
+
 	-- Reccomended settings for nvim-cmp
 	vim.o.completeopt = 'menu,menuone,noselect'
-	
+
 	vim.o.showmode = false -- Hide the default mode text (e.g. -- INSERT -- below the statusline)
 	-- print options
 	-- set printoptions=paper:letter
-	
+
 	-- display line numbers
 	vim.o.number = true --  If this is used with [[relativenumber]], then it shows the current lineno on the current line (as opposed to `0`)
 	vim.o.relativenumber = true
-	
+
 	vim.o.tabstop = 4
 	vim.o.shiftwidth = 4
 	vim.o.backspace = 'indent,eol,start'
-	
+
 	-- Use sys clipboard
 	vim.o.clipboard = 'unnamedplus'
-	
+
 	-- Title magic.
 	vim.o.title = true
 
