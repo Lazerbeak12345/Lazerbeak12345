@@ -21,8 +21,18 @@ elseif vim.env.VIMRUNNING ~= "2" then
 	vim.env.VIMRUNNING = 1
 end
 
+local function configure_lsp_status()
+	local lsp_status = require'lsp-status'
+	lsp_status.config{
+		status_symbol = '', -- The default V breaks some layout stuff
+		show_filename = false, -- Takes up too much space
+		--kind_labels = lspkind.symbol_map TODO
+	}
+	lsp_status.register_progress()
+end
+
 local function configuire_lspconfig()
-	local lspconfig=require'lspconfig'
+	local lsp_status = require'lsp-status'
 	local function my_on_attach(...)
 		--[[
 		TODO
@@ -31,21 +41,22 @@ local function configuire_lspconfig()
 		pairs in server_capabilities directly match those defined in the language server
 		protocol
 		]]
-		--lsp_status.on_attach(...)
-		--require'folding'.on_attach(...)
+		lsp_status.on_attach(...)
+		require'folding'.on_attach(...)
 	end
 	local default_args={
 		on_attach=my_on_attach,
-		--capabilities=require'cmp_nvim_lsp'.update_capabilities(lsp_status.capabilities)
+		--capabilities=require'cmp_nvim_lsp'.update_capabilities(lsp_status.capabilities) TODO
+		capabilities = lsp_status.capabilities
 	}
+	local lspconfig=require'lspconfig'
 	-- Confirmed to have been used
 	lspconfig.racket_langserver.setup(default_args)
 	lspconfig.clangd.setup(default_args)
 end
 
 local function configure_null_ls()
-	local null_ls = require"null-ls"
-	null_ls.setup{
+	require"null-ls".setup{
 	    sources = {
 			--[[ TODO was super laggy, and duplicative in nature
 			null_ls.builtins.code_actions.eslint,
@@ -250,17 +261,24 @@ return require'packer'.startup(function(use)
 	-- Must be after language specific things
 	use{
 		'neovim/nvim-lspconfig',
+		disable = true,
 		config = configuire_lspconfig,
 		-- The config function for this requires these to be present. It's a two way dependancy.
-		after = 'lsp-status.nvim'
+		after = {
+			'lsp-status.nvim',
+			'folding-nvim'
+		}
 	}
-	use 'nvim-lua/lsp-status.nvim'
+	use{
+		'nvim-lua/lsp-status.nvim',
+		config = configure_lsp_status
+	}
 ----Automate installing some language-servers
 --Plug 'williamboman/nvim-lsp-installer'
 ---- LSP breakdown icons and stuff
 --Plug 'onsails/lspkind-nvim'
----- Better folding
---Plug 'pierreglaser/folding-nvim'
+	-- Better folding
+	use 'pierreglaser/folding-nvim'
 --
 ---- Completion details (uses LSP)
 --Plug 'hrsh7th/cmp-nvim-lsp'
@@ -463,13 +481,6 @@ return require'packer'.startup(function(use)
 --    --debug = false, 
 --}
 ----lsp setup
---local lsp_status = require'lsp-status'
---lsp_status.config{
---	status_symbol = '', -- The default V breaks some layout stuff
---	show_filename = false, -- Takes up too much space
---	kind_labels = lspkind.symbol_map
---}
---lsp_status.register_progress()
 --require"nvim-lsp-installer".on_server_ready(function(server)
 --    -- (optional) Customize the options passed to the server
 --    -- if server.name == "tsserver" then
