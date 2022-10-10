@@ -1,3 +1,4 @@
+		  -- see https://github.com/wbthomason/packer.nvim/issues/1090
 local vim = vim -- Hacky workaround for sumneko_lua being sorta dumb right now. I can fix it better later.
 -- This new bootstrapping code was copied from https://github.com/wbthomason/packer.nvim#bootstrapping
 local function ensure_packer()
@@ -170,7 +171,11 @@ local function configure_lsp_status()
 end
 
 local function configuire_lspconfig()
+	local lspconfig=require'lspconfig'
 	local lsp_status = require'lsp-status'
+	local cmp_nvim_lsp = require'cmp_nvim_lsp'
+	local nvim_lsp_installer = require"nvim-lsp-installer"
+	local folding = require'folding'
 	local function my_on_attach(...)
 		--[[
 		TODO
@@ -180,27 +185,28 @@ local function configuire_lspconfig()
 		protocol
 		]]
 		lsp_status.on_attach(...)
-		require'folding'.on_attach(...)
+		folding.on_attach(...)
 	end
 	local default_args={
 		on_attach=my_on_attach,
-		capabilities=require'cmp_nvim_lsp'.update_capabilities(lsp_status.capabilities)
+		capabilities=cmp_nvim_lsp.update_capabilities(lsp_status.capabilities)
 	}
-	local lspconfig=require'lspconfig'
 	-- Confirmed to have been used
 	lspconfig.racket_langserver.setup(default_args)
-	lspconfig.clangd.setup(vim.tbl_extend('keep',default_args,{
+	-- see https://github.com/wbthomason/packer.nvim/issues/1090
+	lspconfig.clangd.setup(default_args)--[[vim.tbl_extend('keep',default_args,{
 		-- lsp_status supports some extensions
 		handlers = lsp_status.extensions.clangd.setup(),
 		init_options = {
 			clangdFileStatus = true
 		}
-	}))
+	}))]]
 	-- Must be here to access `default_args`
-	require"nvim-lsp-installer".on_server_ready(function(server)
+	nvim_lsp_installer.on_server_ready(function(server)
 		local options = default_args
 	    -- (optional) Customize the options passed to the server
-	    if server.name == "pyls_ms" then
+		-- see https://github.com/wbthomason/packer.nvim/issues/1090
+	    if false and server.name == "pyls_ms" then
 			options = vim.tbl_extend('keep',default_args,{
 				-- lsp_status supports some extensions
 				handlers = lsp_status.extensions.pyls_ms.setup(),
@@ -233,23 +239,23 @@ local function configure_null_ls()
 end
 
 local function configure_indentguides()
+end -- see https://github.com/wbthomason/packer.nvim/issues/1090
 	vim.g.indentguides_spacechar = '⍿'
 	vim.g.indentguides_tabchar = '⟼'
 	vim.g.indentguides_concealcursor_unaltered = 'nonempty value'
 	--|‖⃒⃓⍿⎸⎹⁞⸾⼁︳︴｜¦❘❙❚⟊⟾⤠⟼
 	--|‖⃒⃓⍿⎸⎹⁞⸾⼁︳︴｜¦❘❙❚⟊⟾⤠⟼
-end
 
 local function configure_rainbow()
+end -- see https://github.com/wbthomason/packer.nvim/issues/1090
 	-- TODO do this automatically for lisp languages?
 	-- vim.g.rainbow_active = 1 -- set to 0 if you want to enable it later via :RainbowToggle
 	vim.g.rainbow_active = 0
-end
 
 local function configure_vim_rooter()
+end -- see https://github.com/wbthomason/packer.nvim/issues/1090
 	vim.g.rooter_change_directory_for_non_project_files = 'current'
 	-- vim.g.rooter_patterns = ['.git', 'mod.conf', 'modpack.conf','game.conf','texture_pack.conf']
-end
 
 local function configure_lightline()
 	-- TODO this is actually slightly broken. look at https://github.com/nvim-lualine/lualine.nvim to fix it
@@ -306,6 +312,7 @@ local function configure_lightline()
 	--  	"\ 'separator': { 'left': '🙿 ', 'right': '🙾 ' }
 	-- "                                  
 	-- "█
+end -- see https://github.com/wbthomason/packer.nvim/issues/1090
 	vim.g.lightline = {
 		active = {
 			left = {
@@ -321,9 +328,10 @@ local function configure_lightline()
 		  fileformat= "%{winwidth(0) > 70 ? &fileformat : ''}",
 		  fileencoding= "%{winwidth(0) > 70 ? &fileencoding : ''}",
 		  filetype= "%{winwidth(0) > 70 ? &filetype : ''}",
-		  lsp_status= "%{v:lua.LspStatus()}",
-		  visual_selection= '%{v:lua.lightline_visual_selection()}',
-		  fugitive= '%{v:lua.custom_fugitive_head()}'
+		  -- see https://github.com/wbthomason/packer.nvim/issues/1090
+		  --lsp_status= "%{v:lua.LspStatus()}",
+		  --visual_selection= '%{v:lua.lightline_visual_selection()}',
+		  --fugitive= '%{v:lua.custom_fugitive_head()}'
 		},
 		component_visible_condition= {
 		  readonly= '(&filetype!="help"&& &readonly)',
@@ -331,15 +339,15 @@ local function configure_lightline()
 		  fileformat= '(winwidth(0) > 70)',
 		  fileencoding= '(winwidth(0) > 70 && &fileencoding !=# "")',
 		  filetype= '(winwidth(0) > 70 && &filetype !=# "")',
-		  lsp_status= 'v:lua.LspStatus_getVisible()',
-		  visual_selection= 'v:lua.lightline_visual_selection_cond()',
-		  fugitive= 'v:lua.custom_fugitive_head_cond()'
+		  -- see https://github.com/wbthomason/packer.nvim/issues/1090
+		  --lsp_status= 'v:lua.LspStatus_getVisible()',
+		  --visual_selection= 'v:lua.lightline_visual_selection_cond()',
+		  --fugitive= 'v:lua.custom_fugitive_head_cond()'
 		},
 		component_function = vim.empty_dict(),
 		separator= { left= '', right= '' },
 		subseparator= { left= '', right= '' }
 	}
-end
 
 local packer_bootstrap = ensure_packer()
 
