@@ -1,4 +1,3 @@
-		  -- see https://github.com/wbthomason/packer.nvim/issues/1090
 local vim = vim -- Hacky workaround for sumneko_lua being sorta dumb right now. I can fix it better later.
 -- This new bootstrapping code was copied from https://github.com/wbthomason/packer.nvim#bootstrapping
 local function ensure_packer()
@@ -21,6 +20,21 @@ if vim.env.VIMRUNNING == "1" then
 	-- So vim has to take care of it.
 elseif vim.env.VIMRUNNING ~= "2" then
 	vim.env.VIMRUNNING = 1
+end
+
+local function configure_cmp_dictionary()
+	require"cmp_dictionary".setup{
+	    dic = {
+	        ["*"] = "/usr/share/dict/words",
+	        --["markdown"] = { "path/to/mddict", "path/to/mddict2" },
+	        --["javascript,typescript"] = { "path/to/jsdict" },
+	    },
+	    -- The following are default values, so you don't need to write them if you don't want to change them
+	    --exact = 2,
+	    --async = true,
+	    --capacity = 5,
+	    --debug = false, 
+	}
 end
 
 local function configure_nvim_cmp()
@@ -162,10 +176,11 @@ end
 
 local function configure_lsp_status()
 	local lsp_status = require'lsp-status'
+	local lspkind = require'lspkind'
 	lsp_status.config{
 		status_symbol = '', -- The default V breaks some layout stuff
 		show_filename = false, -- Takes up too much space
-		kind_labels = require'lspkind'.symbol_map
+		kind_labels = lspkind.symbol_map
 	}
 	lsp_status.register_progress()
 end
@@ -259,6 +274,7 @@ end -- see https://github.com/wbthomason/packer.nvim/issues/1090
 
 local function configure_lightline()
 	-- TODO this is actually slightly broken. look at https://github.com/nvim-lualine/lualine.nvim to fix it
+end -- see https://github.com/wbthomason/packer.nvim/issues/1090
 	function _G.lightline_visual_selection()
 		local mode = vim.fn.mode()
 		local lines = vim.fn.abs(vim.fn.line("v") - vim.fn.line(".")) + 1
@@ -312,7 +328,6 @@ local function configure_lightline()
 	--  	"\ 'separator': { 'left': '🙿 ', 'right': '🙾 ' }
 	-- "                                  
 	-- "█
-end -- see https://github.com/wbthomason/packer.nvim/issues/1090
 	vim.g.lightline = {
 		active = {
 			left = {
@@ -328,10 +343,9 @@ end -- see https://github.com/wbthomason/packer.nvim/issues/1090
 		  fileformat= "%{winwidth(0) > 70 ? &fileformat : ''}",
 		  fileencoding= "%{winwidth(0) > 70 ? &fileencoding : ''}",
 		  filetype= "%{winwidth(0) > 70 ? &filetype : ''}",
-		  -- see https://github.com/wbthomason/packer.nvim/issues/1090
-		  --lsp_status= "%{v:lua.LspStatus()}",
-		  --visual_selection= '%{v:lua.lightline_visual_selection()}',
-		  --fugitive= '%{v:lua.custom_fugitive_head()}'
+		  lsp_status= "%{v:lua.LspStatus()}",
+		  visual_selection= '%{v:lua.lightline_visual_selection()}',
+		  fugitive= '%{v:lua.custom_fugitive_head()}'
 		},
 		component_visible_condition= {
 		  readonly= '(&filetype!="help"&& &readonly)',
@@ -339,10 +353,9 @@ end -- see https://github.com/wbthomason/packer.nvim/issues/1090
 		  fileformat= '(winwidth(0) > 70)',
 		  fileencoding= '(winwidth(0) > 70 && &fileencoding !=# "")',
 		  filetype= '(winwidth(0) > 70 && &filetype !=# "")',
-		  -- see https://github.com/wbthomason/packer.nvim/issues/1090
-		  --lsp_status= 'v:lua.LspStatus_getVisible()',
-		  --visual_selection= 'v:lua.lightline_visual_selection_cond()',
-		  --fugitive= 'v:lua.custom_fugitive_head_cond()'
+		  lsp_status= 'v:lua.LspStatus_getVisible()',
+		  visual_selection= 'v:lua.lightline_visual_selection_cond()',
+		  fugitive= 'v:lua.custom_fugitive_head_cond()'
 		},
 		component_function = vim.empty_dict(),
 		separator= { left= '', right= '' },
@@ -360,7 +373,7 @@ return require'packer'.startup(function(use)
 	use{
 		'itchyny/lightline.vim',
 		config = configure_lightline,
-		after = {
+		requires = {
 			'vim-fugitive',
 			'lsp-status.nvim'
 		}
@@ -425,7 +438,7 @@ return require'packer'.startup(function(use)
 		'neovim/nvim-lspconfig',
 		config = configuire_lspconfig,
 		-- The config function for this requires these to be present. It's a two way dependancy.
-		after = {
+		requires = {
 			'lsp-status.nvim',
 			'folding-nvim',
 			'cmp-nvim-lsp',
@@ -435,7 +448,7 @@ return require'packer'.startup(function(use)
 	use{
 		'nvim-lua/lsp-status.nvim',
 		config = configure_lsp_status,
-		after = 'lspkind-nvim'
+		requires = 'lspkind-nvim'
 	}
 	--Automate installing some language-servers
 	use 'williamboman/nvim-lsp-installer'
@@ -447,14 +460,17 @@ return require'packer'.startup(function(use)
 	-- Completion details (uses LSP)
 	use{
 		'hrsh7th/cmp-nvim-lsp',
-		after = 'nvim-cmp'
+		requires = 'nvim-cmp'
 	}
 --Plug 'hrsh7th/cmp-buffer'
 --Plug 'hrsh7th/cmp-path'
 	use{
 		'hrsh7th/nvim-cmp',
 		config = configure_nvim_cmp,
-		after = 'lspkind-nvim'
+		requires = {
+			'lspkind-nvim',
+			'cmp-dictionary'
+		}
 	}
 ---- Lower the text sorting of completions starting with _
 --Plug 'lukas-reineke/cmp-under-comparator'
@@ -495,8 +511,11 @@ return require'packer'.startup(function(use)
 --Plug 'hrsh7th/cmp-nvim-lsp-document-symbol'
 ---- Completion on the vim.lsp apis
 --Plug 'hrsh7th/cmp-nvim-lua'
----- Use /usr/share/dict/words for completion
---Plug 'uga-rosa/cmp-dictionary'
+	-- Use /usr/share/dict/words for completion
+	use{
+		'uga-rosa/cmp-dictionary',
+		config = configure_cmp_dictionary
+	}
 
 
 -- TODO where'd my config go eh?
@@ -507,18 +526,6 @@ return require'packer'.startup(function(use)
 --require'cmp-npm'.setup{} TODO see docs for this one. It was odd.
 --require"cmp_git".setup()
 --require'crates'.setup()
---require"cmp_dictionary".setup{
---    dic = {
---        ["*"] = "/usr/share/dict/words",
---        --["markdown"] = { "path/to/mddict", "path/to/mddict2" },
---        --["javascript,typescript"] = { "path/to/jsdict" },
---    },
---    -- The following are default values, so you don't need to write them if you don't want to change them
---    --exact = 2,
---    --async = true,
---    --capacity = 5,
---    --debug = false, 
---}
 	--vim.lsp.set_log_level("debug")
 
 	-- Which syntaxes would you like to enable highlighting for in vim files?
