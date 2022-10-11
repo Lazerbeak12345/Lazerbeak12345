@@ -387,15 +387,15 @@ return require'packer'.startup(function(use)
 	-- Git integration
 	--  Genral use
 	use 'tpope/vim-fugitive'
-----  Line-per-line indicators and chunk selection
---Plug 'airblade/vim-gitgutter'
----- Nicer file management
---Plug 'preservim/nerdtree'
---Plug 'tiagofumo/vim-nerdtree-syntax-highlight'
-----Plug 'jistr/vim-nerdtree-tabs'
---Plug 'Xuyuanp/nerdtree-git-plugin'
----- Icons
---Plug 'ryanoasis/vim-devicons'
+	--  Line-per-line indicators and chunk selection
+	use 'airblade/vim-gitgutter'
+	-- Nicer file management
+	use 'preservim/nerdtree'
+	use 'tiagofumo/vim-nerdtree-syntax-highlight'
+	--Plug 'jistr/vim-nerdtree-tabs'
+	use 'Xuyuanp/nerdtree-git-plugin'
+	-- Icons
+	use 'ryanoasis/vim-devicons'
 
 	--  This should work on all files (it's python support ain't great)
 	--Plug 'khzaw/vim-conceal'
@@ -408,24 +408,24 @@ return require'packer'.startup(function(use)
 		'airblade/vim-rooter',
 		config = configure_vim_rooter
 	}
-----  Start Screen
---Plug 'mhinz/vim-startify'
----- common dependancies of many nvim plugins
+	--  Start Screen
+	use 'mhinz/vim-startify'
+	-- common dependancies of many nvim plugins
 	use 'nvim-lua/plenary.nvim'
 	use {
 		'jose-elias-alvarez/null-ls.nvim',
 		config = configure_null_ls
 	}
----- Interactive eval
---Plug 'Olical/conjure'
---
----- Specific file type compat
----- CSV
---Plug 'chrisbra/csv.vim'
----- Racket
---Plug 'wlangstroth/vim-racket'
----- Eww's configuration language, yuck
---Plug 'elkowar/yuck.vim'
+	-- Interactive eval
+	use 'Olical/conjure'
+	
+	-- Specific file type compat
+	-- CSV
+	use 'chrisbra/csv.vim'
+	-- Racket
+	use 'wlangstroth/vim-racket'
+	-- Eww's configuration language, yuck
+	use 'elkowar/yuck.vim'
 	-- Anything with parens as well as html
 	use {
 		'luochen1990/rainbow',
@@ -462,8 +462,8 @@ return require'packer'.startup(function(use)
 		'hrsh7th/cmp-nvim-lsp',
 		requires = 'nvim-cmp'
 	}
---Plug 'hrsh7th/cmp-buffer'
---Plug 'hrsh7th/cmp-path'
+	use 'hrsh7th/cmp-buffer'
+	use 'hrsh7th/cmp-path'
 	use{
 		'hrsh7th/nvim-cmp',
 		config = configure_nvim_cmp,
@@ -475,23 +475,23 @@ return require'packer'.startup(function(use)
 			'cmp-npm',
 		}
 	}
----- Lower the text sorting of completions starting with _
---Plug 'lukas-reineke/cmp-under-comparator'
----- cmdline source
---Plug 'hrsh7th/cmp-cmdline'
----- Snippet source
-----  For vsnip users.
---Plug 'hrsh7th/cmp-vsnip'
---Plug 'hrsh7th/vim-vsnip'
-----  For luasnip users.
-----Plug 'L3MON4D3/LuaSnip'
-----Plug 'saadparwaiz1/cmp_luasnip'
-----  For ultisnips users.
-----Plug 'SirVer/ultisnips'
-----Plug 'quangnguyen30192/cmp-nvim-ultisnips'
-----  For snippy users.
-----Plug 'dcampos/nvim-snippy'
-----Plug 'dcampos/cmp-snippy'
+	-- Lower the text sorting of completions starting with _
+	use 'lukas-reineke/cmp-under-comparator'
+	-- cmdline source
+	use 'hrsh7th/cmp-cmdline'
+	-- Snippet source
+	--  For vsnip users.
+	use 'hrsh7th/cmp-vsnip'
+	use 'hrsh7th/vim-vsnip'
+	--  For luasnip users.
+	--Plug 'L3MON4D3/LuaSnip'
+	--Plug 'saadparwaiz1/cmp_luasnip'
+	--  For ultisnips users.
+	--Plug 'SirVer/ultisnips'
+	--Plug 'quangnguyen30192/cmp-nvim-ultisnips'
+	--  For snippy users.
+	--Plug 'dcampos/nvim-snippy'
+	--Plug 'dcampos/cmp-snippy'
 	-- Git completion source
 	use{
 		'petertriho/cmp-git',
@@ -516,22 +516,22 @@ return require'packer'.startup(function(use)
 			require'cmp-npm'.setup{}
 		end
 	}
----- latex symbol completion support (allows for inserting unicode)
---Plug 'kdheepak/cmp-latex-symbols'
----- Emoji completion support
---Plug 'hrsh7th/cmp-emoji'
----- Pandoc completion
---Plug 'jc-doyle/cmp-pandoc-references'
----- cmdline history completion
-----Plug 'dmitmel/cmp-cmdline-history'
----- Fish completion
---Plug 'mtoohey31/cmp-fish'
----- conjure intractive eval completion
---Plug 'PaterJason/cmp-conjure'
----- Use LSP symbols for buffer-style search
---Plug 'hrsh7th/cmp-nvim-lsp-document-symbol'
----- Completion on the vim.lsp apis
---Plug 'hrsh7th/cmp-nvim-lua'
+	-- latex symbol completion support (allows for inserting unicode)
+	use 'kdheepak/cmp-latex-symbols'
+	-- Emoji completion support
+	use 'hrsh7th/cmp-emoji'
+	-- Pandoc completion
+	use 'jc-doyle/cmp-pandoc-references'
+	-- cmdline history completion
+	--Plug 'dmitmel/cmp-cmdline-history'
+	-- Fish completion
+	use 'mtoohey31/cmp-fish'
+	-- conjure intractive eval completion
+	use 'PaterJason/cmp-conjure'
+	-- Use LSP symbols for buffer-style search
+	use 'hrsh7th/cmp-nvim-lsp-document-symbol'
+	-- Completion on the vim.lsp apis
+	use 'hrsh7th/cmp-nvim-lua'
 	-- Use /usr/share/dict/words for completion
 	use{
 		'uga-rosa/cmp-dictionary',
