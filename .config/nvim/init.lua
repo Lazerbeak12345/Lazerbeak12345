@@ -411,7 +411,7 @@ return require'packer'.startup(function(use)
 ----  Start Screen
 --Plug 'mhinz/vim-startify'
 ---- common dependancies of many nvim plugins
---Plug 'nvim-lua/plenary.nvim'
+	use 'nvim-lua/plenary.nvim'
 	use {
 		'jose-elias-alvarez/null-ls.nvim',
 		config = configure_null_ls
@@ -469,7 +469,10 @@ return require'packer'.startup(function(use)
 		config = configure_nvim_cmp,
 		requires = {
 			'lspkind-nvim',
-			'cmp-dictionary'
+			'cmp-dictionary',
+			'cmp-git',
+			'crates.nvim',
+			'cmp-npm',
 		}
 	}
 ---- Lower the text sorting of completions starting with _
@@ -489,12 +492,30 @@ return require'packer'.startup(function(use)
 ----  For snippy users.
 ----Plug 'dcampos/nvim-snippy'
 ----Plug 'dcampos/cmp-snippy'
----- Git completion source
---Plug 'petertriho/cmp-git'
----- crates.io completion source
---Plug 'saecki/crates.nvim'
----- package.json completion source
---Plug 'David-Kunz/cmp-npm'
+	-- Git completion source
+	use{
+		'petertriho/cmp-git',
+		config = function()
+			require"cmp_git".setup()
+		end
+	}
+	-- crates.io completion source
+	use {
+		'saecki/crates.nvim',
+		config = function()
+			require'crates'.setup()
+		end
+	}
+	-- package.json completion source
+	use {
+		'David-Kunz/cmp-npm',
+		requires = {
+			'plenary.nvim'
+		},
+		config = function()
+			require'cmp-npm'.setup{}
+		end
+	}
 ---- latex symbol completion support (allows for inserting unicode)
 --Plug 'kdheepak/cmp-latex-symbols'
 ---- Emoji completion support
@@ -517,15 +538,8 @@ return require'packer'.startup(function(use)
 		config = configure_cmp_dictionary
 	}
 
+	-- refer to https://github.com/nanotee/nvim-lua-guide
 
--- TODO where'd my config go eh?
-
-----nvim-cmp setup
----- In the meantime refer to https://github.com/nanotee/nvim-lua-guide
---local cmp = require'cmp'
---require'cmp-npm'.setup{} TODO see docs for this one. It was odd.
---require"cmp_git".setup()
---require'crates'.setup()
 	--vim.lsp.set_log_level("debug")
 
 	-- Which syntaxes would you like to enable highlighting for in vim files?
