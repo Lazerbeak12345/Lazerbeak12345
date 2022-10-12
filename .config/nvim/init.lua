@@ -61,7 +61,7 @@ local function configure_nvim_cmp()
 				i = cmp.mapping.abort(),
 				c = cmp.mapping.close(),
 			},
-			['<Tab>'] = cmp.mapping(cmp.mapping.confirm{ select = true }, { 'i', 'c' })
+			['<Tab>'] = cmp.mapping.confirm{ select = true }
 			--[[ TODO this is what some of it was before:
 			--  Use keyboard shortcuts to change to the next or previous sources
 			vim.keymap.set('i', '<c-j>', '<Plug>(completion_next_source)')
@@ -363,8 +363,15 @@ end -- see https://github.com/wbthomason/packer.nvim/issues/1090
 	}
 
 local packer_bootstrap = ensure_packer()
+local packer_config = {
+	profile = {
+		enable = true,
+		-- Amount of load time for plugin to be included in profile
+		threshold = 0,
+	}
+}
 
-return require'packer'.startup(function(use)
+return require'packer'.startup{function(use)
 	use 'wbthomason/packer.nvim' -- Self-manage the package manager.
 
 	-- Commenting
@@ -414,11 +421,12 @@ return require'packer'.startup(function(use)
 	use 'nvim-lua/plenary.nvim'
 	use {
 		'jose-elias-alvarez/null-ls.nvim',
+		--disable = true, -- TODO figure out how to make actual use of this
 		config = configure_null_ls
 	}
 	-- Interactive eval
 	use 'Olical/conjure'
-	
+
 	-- Specific file type compat
 	-- CSV
 	use 'chrisbra/csv.vim'
@@ -443,12 +451,20 @@ return require'packer'.startup(function(use)
 			'folding-nvim',
 			'cmp-nvim-lsp',
 			'nvim-lsp-installer'
+		},
+		module = {
+			'lspconfig',
+			--'lsp-status',
+			'cmp_nvim_lsp',
+			"nvim-lsp-installer",
+			'folding'
 		}
 	}
 	use{
 		'nvim-lua/lsp-status.nvim',
 		config = configure_lsp_status,
-		requires = 'lspkind-nvim'
+		requires = 'lspkind-nvim',
+		module = 'lsp-status'
 	}
 	--Automate installing some language-servers
 	use 'williamboman/nvim-lsp-installer'
@@ -473,7 +489,8 @@ return require'packer'.startup(function(use)
 			'cmp-git',
 			'crates.nvim',
 			'cmp-npm',
-		}
+		},
+		module_pattern = ".*cmp.*"
 	}
 	-- Lower the text sorting of completions starting with _
 	use 'lukas-reineke/cmp-under-comparator'
@@ -497,14 +514,22 @@ return require'packer'.startup(function(use)
 		'petertriho/cmp-git',
 		config = function()
 			require"cmp_git".setup()
-		end
+		end,
+		requires = "nvim-lua/plenary.nvim",
+		-- They don't even talk - this is just because I won't need cmp-git until
+		-- after interacting with fugitive anyway
+		after = 'vim-fugitive'
 	}
 	-- crates.io completion source
 	use {
 		'saecki/crates.nvim',
 		config = function()
 			require'crates'.setup()
-		end
+		end,
+		requires = {
+			'plenary.nvim'
+		},
+		event = "BufRead Cargo.toml"
 	}
 	-- package.json completion source
 	use {
@@ -514,7 +539,8 @@ return require'packer'.startup(function(use)
 		},
 		config = function()
 			require'cmp-npm'.setup{}
-		end
+		end,
+		event = "BufRead package.json"
 	}
 	-- latex symbol completion support (allows for inserting unicode)
 	use 'kdheepak/cmp-latex-symbols'
@@ -535,7 +561,8 @@ return require'packer'.startup(function(use)
 	-- Use /usr/share/dict/words for completion
 	use{
 		'uga-rosa/cmp-dictionary',
-		config = configure_cmp_dictionary
+		config = configure_cmp_dictionary,
+		opt = true -- TODO load in later when cmp runs
 	}
 
 	-- refer to https://github.com/nanotee/nvim-lua-guide
@@ -631,7 +658,7 @@ return require'packer'.startup(function(use)
 	-- TODO broken
 	-- Always underline the current line
 	-- change cursor on insert mode. doesn't always work
-	-- below two lines work in konsole
+	-- below two lines no longer work in konsole
 	--vim.o.t_SI = "\\e[3 q" -- insert
 	--vim.o.t_EI = "\\e[1 q" -- command
 
@@ -663,14 +690,14 @@ return require'packer'.startup(function(use)
 		-- TODO convert this
 		command = "match BadWhitespace /\s\+$/"
 	})]]
-	--[[ (failed) Attempt to disable numbers on terminal only.
-	vim.api.nvim_create_autocmd({ "TermOpen " }, {
+	-- Disable numbers on terminal only.
+	vim.api.nvim_create_autocmd({ "TermOpen" }, {
 		pattern = "*",
 		callback = function()
 			vim.o.number = false
 			vim.o.relativenumber = false
 		end
-	})]]
+	})
 	-- Popup windows tend to be unreadable with a pink background
 	vim.api.nvim_set_hl(0, "Pmenu", {})
 
@@ -679,5 +706,5 @@ return require'packer'.startup(function(use)
 	if packer_bootstrap then
 		require('packer').sync()
 	end
-end)
+end, config = packer_config }
 -- vim.o.ambiwidth="double" -- use this if the arrows are cut off
