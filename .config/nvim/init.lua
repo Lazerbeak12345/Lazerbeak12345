@@ -40,12 +40,13 @@ end
 local function configure_nvim_cmp()
 	local cmp = require'cmp'
 	local lspkind = require'lspkind'
-	--local cmp_under_comparator = require"cmp-under-comparator" TODO
+	local cmp_under_comparator = require"cmp-under-comparator"
 	cmp.setup{
 		--Defaults:https://github.com/hrsh7th/nvim-cmp/blob/main/lua/cmp/config/default.lua
 		snippet = {
 			-- REQUIRED - you must specify a snippet engine
 			expand = function(args)
+				-- TODO can't find workaround for https://github.com/wbthomason/packer.nvim/issues/1090
 				vim.fn["vsnip#anonymous"](args.body) -- For `vsnip` users.
 				-- require('luasnip').lsp_expand(args.body) -- For `luasnip` users.
 				-- vim.fn["UltiSnips#Anon"](args.body) -- For `ultisnips` users.
@@ -101,7 +102,7 @@ local function configure_nvim_cmp()
 	            cmp.config.compare.exact,
 	            cmp.config.compare.score,
 	            cmp.config.compare.recently_used,
-	            --cmp_under_comparator.under,
+	            cmp_under_comparator.under,
 	            cmp.config.compare.kind,
 	            cmp.config.compare.sort_text,
 	            cmp.config.compare.length,
@@ -178,9 +179,10 @@ local function configure_lsp_status()
 	local lsp_status = require'lsp-status'
 	local lspkind = require'lspkind'
 	lsp_status.config{
-		status_symbol = '', -- The default V breaks some layout stuff
-		show_filename = false, -- Takes up too much space
-		kind_labels = lspkind.symbol_map
+		status_symbol = '', -- The default V breaks some layout stuff.  was the next I used, but it's not needed
+		show_filename = false, -- Takes up too much space, redundant
+		diagnostics = false, -- lualine actually already displays this information
+		kind_labels = lspkind.symbol_map,
 	}
 	lsp_status.register_progress()
 end
@@ -272,7 +274,36 @@ end -- see https://github.com/wbthomason/packer.nvim/issues/1090
 	vim.g.rooter_change_directory_for_non_project_files = 'current'
 	-- vim.g.rooter_patterns = ['.git', 'mod.conf', 'modpack.conf','game.conf','texture_pack.conf']
 
-local function configure_lightline()
+local function configure_nvim_base16()
+end -- see https://github.com/wbthomason/packer.nvim/issues/1090
+	vim.cmd.colorscheme'base16-default-dark'
+
+local function configure_lualine()
+	--                                   █ 🙽 🙼 🙿   🙾
+	-- TODO custom visual selection
+	-- TODO replace mode
+	-- TODO lualine tabline (ie :tabnew tabs)
+	--[[ TODO local prepend_ln = function(str)
+		return " " .. str
+	end]]
+	local lsp_status = require'lsp-status'
+	require'lualine'.setup{
+		options = {
+			theme = 'base16' -- Don't be fooled. Nice theme, but not using base16 at all.
+		},
+		sections = {
+			lualine_c = {
+				'filename',
+				function()
+					-- TODO because of https://github.com/wbthomason/packer.nvim/issues/1090
+					-- we can't get the exact components we wish the way we want to using vim.g.lsp_function_name
+					return lsp_status.status()
+				end
+			}
+		}
+	}
+end
+--[[local function configure_lightline()
 	-- TODO this is actually slightly broken. look at https://github.com/nvim-lualine/lualine.nvim to fix it
 end -- see https://github.com/wbthomason/packer.nvim/issues/1090
 	function _G.lightline_visual_selection()
@@ -303,64 +334,26 @@ end -- see https://github.com/wbthomason/packer.nvim/issues/1090
 			mode == 'S' or
 			mode == "<C-v>"
 	end
-	function _G.custom_fugitive_head()
-		local result = vim.api.nvim_eval("FugitiveHead()")
-		if result == "" then
-			return ""
-		end
-		return " " ..  result
-	end
-	function _G.custom_fugitive_head_cond()
-		return "" ~= vim.api.nvim_eval("FugitiveHead()")
-	end
 	-- TODO there's a native way to do the width thing now.
 	function _G.LspStatus_getVisible()
 		return vim.fn.winwidth(0) > 60 and #vim.lsp.buf_get_clients() > 0
 	end
-	function _G.LspStatus()
-		if LspStatus_getVisible() then
-			return require'lsp-status'.status()
-		else
-			return ''
-		end
-	end
-	--  	"\ 'separator': { 'left': '🙽 ', 'right': '🙼 ' },
-	--  	"\ 'separator': { 'left': '🙿 ', 'right': '🙾 ' }
-	-- "                                  
-	-- "█
 	vim.g.lightline = {
 		active = {
 			left = {
 				{ 'mode', 'paste' },
-				{ 'fugitive', 'readonly', 'filename', 'modified', 'visual_selection' },
+				{ 'readonly', 'filename', 'visual_selection' },
 				{ 'lsp_status' }
 			}
 		},
 		component = {
-		  readonly= '%{&filetype=="help"?"":&readonly?"":""}',
-		  modified= '%{&filetype=="help"?"":&modified?"+":&modifiable?"":"-"}',
-		  lineinfo= " %3l:%-2c",
-		  fileformat= "%{winwidth(0) > 70 ? &fileformat : ''}",
-		  fileencoding= "%{winwidth(0) > 70 ? &fileencoding : ''}",
-		  filetype= "%{winwidth(0) > 70 ? &filetype : ''}",
-		  lsp_status= "%{v:lua.LspStatus()}",
-		  visual_selection= '%{v:lua.lightline_visual_selection()}',
-		  fugitive= '%{v:lua.custom_fugitive_head()}'
+			visual_selection= '%{v:lua.lightline_visual_selection()}',
 		},
 		component_visible_condition= {
-		  readonly= '(&filetype!="help"&& &readonly)',
-		  modified= '(&filetype!="help"&&(&modified||!&modifiable))',
-		  fileformat= '(winwidth(0) > 70)',
-		  fileencoding= '(winwidth(0) > 70 && &fileencoding !=# "")',
-		  filetype= '(winwidth(0) > 70 && &filetype !=# "")',
-		  lsp_status= 'v:lua.LspStatus_getVisible()',
-		  visual_selection= 'v:lua.lightline_visual_selection_cond()',
-		  fugitive= 'v:lua.custom_fugitive_head_cond()'
+			visual_selection= 'v:lua.lightline_visual_selection_cond()',
 		},
-		component_function = vim.empty_dict(),
-		separator= { left= '', right= '' },
-		subseparator= { left= '', right= '' }
 	}
+]]
 
 local packer_bootstrap = ensure_packer()
 local packer_config = {
@@ -376,10 +369,21 @@ return require'packer'.startup{function(use)
 
 	-- Commenting
 	--Plug 'tpope/vim-commentary'
+	-- The looks of Powerline but faster than:
+	-- - Powerline
+	-- - Airline
+	-- - And the well-known, formerly first-place Lightline
+	use {
+		'nvim-lualine/lualine.nvim',
+		config = configure_lualine,
+		requires = 'nvim-web-devicons',
+		after = 'nvim-base16'
+	}
 	-- The looks of Powerline, but faster
 	use{
 		'itchyny/lightline.vim',
-		config = configure_lightline,
+		disable = true,
+		--config = configure_lightline,
 		requires = {
 			'vim-fugitive',
 			'lsp-status.nvim'
@@ -389,6 +393,11 @@ return require'packer'.startup{function(use)
 	use{
 		'thaerkh/vim-indentguides',
 		config = configure_indentguides
+	}
+	-- Super fancy coloring
+	use {
+		'RRethy/nvim-base16',
+		config = configure_nvim_base16
 	}
 
 	-- Git integration
@@ -403,6 +412,9 @@ return require'packer'.startup{function(use)
 	use 'Xuyuanp/nerdtree-git-plugin'
 	-- Icons
 	use 'ryanoasis/vim-devicons'
+	use 'kyazdani42/nvim-web-devicons'
+	--  LSP breakdown icons and stuff
+	use 'onsails/lspkind-nvim'
 
 	--  This should work on all files (it's python support ain't great)
 	--Plug 'khzaw/vim-conceal'
@@ -468,8 +480,6 @@ return require'packer'.startup{function(use)
 	}
 	--Automate installing some language-servers
 	use 'williamboman/nvim-lsp-installer'
-	-- LSP breakdown icons and stuff
-	use 'onsails/lspkind-nvim'
 	-- Better folding
 	use 'pierreglaser/folding-nvim'
 
@@ -699,7 +709,7 @@ return require'packer'.startup{function(use)
 		end
 	})
 	-- Popup windows tend to be unreadable with a pink background
-	vim.api.nvim_set_hl(0, "Pmenu", {})
+	--vim.api.nvim_set_hl(0, "Pmenu", {})
 
 	-- Automatically set up your configuration after cloning packer.nvim
 	-- Put this at the end after all plugins
