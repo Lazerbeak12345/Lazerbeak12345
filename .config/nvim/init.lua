@@ -277,6 +277,17 @@ end -- see https://github.com/wbthomason/packer.nvim/issues/1090
 local function configure_nvim_base16()
 end -- see https://github.com/wbthomason/packer.nvim/issues/1090
 	vim.cmd.colorscheme'base16-default-dark'
+	if false then -- I'm still working this out. Contrast issues right now.
+		vim.api.nvim_create_autocmd("BufEnter", {
+			pattern = "*",
+			callback = function()
+				local hl = vim.api.nvim_get_hl_by_name("Normal", "")
+				hl.background = "NONE"
+				vim.api.nvim_set_hl(0, "Normal", hl)
+				print("fixed bg!")
+			end
+		})
+	end
 
 local function configure_lualine()
 	--                                   █ 🙽 🙼 🙿   🙾
