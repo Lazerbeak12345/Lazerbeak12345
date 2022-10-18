@@ -421,6 +421,7 @@ return require'packer'.startup{function(use)
 	use 'tiagofumo/vim-nerdtree-syntax-highlight'
 	--Plug 'jistr/vim-nerdtree-tabs'
 	use 'Xuyuanp/nerdtree-git-plugin'
+
 	-- Icons
 	use 'ryanoasis/vim-devicons'
 	use 'kyazdani42/nvim-web-devicons'
@@ -451,17 +452,15 @@ return require'packer'.startup{function(use)
 	use 'Olical/conjure'
 
 	-- Specific file type compat
-	-- CSV
-	use 'chrisbra/csv.vim'
-	-- Racket
-	use 'wlangstroth/vim-racket'
+	--  General stuff
+	use 'sheerun/vim-polyglot'
 	-- Eww's configuration language, yuck
 	use 'elkowar/yuck.vim'
 	-- Anything with parens as well as html
-	use {
+	--[[use {
 		'luochen1990/rainbow',
 		config = configure_rainbow
-	}
+	}]]
 
 	-- Language-server protocol
 	-- Must be after language specific things
