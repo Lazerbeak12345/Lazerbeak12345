@@ -23,18 +23,7 @@ elseif vim.env.VIMRUNNING ~= "2" then
 end
 
 local function configure_cmp_dictionary()
-	require"cmp_dictionary".setup{
-	    dic = {
-	        ["*"] = "/usr/share/dict/words",
-	        --["markdown"] = { "path/to/mddict", "path/to/mddict2" },
-	        --["javascript,typescript"] = { "path/to/jsdict" },
-	    },
-	    -- The following are default values, so you don't need to write them if you don't want to change them
-	    --exact = 2,
-	    --async = true,
-	    --capacity = 5,
-	    --debug = false, 
-	}
+	require"cmp_dictionary".setup{dic = {["*"] = "/usr/share/dict/words"}}
 end
 
 local function configure_nvim_cmp()
@@ -97,18 +86,18 @@ local function configure_nvim_cmp()
 			{ name = 'cmdline_history', options = { history_type = ':' } },
 		}]]),
 		sorting = {
-	        comparators = {
-	            cmp.config.compare.offset,
-	            cmp.config.compare.exact,
-	            cmp.config.compare.score,
-	            cmp.config.compare.recently_used,
-	            cmp_under_comparator.under,
-	            cmp.config.compare.kind,
-	            cmp.config.compare.sort_text,
-	            cmp.config.compare.length,
-	            cmp.config.compare.order,
-	        },
-	    },
+			comparators = {
+				cmp.config.compare.offset,
+				cmp.config.compare.exact,
+				cmp.config.compare.score,
+				cmp.config.compare.recently_used,
+				cmp_under_comparator.under,
+				cmp.config.compare.kind,
+				cmp.config.compare.sort_text,
+				cmp.config.compare.length,
+				cmp.config.compare.order,
+			},
+		},
 		formatting = {
 			format = lspkind.cmp_format{
 				with_text = true,
@@ -148,31 +137,25 @@ local function configure_nvim_cmp()
 		},
 	}
 	-- Use buffer source (then history) for `/` and `?` (if you enabled `native_menu`, this won't work anymore).
-	for _, cmd_type in ipairs{'/', '?'} do
-		cmp.setup.cmdline(cmd_type, {
-		  sources = {
-			{ name = 'buffer' },
-		  }, {
-			{ name = 'cmdline_history' },
-		  }
-		})
-	end
+	cmp.setup.cmdline({'/', '?'}, {
+		sources = cmp.config.sources(
+			{ { name = 'buffer' } },
+			{ { name = 'cmdline_history' } }
+		)
+	})
 	-- Use cmdline & path source for ':' (if you enabled `native_menu`, this won't work anymore).
 	cmp.setup.cmdline(':', {
-	  sources = cmp.config.sources({
-	    { name = 'path' },
-	  }, {
-	    { name = 'cmdline' },
-		{ name = 'cmdline_history' },
-	  })
+		sources = cmp.config.sources(
+			{ { name = 'path' } },
+			{
+				{ name = 'cmdline' },
+				{ name = 'cmdline_history' }
+			}
+		)
 	})
-	for _, cmd_type in ipairs{'@', '='} do
-	  cmp.setup.cmdline(cmd_type, {
-	    sources = {
-	      { name = 'cmdline_history' },
-	    },
-	  })
-	end
+	cmp.setup.cmdline({'@', '='}, {
+		sources = { { name = 'cmdline_history' } }
+	})
 end
 
 local function configure_lsp_status()
@@ -193,20 +176,12 @@ local function configuire_lspconfig()
 	local cmp_nvim_lsp = require'cmp_nvim_lsp'
 	local nvim_lsp_installer = require"nvim-lsp-installer"
 	local folding = require'folding'
-	local function my_on_attach(...)
-		--[[
-		TODO
-		[LSP] Accessing client.resolved_capabilities is deprecated, update your plugins
-		or configuration to access client.server_capabilities instead.The new key/value
-		pairs in server_capabilities directly match those defined in the language server
-		protocol
-		]]
-		lsp_status.on_attach(...)
-		folding.on_attach(...)
-	end
 	local default_args={
-		on_attach=my_on_attach,
-		capabilities=cmp_nvim_lsp.update_capabilities(lsp_status.capabilities)
+		on_attach = function(...)
+			lsp_status.on_attach(...)
+			folding.on_attach(...)
+		end,
+		capabilities = cmp_nvim_lsp.update_capabilities(lsp_status.capabilities)
 	}
 	-- Confirmed to have been used
 	lspconfig.racket_langserver.setup(default_args)
@@ -221,18 +196,18 @@ local function configuire_lspconfig()
 	-- Must be here to access `default_args`
 	nvim_lsp_installer.on_server_ready(function(server)
 		local options = default_args
-	    -- (optional) Customize the options passed to the server
+		-- (optional) Customize the options passed to the server
 		-- see https://github.com/wbthomason/packer.nvim/issues/1090
-	    if false and server.name == "pyls_ms" then
+		if false and server.name == "pyls_ms" then
 			options = vim.tbl_extend('keep',default_args,{
 				-- lsp_status supports some extensions
 				handlers = lsp_status.extensions.pyls_ms.setup(),
 				settings = { python = { workspaceSymbols = { enabled = true }}},
 			})
-	    end
-	    -- This setup() function is exactly the same as lspconfig's setup function.
-	    -- Refer to https://github.com/neovim/nvim-lspconfig/blob/master/doc/server_configurations.md
-	    server:setup(options)
+		end
+		-- This setup() function is exactly the same as lspconfig's setup function.
+		-- Refer to https://github.com/neovim/nvim-lspconfig/blob/master/doc/server_configurations.md
+		server:setup(options)
 	end)
 end
 
@@ -498,6 +473,7 @@ return require'packer'.startup{function(use)
 			'cmp-git',
 			'crates.nvim',
 			'cmp-npm',
+			'LuaSnip'
 		},
 		module_pattern = ".*cmp.*"
 	}
