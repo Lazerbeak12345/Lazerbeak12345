@@ -46,9 +46,9 @@ local function configure_nvim_cmp()
 		snippet = {
 			-- REQUIRED - you must specify a snippet engine
 			expand = function(args)
-				-- TODO can't find workaround for https://github.com/wbthomason/packer.nvim/issues/1090
-				vim.fn["vsnip#anonymous"](args.body) -- For `vsnip` users.
-				-- require('luasnip').lsp_expand(args.body) -- For `luasnip` users.
+				-- vim.fn["vsnip#anonymous"](args.body) -- For `vsnip` users.
+				-- TODO See other comment about this choice
+				require'luasnip'.lsp_expand(args.body) -- For `luasnip` users.
 				-- vim.fn["UltiSnips#Anon"](args.body) -- For `ultisnips` users.
 				-- require'snippy'.expand_snippet(args.body) -- For `snippy` users.
 			end,
@@ -71,8 +71,8 @@ local function configure_nvim_cmp()
 		},
 		sources = cmp.config.sources({
 			{ name = 'nvim_lsp' },
-			{ name = 'vsnip' }, -- For vsnip users.
-			-- { name = 'luasnip' }, -- For luasnip users.
+			-- { name = 'vsnip' }, -- For vsnip users.
+			{ name = 'luasnip' }, -- For luasnip users.
 			-- { name = 'ultisnips' }, -- For ultisnips users.
 			-- { name = 'snippy' }, -- For snippy users.
 			{ name = 'latex_symbols' },
@@ -128,8 +128,8 @@ local function configure_nvim_cmp()
 					nvim_lsp                 = "[LSP]",
 					nvim_lua                 = "[Lua]",
 					latex_symbols            = "[Latex]",
-					vsnip                    = "[VSnip]",
-					--luasnip                  = "[LuaSnip]",
+					--vsnip                    = "[VSnip]",
+					luasnip                  = "[LuaSnip]",
 					--ultisnips                = "[UltiSnips]",
 					--snippy                   = "[Snippy]",
 					emoji                    = "[Emoji]",
@@ -507,11 +507,14 @@ return require'packer'.startup{function(use)
 	use 'hrsh7th/cmp-cmdline'
 	-- Snippet source
 	--  For vsnip users.
-	use 'hrsh7th/cmp-vsnip'
-	use 'hrsh7th/vim-vsnip'
+	--use 'hrsh7th/cmp-vsnip'
+	--use 'hrsh7th/vim-vsnip'
 	--  For luasnip users.
-	--Plug 'L3MON4D3/LuaSnip'
-	--Plug 'saadparwaiz1/cmp_luasnip'
+	--   TODO I don't actually know anything about this package. I'm only using
+	--   it because vsnip's api doesn't work due to packer bug
+	--   https://github.com/wbthomason/packer.nvim/issues/1090
+	use 'L3MON4D3/LuaSnip'
+	use 'saadparwaiz1/cmp_luasnip'
 	--  For ultisnips users.
 	--Plug 'SirVer/ultisnips'
 	--Plug 'quangnguyen30192/cmp-nvim-ultisnips'
