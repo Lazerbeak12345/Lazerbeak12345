@@ -263,12 +263,6 @@ end -- see https://github.com/wbthomason/packer.nvim/issues/1090
 	--|‖⃒⃓⍿⎸⎹⁞⸾⼁︳︴｜¦❘❙❚⟊⟾⤠⟼
 	--|‖⃒⃓⍿⎸⎹⁞⸾⼁︳︴｜¦❘❙❚⟊⟾⤠⟼
 
-local function configure_rainbow()
-end -- see https://github.com/wbthomason/packer.nvim/issues/1090
-	-- TODO do this automatically for lisp languages?
-	-- vim.g.rainbow_active = 1 -- set to 0 if you want to enable it later via :RainbowToggle
-	vim.g.rainbow_active = 0
-
 local function configure_vim_rooter()
 end -- see https://github.com/wbthomason/packer.nvim/issues/1090
 	vim.g.rooter_change_directory_for_non_project_files = 'current'
@@ -456,11 +450,6 @@ return require'packer'.startup{function(use)
 	use 'sheerun/vim-polyglot'
 	-- Eww's configuration language, yuck
 	use 'elkowar/yuck.vim'
-	-- Anything with parens as well as html
-	--[[use {
-		'luochen1990/rainbow',
-		config = configure_rainbow
-	}]]
 
 	-- Language-server protocol
 	-- Must be after language specific things
