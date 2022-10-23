@@ -262,14 +262,15 @@ local function configure_lualine()
 	--                                   █ 🙽 🙼 🙿   🙾
 	-- TODO custom visual selection
 	-- TODO replace mode
-	-- TODO lualine tabline (ie :tabnew tabs)
 	--[[ TODO local prepend_ln = function(str)
 		return " " .. str
 	end]]
 	local lsp_status = require'lsp-status'
 	require'lualine'.setup{
 		options = {
-			theme = 'base16' -- Don't be fooled. Nice theme, but not using base16 at all.
+			-- Don't be fooled. Nice theme, but not using base16 at all.
+			-- This has become a problem. My phone's shell doesn't support truecolor.
+			theme = 'base16'
 		},
 		sections = {
 			lualine_c = {
@@ -358,6 +359,16 @@ return require'packer'.startup{function(use)
 		config = configure_lualine,
 		requires = 'nvim-web-devicons',
 		after = 'nvim-base16'
+	}
+	use {
+		'kdheepak/tabline.nvim',
+		config = function ()
+			require'tabline'.setup()
+		end,
+		requires = {
+			{'lualine.nvim', opt=true },
+			{'nvim-web-devicons', opt = true}
+		}
 	}
 	-- The looks of Powerline, but faster
 	use{
