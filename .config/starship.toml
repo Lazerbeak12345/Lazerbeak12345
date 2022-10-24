@@ -1,0 +1,70 @@
+# The starship configuration file.
+# A cross-platform, cross shell, shell prompt, written in rust.
+[directory]
+format = "in [$path]($style)[$read_only]($read_only_style) "
+truncation_symbol = "…/"
+[git_commit]
+tag_disabled = false
+[git_metrics]
+disabled = false
+[git_status]
+ahead = "⇡${count}"
+behind = "⇣${count}"
+diverged = "⇕⇡${ahead_count}⇣${behind_count}"
+staged = '[++\($count\)](green)'
+[hostname]
+# I use ssh a lot. I'd like to be able to tell what "localhost" means
+#ssh_only = false
+trim_at = ""  # Don't bother hiding tlds
+format = "on [$hostname]($style) "  # Don't say "in." Let [directory] do that.
+[kubernetes]
+disabled = false
+[lua]
+symbol=" "
+[memory_usage]
+disabled = false
+format = "$symbol [${ram}( ⮀  ${swap})]($style) "
+[hg_branch]
+disabled = false
+[shell]
+disabled = false
+bash_indicator = "🐚🐚"
+fish_indicator = "🐟"
+zsh_indicator = "Z🐚"
+powershell_indicator = "ﲵ"
+ion_indicator = "⚛ "
+elvish_indicator = "λ"
+tcsh_indicator = "🐚"
+xonsh_indicator = "X🐚"
+cmd_indicator = "ﲵ"
+nu_indicator = ">🐚"
+unknown_indicator = "🐚?"
+[shlvl]
+disabled = false
+format = " $shlvl levels down "
+threshold = 3
+[status]
+disabled = false
+format = "[$symbol $status]($style) "
+[sudo]
+disabled = false
+[username]
+#show_always = true
+format = "[$user]($style) "  # Don't say in. Let hostname do that
+[jobs]
+symbol = "✦ "  # I need a space here.
+[custom.vim]
+when = "[ $VIM ]"  # One such value is `/usr/share/nvim`
+format = " "
+[custom.minetest_mod]
+files = ["mod.conf"]
+format = "in minetest mod "
+[custom.minetest_modpack]
+files = ["modpack.conf"]
+format = "in minetest modpack "
+[custom.minetest_game]
+files = ["game.conf"]
+format = "in minetest game "
+[custom.minetest_texture_pack]
+files = ["texture_pack.conf"]
+format = "in minetest texture pack "
