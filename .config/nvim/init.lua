@@ -258,9 +258,17 @@ end -- see https://github.com/wbthomason/packer.nvim/issues/1090
 		})
 	end
 
+local function configure_tabline()
+	require'tabline'.setup {
+		options = {
+			show_tabs_only = true,
+		}
+	}
+end
+
 local function configure_lualine()
 	--                                   █ 🙽 🙼 🙿   🙾
-	-- TODO custom visual selection
+	-- TODO custom visual selection. Broken due to https://github.com/wbthomason/packer.nvim/issues/1090
 	-- TODO replace mode
 	--[[ TODO local prepend_ln = function(str)
 		return " " .. str
@@ -362,13 +370,8 @@ return require'packer'.startup{function(use)
 	}
 	use {
 		'kdheepak/tabline.nvim',
-		config = function ()
-			require'tabline'.setup()
-		end,
-		requires = {
-			{'lualine.nvim', opt=true },
-			{'nvim-web-devicons', opt = true}
-		}
+		config = configure_tabline,
+		requires = {'lualine.nvim','nvim-web-devicons'}
 	}
 	-- The looks of Powerline, but faster
 	use{
