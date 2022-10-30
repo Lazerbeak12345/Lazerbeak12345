@@ -181,6 +181,8 @@ local function configuire_lspconfig()
 			lsp_status.on_attach(...)
 			folding.on_attach(...)
 		end,
+		-- TODO deprecated, but I can't do anything about it. I have to merge
+		-- lsp_status, but I can't due to https://github.com/wbthomason/packer.nvim/issues/1090
 		capabilities = cmp_nvim_lsp.update_capabilities(lsp_status.capabilities)
 	}
 	-- Confirmed to have been used
