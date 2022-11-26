@@ -14,7 +14,7 @@ diverged = "⇕⇡${ahead_count}⇣${behind_count}"
 staged = '[++\($count\)](green)'
 [hostname]
 # I use ssh a lot. I'd like to be able to tell what "localhost" means
-#ssh_only = false
+ssh_only = false
 trim_at = ""  # Don't bother hiding tlds
 format = "on [$hostname]($style) "  # Don't say "in." Let [directory] do that.
 [kubernetes]
@@ -49,7 +49,7 @@ format = "[$symbol $status]($style) "
 [sudo]
 disabled = false
 [username]
-#show_always = true
+show_always = true
 format = "[$user]($style) "  # Don't say in. Let hostname do that
 [jobs]
 symbol = "✦ "  # I need a space here.
