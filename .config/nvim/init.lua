@@ -246,9 +246,14 @@ end -- see https://github.com/wbthomason/packer.nvim/issues/1090
 	vim.g.rooter_change_directory_for_non_project_files = 'current'
 	-- vim.g.rooter_patterns = ['.git', 'mod.conf', 'modpack.conf','game.conf','texture_pack.conf']
 
+local packer_bootstrap = ensure_packer() -- Moved up here so configure_nvim_base16 would work
+
 local function configure_nvim_base16()
 end -- see https://github.com/wbthomason/packer.nvim/issues/1090
-	vim.cmd.colorscheme'base16-default-dark'
+	if not packer_bootstrap then
+		-- Doesn't work unless the theme is present. Wouldn't be an issue if not for the packer bug.
+		vim.cmd.colorscheme'base16-default-dark'
+	end
 	if false then -- I'm still working this out. Contrast issues right now.
 		vim.api.nvim_create_autocmd("BufEnter", {
 			pattern = "*",
@@ -347,7 +352,6 @@ end -- see https://github.com/wbthomason/packer.nvim/issues/1090
 	}
 ]]
 
-local packer_bootstrap = ensure_packer()
 local packer_config = {
 	profile = {
 		enable = true,
