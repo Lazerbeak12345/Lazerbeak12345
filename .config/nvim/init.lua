@@ -171,7 +171,9 @@ local function configure_lsp_status()
 	lsp_status.register_progress()
 end
 
-local function configuire_lspconfig()
+-- see https://github.com/wbthomason/packer.nvim/issues/1090
+--local function configuire_lspconfig()
+local configuire_lspconfig = [[
 	local lspconfig=require'lspconfig'
 	local lsp_status = require'lsp-status'
 	local cmp_nvim_lsp = require'cmp_nvim_lsp'
@@ -182,26 +184,29 @@ local function configuire_lspconfig()
 			lsp_status.on_attach(...)
 			folding.on_attach(...)
 		end,
-		-- TODO deprecated, but I can't do anything about it. I have to merge
-		-- lsp_status, but I can't due to https://github.com/wbthomason/packer.nvim/issues/1090
-		capabilities = cmp_nvim_lsp.update_capabilities(lsp_status.capabilities)
 	}
+	local capabilities = vim.lsp.protocol.make_client_capabilities()
+	capabilities = vim.tbl_extend('keep', capabilities, lsp_status.capabilities)
+	capabilities = vim.tbl_extend('keep', capabilities, cmp_nvim_lsp.default_capabilities())
+	default_args.capabilities = capabilities
 	-- Confirmed to have been used
 	lspconfig.racket_langserver.setup(default_args)
-	-- see https://github.com/wbthomason/packer.nvim/issues/1090
-	lspconfig.clangd.setup(default_args)--[[vim.tbl_extend('keep',default_args,{
-		-- lsp_status supports some extensions
-		handlers = lsp_status.extensions.clangd.setup(),
-		init_options = {
-			clangdFileStatus = true
-		}
-	}))]]
+	lspconfig.clangd.setup(
+		default_args,
+		vim.tbl_extend('keep',default_args,{
+			-- lsp_status supports some extensions
+			handlers = lsp_status.extensions.clangd.setup(),
+			init_options = {
+				clangdFileStatus = true
+			}
+		})
+	)
 	-- Must be here to access `default_args`
 	nvim_lsp_installer.on_server_ready(function(server)
 		local options = default_args
 		-- (optional) Customize the options passed to the server
 		-- see https://github.com/wbthomason/packer.nvim/issues/1090
-		if false and server.name == "pyls_ms" then
+		if server.name == "pyls_ms" then
 			options = vim.tbl_extend('keep',default_args,{
 				-- lsp_status supports some extensions
 				handlers = lsp_status.extensions.pyls_ms.setup(),
@@ -212,7 +217,8 @@ local function configuire_lspconfig()
 		-- Refer to https://github.com/neovim/nvim-lspconfig/blob/master/doc/server_configurations.md
 		server:setup(options)
 	end)
-end
+]]
+--end
 
 local function configure_null_ls()
 	require"null-ls".setup{
@@ -285,7 +291,7 @@ local function configure_lualine()
 	require'lualine'.setup{
 		options = {
 			-- Don't be fooled. Nice theme, but not using base16 at all.
-			-- This has become a problem. My phone's shell doesn't support truecolor.
+			-- TODO This has become a problem. My phone's shell doesn't support truecolor.
 			theme = 'base16'
 		},
 		sections = {
