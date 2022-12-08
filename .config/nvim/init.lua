@@ -205,7 +205,6 @@ local configuire_lspconfig = [[
 	nvim_lsp_installer.on_server_ready(function(server)
 		local options = default_args
 		-- (optional) Customize the options passed to the server
-		-- see https://github.com/wbthomason/packer.nvim/issues/1090
 		if server.name == "pyls_ms" then
 			options = vim.tbl_extend('keep',default_args,{
 				-- lsp_status supports some extensions
@@ -239,39 +238,6 @@ local function configure_null_ls()
 	}
 end
 
-local function configure_indentguides()
-end -- see https://github.com/wbthomason/packer.nvim/issues/1090
-	vim.g.indentguides_spacechar = '⍿'
-	vim.g.indentguides_tabchar = '⟼'
-	vim.g.indentguides_concealcursor_unaltered = 'nonempty value'
-	--|‖⃒⃓⍿⎸⎹⁞⸾⼁︳︴｜¦❘❙❚⟊⟾⤠⟼
-	--|‖⃒⃓⍿⎸⎹⁞⸾⼁︳︴｜¦❘❙❚⟊⟾⤠⟼
-
-local function configure_vim_rooter()
-end -- see https://github.com/wbthomason/packer.nvim/issues/1090
-	vim.g.rooter_change_directory_for_non_project_files = 'current'
-	-- vim.g.rooter_patterns = ['.git', 'mod.conf', 'modpack.conf','game.conf','texture_pack.conf']
-
-local packer_bootstrap = ensure_packer() -- Moved up here so configure_nvim_base16 would work
-
-local function configure_nvim_base16()
-end -- see https://github.com/wbthomason/packer.nvim/issues/1090
-	if not packer_bootstrap then
-		-- Doesn't work unless the theme is present. Wouldn't be an issue if not for the packer bug.
-		vim.cmd.colorscheme'base16-default-dark'
-	end
-	if false then -- I'm still working this out. Contrast issues right now.
-		vim.api.nvim_create_autocmd("BufEnter", {
-			pattern = "*",
-			callback = function()
-				local hl = vim.api.nvim_get_hl_by_name("Normal", "")
-				hl.background = "NONE"
-				vim.api.nvim_set_hl(0, "Normal", hl)
-				print("fixed bg!")
-			end
-		})
-	end
-
 local function configure_tabline()
 	require'tabline'.setup {
 		options = {
@@ -280,36 +246,16 @@ local function configure_tabline()
 	}
 end
 
-local function configure_lualine()
+-- See https://github.com/wbthomason/packer.nvim/issues/1090
+--local function configure_lualine()
+local configure_lualine = [[
 	--                                   █ 🙽 🙼 🙿   🙾
-	-- TODO custom visual selection. Broken due to https://github.com/wbthomason/packer.nvim/issues/1090
 	-- TODO replace mode
-	--[[ TODO local prepend_ln = function(str)
-		return " " .. str
-	end]]
+	-- TODO local prepend_ln = function(str)
+	-- 	return " " .. str
+	-- end
 	local lsp_status = require'lsp-status'
-	require'lualine'.setup{
-		options = {
-			-- Don't be fooled. Nice theme, but not using base16 at all.
-			-- TODO This has become a problem. My phone's shell doesn't support truecolor.
-			theme = 'base16'
-		},
-		sections = {
-			lualine_c = {
-				'filename',
-				function()
-					-- TODO because of https://github.com/wbthomason/packer.nvim/issues/1090
-					-- we can't get the exact components we wish the way we want to using vim.g.lsp_function_name
-					return lsp_status.status()
-				end
-			}
-		}
-	}
-end
---[[local function configure_lightline()
-	-- TODO this is actually slightly broken. look at https://github.com/nvim-lualine/lualine.nvim to fix it
-end -- see https://github.com/wbthomason/packer.nvim/issues/1090
-	function _G.lightline_visual_selection()
+	local function lightline_visual_selection()
 		local mode = vim.fn.mode()
 		local lines = vim.fn.abs(vim.fn.line("v") - vim.fn.line(".")) + 1
 		local lines_str = '↕' .. lines
@@ -323,40 +269,34 @@ end -- see https://github.com/wbthomason/packer.nvim/issues/1090
 			end
 		elseif mode == 'V' or mode == 'S' then
 			return lines_str
-		elseif mode == "<C-v>" then
-			return lines_str .. cols_str
+		elseif mode == '' then
+			return lines_str .. ' ' .. cols_str
 		else
 			return ''
 		end
 	end
-	function _G.lightline_visual_selection_cond()
-		local mode = vim.fn.mode()
-		return mode == 'v' or
-			mode == 's' or
-			mode == 'V' or
-			mode == 'S' or
-			mode == "<C-v>"
-	end
-	-- TODO there's a native way to do the width thing now.
-	function _G.LspStatus_getVisible()
-		return vim.fn.winwidth(0) > 60 and #vim.lsp.buf_get_clients() > 0
-	end
-	vim.g.lightline = {
-		active = {
-			left = {
-				{ 'mode', 'paste' },
-				{ 'readonly', 'filename', 'visual_selection' },
-				{ 'lsp_status' }
+	require'lualine'.setup{
+		options = {
+			-- Don't be fooled. Nice theme, but not using base16 at all.
+			-- TODO This has become a problem. My phone's shell doesn't support truecolor.
+			theme = 'base16'
+		},
+		sections = {
+			lualine_c = {
+				'filename',
+				lightline_visual_selection,
+				function()
+					-- TODO because of https://github.com/wbthomason/packer.nvim/issues/1090
+					-- we can't get the exact components we wish the way we want to using vim.g.lsp_function_name
+					return lsp_status.status()
+				end
 			}
-		},
-		component = {
-			visual_selection= '%{v:lua.lightline_visual_selection()}',
-		},
-		component_visible_condition= {
-			visual_selection= 'v:lua.lightline_visual_selection_cond()',
-		},
+		}
 	}
 ]]
+--end
+
+local packer_bootstrap = ensure_packer()
 
 local packer_config = {
 	profile = {
@@ -399,12 +339,33 @@ return require'packer'.startup{function(use)
 	-- Indent lines
 	use{
 		'thaerkh/vim-indentguides',
-		config = configure_indentguides
+		-- see https://github.com/wbthomason/packer.nvim/issues/1090
+		config = [[
+			vim.g.indentguides_spacechar = '⍿'
+			vim.g.indentguides_tabchar = '⟼'
+			vim.g.indentguides_concealcursor_unaltered = 'nonempty value'
+			--|‖⃒⃓⍿⎸⎹⁞⸾⼁︳︴｜¦❘❙❚⟊⟾⤠⟼
+			--|‖⃒⃓⍿⎸⎹⁞⸾⼁︳︴｜¦❘❙❚⟊⟾⤠⟼
+		]]
 	}
 	-- Super fancy coloring
 	use {
 		'RRethy/nvim-base16',
-		config = configure_nvim_base16
+		-- see https://github.com/wbthomason/packer.nvim/issues/1090
+		config = [[
+			vim.cmd.colorscheme'base16-default-dark'
+			if false then -- I'm still working this out. Contrast issues right now.
+				vim.api.nvim_create_autocmd("BufEnter", {
+					pattern = "*",
+					callback = function()
+						local hl = vim.api.nvim_get_hl_by_name("Normal", "")
+						hl.background = "NONE"
+						vim.api.nvim_set_hl(0, "Normal", hl)
+						print("fixed bg!")
+					end
+				})
+			end
+		]]
 	}
 
 	-- Git integration
@@ -433,7 +394,11 @@ return require'packer'.startup{function(use)
 	use 'vimlab/split-term.vim'
 	use {
 		'airblade/vim-rooter',
-		config = configure_vim_rooter
+		-- see https://github.com/wbthomason/packer.nvim/issues/1090
+		config = [[
+			vim.g.rooter_change_directory_for_non_project_files = 'current'
+			-- vim.g.rooter_patterns = ['.git', 'mod.conf', 'modpack.conf','game.conf','texture_pack.conf']
+		]]
 	}
 	--  Start Screen
 	use 'mhinz/vim-startify'
