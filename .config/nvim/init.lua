@@ -34,13 +34,8 @@ local function configure_nvim_cmp()
 	cmp.setup{
 		--Defaults:https://github.com/hrsh7th/nvim-cmp/blob/main/lua/cmp/config/default.lua
 		snippet = {
-			-- REQUIRED - you must specify a snippet engine
 			expand = function(args)
-				-- vim.fn["vsnip#anonymous"](args.body) -- For `vsnip` users.
-				-- TODO See other comment about this choice
-				luasnip.lsp_expand(args.body) -- For `luasnip` users.
-				-- vim.fn["UltiSnips#Anon"](args.body) -- For `ultisnips` users.
-				-- require'snippy'.expand_snippet(args.body) -- For `snippy` users.
+				luasnip.lsp_expand(args.body)
 			end,
 		},
 		mapping = {
@@ -61,10 +56,7 @@ local function configure_nvim_cmp()
 		},
 		sources = cmp.config.sources({
 			{ name = 'nvim_lsp' },
-			-- { name = 'vsnip' }, -- For vsnip users.
-			{ name = 'luasnip' }, -- For luasnip users.
-			-- { name = 'ultisnips' }, -- For ultisnips users.
-			-- { name = 'snippy' }, -- For snippy users.
+			{ name = 'luasnip' },
 			{ name = 'latex_symbols' },
 			{ name = 'emoji', insert = true },
 		--}, {
@@ -118,10 +110,7 @@ local function configure_nvim_cmp()
 					nvim_lsp                 = "[LSP]",
 					nvim_lua                 = "[Lua]",
 					latex_symbols            = "[Latex]",
-					--vsnip                    = "[VSnip]",
 					luasnip                  = "[LuaSnip]",
-					--ultisnips                = "[UltiSnips]",
-					--snippy                   = "[Snippy]",
 					emoji                    = "[Emoji]",
 					git                      = "[Git]",
 					crates                   = "[Crates]",
@@ -473,22 +462,17 @@ return require'packer'.startup{function(use)
 	use 'lukas-reineke/cmp-under-comparator'
 	-- cmdline source
 	use 'hrsh7th/cmp-cmdline'
-	-- Snippet source
-	--  For vsnip users.
-	--use 'hrsh7th/cmp-vsnip'
-	--use 'hrsh7th/vim-vsnip'
-	--  For luasnip users.
-	--   TODO I don't actually know anything about this package. I'm only using
-	--   it because vsnip's api doesn't work due to packer bug
-	--   https://github.com/wbthomason/packer.nvim/issues/1090
-	use 'L3MON4D3/LuaSnip'
+	-- Snippet source. (There's others out there too)
+	use {
+		'L3MON4D3/LuaSnip',
+		config = function ()
+			-- Grab things from rafamadriz/friendly-snippets & etc.
+			require("luasnip.loaders.from_vscode").lazy_load()
+		end
+	}
 	use 'saadparwaiz1/cmp_luasnip'
-	--  For ultisnips users.
-	--Plug 'SirVer/ultisnips'
-	--Plug 'quangnguyen30192/cmp-nvim-ultisnips'
-	--  For snippy users.
-	--Plug 'dcampos/nvim-snippy'
-	--Plug 'dcampos/cmp-snippy'
+	--  Pre-configured snippits
+	use 'rafamadriz/friendly-snippets'
 	-- Git completion source
 	use{
 		'petertriho/cmp-git',
