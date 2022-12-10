@@ -39,20 +39,23 @@ local function configure_nvim_cmp()
 			end,
 		},
 		mapping = {
+			-- TODO Can't use `cmp.scroll_docs` alias. Must go through mapping first.
+			-- TODO same for these:
+			-- - `cmp.complete`
+			-- - `cmp.select_next_item`
+			-- - `cmp.select_prev_item`
+			-- - `cmp.abort`
+			-- - `cmp.close`
 			['<C-d>'] = cmp.mapping(cmp.mapping.scroll_docs(-4), { 'i', 'c' }),
 			['<C-f>'] = cmp.mapping(cmp.mapping.scroll_docs(4), { 'i', 'c' }),
 			['<C-Space>'] = cmp.mapping(cmp.mapping.complete(), { 'i', 'c' }),
-			['<C-y>'] = cmp.config.disable, -- Specify `cmp.config.disable` if you want to remove the default `<C-y>` mapping.
 			['<C-e>'] = cmp.mapping{
 				i = cmp.mapping.abort(),
 				c = cmp.mapping.close(),
 			},
-			['<Tab>'] = cmp.mapping.confirm{ select = true }
-			--[[ TODO this is what some of it was before:
-			--  Use keyboard shortcuts to change to the next or previous sources
-			vim.keymap.set('i', '<c-j>', '<Plug>(completion_next_source)')
-			vim.keymap.set('i', '<c-k>', '<Plug>(completion_prev_source)')
-			]]
+			['<Tab>'] = cmp.mapping.confirm{ select = true },
+			['<C-n>'] = cmp.mapping(cmp.mapping.select_next_item(), { 'i', 'c' }),
+			['<C-N>'] = cmp.mapping(cmp.mapping.select_prev_item(), { 'i', 'c' })
 		},
 		sources = cmp.config.sources({
 			{ name = 'nvim_lsp' },
@@ -551,15 +554,13 @@ return require'packer'.startup{function(use)
 		return vim.api.nvim_replace_termcodes(str, true, true, true)
 	end
 
-	-- TODO fix
-	-- nvim_lsp completeion settings
-	--  Use <Tab> and <S-Tab> to navigate through popup menu
-	vim.keymap.set('i', '<Tab>', function()
-		return vim.fn.pumvisible() == 1 and t'<C-n>' or t'<Tab>'
-	end, {expr = true})
-	vim.keymap.set('i', '<S-Tab>', function()
-		return vim.fn.pumvisible() == 1 and t'<C-p>' or t'<S-Tab>'
-	end, {expr = true})
+	vim.keymap.set('i', '<Tab>', function ()
+		local luasnip = require'luasnip'
+		return luasnip.expand_or_jumpable() and luasnip.expand_or_jump() or t'<Tab>'
+	end)
+	vim.keymap.set('i', '<S-Tab>', function ()
+		return require'luasnip'.jump(-1)
+	end)
 
 	vim.keymap.set('n', '<Leader>d', vim.diagnostic.goto_next)
 
