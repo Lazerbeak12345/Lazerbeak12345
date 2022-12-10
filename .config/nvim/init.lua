@@ -31,6 +31,10 @@ local function configure_nvim_cmp()
 	local lspkind = require'lspkind'
 	local cmp_under_comparator = require"cmp-under-comparator"
 	local luasnip = require'luasnip'
+	local function has_words_before()
+		local line, col = unpack(vim.api.nvim_win_get_cursor(0))
+		return col ~= 0 and vim.api.nvim_buf_get_lines(0, line - 1, line, true)[1]:sub(col, col):match("%s") == nil
+	end
 	cmp.setup{
 		--Defaults:https://github.com/hrsh7th/nvim-cmp/blob/main/lua/cmp/config/default.lua
 		snippet = {
@@ -54,6 +58,33 @@ local function configure_nvim_cmp()
 				c = cmp.mapping.close(),
 			},
 			['<Tab>'] = cmp.mapping.confirm{ select = true },
+			-- TODO better (non race condition) way of doing the tabs. (see the other place below that luasnip is used in the context of a keymap
+			-- https://github.com/hrsh7th/nvim-cmp/wiki/Example-mappings#luasnip
+			--[[['<Tab>'] = cmp.mapping(function (fallback)
+				if cmp.visible() then
+					print"tabbed! cmp visible"
+					--cmp.mapping.select_next_item()
+					cmp.mapping.confirm{ select = true }
+				elseif luasnip.expand_or_jumpable() then
+					print"tabbed! luasnip expand or jumpable"
+					luasnip.expand_or_jump()
+				elseif has_words_before() then
+					print"tabbed! has words before"
+					cmp.mapping.complete()
+				else
+					print"tabbed! fallback"
+					fallback()
+				end
+			end, { 'i', 's' }),
+			['<S-Tab>'] = cmp.mapping(function (fallback)
+				if cmp.visible() then
+					cmp.mapping.select_prev_item()
+				elseif luasnip.jumpable(-1) then
+					luasnip.jump(-1)
+				else
+					fallback()
+				end
+			end, { 'i', 's' }),]]
 			['<C-n>'] = cmp.mapping(cmp.mapping.select_next_item(), { 'i', 'c' }),
 			['<C-N>'] = cmp.mapping(cmp.mapping.select_prev_item(), { 'i', 'c' })
 		},
@@ -402,7 +433,7 @@ return require'packer'.startup{function(use)
 		config = configure_null_ls
 	}
 	-- Interactive eval
-	use 'Olical/conjure'
+	use 'Olical/conjure' -- TODO configure this
 
 	-- Specific file type compat
 	--  General stuff
@@ -520,7 +551,7 @@ return require'packer'.startup{function(use)
 	-- Fish completion
 	use 'mtoohey31/cmp-fish'
 	-- conjure intractive eval completion
-	use 'PaterJason/cmp-conjure'
+	use 'PaterJason/cmp-conjure' -- TODO add this to cmp
 	-- Use LSP symbols for buffer-style search
 	use 'hrsh7th/cmp-nvim-lsp-document-symbol'
 	-- Completion on the vim.lsp apis
@@ -554,12 +585,14 @@ return require'packer'.startup{function(use)
 		return vim.api.nvim_replace_termcodes(str, true, true, true)
 	end
 
+	--TODO chance of race conditions
 	vim.keymap.set('i', '<Tab>', function ()
 		local luasnip = require'luasnip'
 		return luasnip.expand_or_jumpable() and luasnip.expand_or_jump() or t'<Tab>'
 	end)
 	vim.keymap.set('i', '<S-Tab>', function ()
-		return require'luasnip'.jump(-1)
+		local luasnip = require'luasnip'
+		return luasnip.jumpable(-1) and luasnip.jump(-1) or t'<S-Tab>'
 	end)
 
 	vim.keymap.set('n', '<Leader>d', vim.diagnostic.goto_next)
