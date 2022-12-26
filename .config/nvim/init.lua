@@ -32,6 +32,7 @@ local function configure_nvim_cmp()
 	local cmp_under_comparator = require"cmp-under-comparator"
 	local luasnip = require'luasnip'
 	local function has_words_before()
+		-- TODO use this approch for line & col elsewhere
 		local line, col = unpack(vim.api.nvim_win_get_cursor(0))
 		return col ~= 0 and vim.api.nvim_buf_get_lines(0, line - 1, line, true)[1]:sub(col, col):match("%s") == nil
 	end
@@ -58,7 +59,8 @@ local function configure_nvim_cmp()
 				c = cmp.mapping.close(),
 			},
 			['<Tab>'] = cmp.mapping.confirm{ select = true },
-			-- TODO better (non race condition) way of doing the tabs. (see the other place below that luasnip is used in the context of a keymap
+			-- TODO better (non race condition) way of doing the tabs. (see the other
+			--  place below that luasnip is used in the context of a keymap
 			-- https://github.com/hrsh7th/nvim-cmp/wiki/Example-mappings#luasnip
 			--[[['<Tab>'] = cmp.mapping(function (fallback)
 				if cmp.visible() then
@@ -85,8 +87,8 @@ local function configure_nvim_cmp()
 					fallback()
 				end
 			end, { 'i', 's' }),]]
-			['<C-n>'] = cmp.mapping(cmp.mapping.select_next_item(), { 'i', 'c' }),
-			['<C-N>'] = cmp.mapping(cmp.mapping.select_prev_item(), { 'i', 'c' })
+			['<C-j>'] = cmp.mapping(cmp.mapping.select_next_item(), { 'i', 'c' }),
+			['<C-k>'] = cmp.mapping(cmp.mapping.select_prev_item(), { 'i', 'c' })
 		},
 		sources = cmp.config.sources({
 			{ name = 'nvim_lsp' },
@@ -212,19 +214,6 @@ local configuire_lspconfig = [[
 	capabilities = vim.tbl_extend('keep', capabilities, lsp_status.capabilities)
 	capabilities = vim.tbl_extend('keep', capabilities, cmp_nvim_lsp.default_capabilities())
 	default_args.capabilities = capabilities
-	-- Confirmed to have been used
-	lspconfig.racket_langserver.setup(default_args)
-	lspconfig.clangd.setup(
-		default_args,
-		vim.tbl_extend('keep',default_args,{
-			-- lsp_status supports some extensions
-			handlers = lsp_status.extensions.clangd.setup(),
-			init_options = {
-				clangdFileStatus = true
-			}
-		})
-	)
-	-- Must be here to access `default_args`
 	nvim_lsp_installer.on_server_ready(function(server)
 		local options = default_args
 		-- (optional) Customize the options passed to the server
@@ -239,25 +228,96 @@ local configuire_lspconfig = [[
 		-- Refer to https://github.com/neovim/nvim-lspconfig/blob/master/doc/server_configurations.md
 		server:setup(options)
 	end)
+	-- Confirmed to have been used
+	lspconfig.racket_langserver.setup(default_args)
+	lspconfig.clangd.setup(
+		default_args,
+		vim.tbl_extend('keep',default_args,{
+			-- lsp_status supports some extensions
+			handlers = lsp_status.extensions.clangd.setup(),
+			init_options = {
+				clangdFileStatus = true
+			}
+		})
+	)
 ]]
 --end
 
 local function configure_null_ls()
-	require"null-ls".setup{
-	    sources = {
-			--[[ TODO was super laggy, and duplicative in nature
-			null_ls.builtins.code_actions.eslint,
-			null_ls.builtins.diagnostics.eslint,
-			null_ls.builtins.formatting.eslint,
-			null_ls.builtins.completion.vsnip,
-			null_ls.builtins.diagnostics.fish,
-			null_ls.builtins.formatting.fish_indent,
-			null_ls.builtins.diagnostics.standardjs,
-			null_ls.builtins.formatting.standardjs,
-			null_ls.builtins.diagnostics.tsc,
-			null_ls.builtins.hover.dictionary
-			]]
-	    }
+	local null_ls = require"null-ls"
+	local builtins = null_ls.builtins
+	local code_actions = builtins.code_actions
+	local diagnostics = builtins.diagnostics
+	local formatting = builtins.formatting
+	local hover = builtins.hover
+	null_ls.setup{
+		-- TODO do this dynamicly
+		sources = {
+			-- https://github.com/jose-elias-alvarez/null-ls.nvim/blob/main/doc/BUILTINS.md
+			-- Style rule: All sources _must_ link to the documentation for each source.
+			-- Must also include what it does.
+			--  https://github.com/streetsidesoftware/cspell
+			--  Injects actions to fix typos found by `cspell`.
+			diagnostics.cspell, code_actions.cspell,
+			--TODO cspell needs to be installed
+			--  https://github.com/mantoni/eslint_d.js
+			--  Injects actions to fix ESLint issues or ignore broken rules. Like ESLint, but faster.
+			--   There's an XO specific one too.
+			--   Beware that eslint_d remains running in the background.
+			code_actions.eslint_d, diagnostics.eslint_d,
+			--  https://github.com/lewis6991/gitsigns.nvim
+			--  Injects code actions for Git operations at the current cursor position
+			--   (stage / preview / reset hunks, blame, etc.).
+			--   TODO gutter highlights are broken.
+			--code_actions.gitsigns,
+			-- TODO ltrs or proselint both look cool. Documentation Grammar
+			-- TODO refactoring is usefull
+			-- TODO luasnip (simpler config?)
+
+			--  https://github.com/get-alex/alex
+			--  Catch insensitive, inconsiderate writing.
+			diagnostics.alex,
+			--  https://github.com/dotenv-linter/dotenv-linter
+			--  Lightning-fast linter for .env files.
+			diagnostics.dotenv_linter,
+			--  https://github.com/editorconfig-checker/editorconfig-checker
+			--  A tool to verify that your files are in harmony with your `.editorconfig`.
+			diagnostics.editorconfig_checker,
+			--  https://github.com/fish-shell/fish-shell
+			--  Basic linting is available for fish scripts using `fish --no-execute`.
+			diagnostics.fish,
+			--  https://github.com/charliermarsh/ruff/
+			--  An extremely fast Python linter, written in Rust.
+			diagnostics.ruff,
+			--  https://kampfkarren.github.io/selene/
+			--  Command line tool designed to help write correct and idiomatic Lua code.
+			diagnostics.selene,
+			--  https://github.com/jose-elias-alvarez/null-ls.nvim/blob/main/doc/BUILTINS.md#todo_comments
+			--  Uses inbuilt Lua code and treesitter to detect lines with TODO comments and show a diagnostic warning on each
+			--   line where it's present.
+			diagnostics.todo_comments,
+			--  https://www.typescriptlang.org/docs/handbook/compiler-options.html
+			--  Parses diagnostics from the TypeScript compiler.
+			diagnostics.tsc,
+			--  https://github.com/Vimjas/vint
+			--  Linter for Vimscript.
+			diagnostics.vint,
+			--  https://fishshell.com/docs/current/cmds/fish_indent.html
+			--  Indent or otherwise prettify a piece of fish code.
+			formatting.fish_indent,
+			--  https://github.com/rust-lang/rustfmt
+			--  A tool for formatting rust code according to style guidelines.
+			formatting.rustfmt,
+			--  https://github.com/anordal/shellharden
+			--  Hardens shell scripts by quoting variables, replacing `function_call` with `$(function_call)`, and more.
+			formatting.shellharden,
+			--  https://github.com/JohnnyMorganz/StyLua
+			--  An opinionated code formatter for Lua.
+			formatting.stylua,
+			--  https://github.com/jose-elias-alvarez/null-ls.nvim/blob/main/doc/BUILTINS.md#printenv
+			--  Shows the value for the current environment variable under the cursor.
+			hover.printenv,
+		}
 	}
 end
 
@@ -395,7 +455,7 @@ return require'packer'.startup{function(use)
 	--  Genral use
 	use 'tpope/vim-fugitive'
 	--  Line-per-line indicators and chunk selection
-	use 'airblade/vim-gitgutter'
+	use 'airblade/vim-gitgutter' -- TODO gitsigns
 	-- Nicer file management
 	use 'preservim/nerdtree'
 	use 'tiagofumo/vim-nerdtree-syntax-highlight'
@@ -430,7 +490,9 @@ return require'packer'.startup{function(use)
 	use {
 		'jose-elias-alvarez/null-ls.nvim',
 		--disable = true, -- TODO figure out how to make actual use of this
-		config = configure_null_ls
+		config = configure_null_ls,
+		requires = "plenary.nvim",
+		--after = 'neovim/nvim-lspconfig',
 	}
 	-- Interactive eval
 	use 'Olical/conjure' -- TODO configure this
@@ -438,8 +500,11 @@ return require'packer'.startup{function(use)
 	-- Specific file type compat
 	--  General stuff
 	use 'sheerun/vim-polyglot'
-	-- Eww's configuration language, yuck
+	--  Eww's configuration language, yuck
 	use 'elkowar/yuck.vim'
+	--  Support editorconfig files
+	--   TODO configure
+	use 'editorconfig/editorconfig-vim'
 
 	-- Language-server protocol
 	-- Must be after language specific things
@@ -513,7 +578,7 @@ return require'packer'.startup{function(use)
 		config = function()
 			require"cmp_git".setup()
 		end,
-		requires = "nvim-lua/plenary.nvim",
+		requires = "plenary.nvim",
 		-- They don't even talk - this is just because I won't need cmp-git until
 		-- after interacting with fugitive anyway
 		after = 'vim-fugitive'
@@ -585,7 +650,7 @@ return require'packer'.startup{function(use)
 		return vim.api.nvim_replace_termcodes(str, true, true, true)
 	end
 
-	--TODO chance of race conditions
+	--TODO chance of race conditions. Also, I can't type tab anymore.
 	vim.keymap.set('i', '<Tab>', function ()
 		local luasnip = require'luasnip'
 		return luasnip.expand_or_jumpable() and luasnip.expand_or_jump() or t'<Tab>'
@@ -620,7 +685,8 @@ return require'packer'.startup{function(use)
 	-- set printoptions=paper:letter
 
 	-- display line numbers
-	vim.o.number = true --  If this is used with [[relativenumber]], then it shows the current lineno on the current line (as opposed to `0`)
+	--  If this is used with [[relativenumber]], then it shows the current lineno on the current line (as opposed to `0`)
+	vim.o.number = true
 	vim.o.relativenumber = true
 
 	vim.o.tabstop = 4
