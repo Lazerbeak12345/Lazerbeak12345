@@ -36,7 +36,10 @@ local function configure_nvim_cmp()
 		local line, col = unpack(vim.api.nvim_win_get_cursor(0))
 		return col ~= 0 and vim.api.nvim_buf_get_lines(0, line - 1, line, true)[1]:sub(col, col):match("%s") == nil
 	end
-	cmp.setup{
+	local mapping = cmp.mapping
+	local config = cmp.config
+	local setup = cmp.setup
+	setup{
 		--Defaults:https://github.com/hrsh7th/nvim-cmp/blob/main/lua/cmp/config/default.lua
 		snippet = {
 			expand = function(args)
@@ -51,14 +54,14 @@ local function configure_nvim_cmp()
 			-- - `cmp.select_prev_item`
 			-- - `cmp.abort`
 			-- - `cmp.close`
-			['<C-d>'] = cmp.mapping(cmp.mapping.scroll_docs(-4), { 'i', 'c' }),
-			['<C-f>'] = cmp.mapping(cmp.mapping.scroll_docs(4), { 'i', 'c' }),
-			['<C-Space>'] = cmp.mapping(cmp.mapping.complete(), { 'i', 'c' }),
-			['<C-e>'] = cmp.mapping{
-				i = cmp.mapping.abort(),
-				c = cmp.mapping.close(),
+			['<C-d>'] = mapping(mapping.scroll_docs(-4), { 'i', 'c' }),
+			['<C-f>'] = mapping(mapping.scroll_docs(4), { 'i', 'c' }),
+			['<C-Space>'] = mapping(mapping.complete(), { 'i', 'c' }),
+			['<C-e>'] = mapping{
+				i = mapping.abort(),
+				c = mapping.close(),
 			},
-			['<Tab>'] = cmp.mapping.confirm{ select = true },
+			['<Tab>'] = mapping.confirm{ select = true },
 			-- TODO better (non race condition) way of doing the tabs. (see the other
 			--  place below that luasnip is used in the context of a keymap
 			-- https://github.com/hrsh7th/nvim-cmp/wiki/Example-mappings#luasnip
@@ -87,10 +90,10 @@ local function configure_nvim_cmp()
 					fallback()
 				end
 			end, { 'i', 's' }),]]
-			['<C-j>'] = cmp.mapping(cmp.mapping.select_next_item(), { 'i', 'c' }),
-			['<C-k>'] = cmp.mapping(cmp.mapping.select_prev_item(), { 'i', 'c' })
+			['<C-j>'] = mapping(mapping.select_next_item(), { 'i', 'c' }),
+			['<C-k>'] = mapping(mapping.select_prev_item(), { 'i', 'c' })
 		},
-		sources = cmp.config.sources({
+		sources = config.sources({
 			{ name = 'nvim_lsp' },
 			{ name = 'luasnip' },
 			{ name = 'latex_symbols' },
@@ -116,15 +119,15 @@ local function configure_nvim_cmp()
 		}]]),
 		sorting = {
 			comparators = {
-				cmp.config.compare.offset,
-				cmp.config.compare.exact,
-				cmp.config.compare.score,
-				cmp.config.compare.recently_used,
+				config.compare.offset,
+				config.compare.exact,
+				config.compare.score,
+				config.compare.recently_used,
 				cmp_under_comparator.under,
-				cmp.config.compare.kind,
-				cmp.config.compare.sort_text,
-				cmp.config.compare.length,
-				cmp.config.compare.order,
+				config.compare.kind,
+				config.compare.sort_text,
+				config.compare.length,
+				config.compare.order,
 			},
 		},
 		formatting = {
@@ -163,15 +166,15 @@ local function configure_nvim_cmp()
 		},
 	}
 	-- Use buffer source (then history) for `/` and `?` (if you enabled `native_menu`, this won't work anymore).
-	cmp.setup.cmdline({'/', '?'}, {
-		sources = cmp.config.sources(
+	setup.cmdline({'/', '?'}, {
+		sources = config.sources(
 			{ { name = 'buffer' } },
 			{ { name = 'cmdline_history' } }
 		)
 	})
 	-- Use cmdline & path source for ':' (if you enabled `native_menu`, this won't work anymore).
-	cmp.setup.cmdline(':', {
-		sources = cmp.config.sources(
+	setup.cmdline(':', {
+		sources = config.sources(
 			{ { name = 'path' } },
 			{
 				{ name = 'cmdline' },
@@ -179,7 +182,7 @@ local function configure_nvim_cmp()
 			}
 		)
 	})
-	cmp.setup.cmdline({'@', '='}, {
+	setup.cmdline({'@', '='}, {
 		sources = { { name = 'cmdline_history' } }
 	})
 end
@@ -256,10 +259,6 @@ local function configure_null_ls()
 			-- https://github.com/jose-elias-alvarez/null-ls.nvim/blob/main/doc/BUILTINS.md
 			-- Style rule: All sources _must_ link to the documentation for each source.
 			-- Must also include what it does.
-			--  https://github.com/streetsidesoftware/cspell
-			--  Injects actions to fix typos found by `cspell`.
-			diagnostics.cspell, code_actions.cspell,
-			--TODO cspell needs to be installed
 			--  https://github.com/mantoni/eslint_d.js
 			--  Injects actions to fix ESLint issues or ignore broken rules. Like ESLint, but faster.
 			--   There's an XO specific one too.
@@ -406,6 +405,7 @@ return require'packer'.startup{function(use)
 	}
 	use {
 		'kdheepak/tabline.nvim',
+		disable = true, -- Buggy, and doesn't play well with a particular nvim render bug. (not the cause)
 		config = configure_tabline,
 		requires = {'lualine.nvim','nvim-web-devicons'}
 	}
@@ -495,7 +495,7 @@ return require'packer'.startup{function(use)
 		--after = 'neovim/nvim-lspconfig',
 	}
 	-- Interactive eval
-	use 'Olical/conjure' -- TODO configure this
+	-- use 'Olical/conjure' -- TODO configure this -- this might be a problem 987632498629765296987492
 
 	-- Specific file type compat
 	--  General stuff
@@ -616,7 +616,7 @@ return require'packer'.startup{function(use)
 	-- Fish completion
 	use 'mtoohey31/cmp-fish'
 	-- conjure intractive eval completion
-	use 'PaterJason/cmp-conjure' -- TODO add this to cmp
+	--use 'PaterJason/cmp-conjure' -- TODO add this to cmp -- this might be a problem 987632498629765296987492
 	-- Use LSP symbols for buffer-style search
 	use 'hrsh7th/cmp-nvim-lsp-document-symbol'
 	-- Completion on the vim.lsp apis
