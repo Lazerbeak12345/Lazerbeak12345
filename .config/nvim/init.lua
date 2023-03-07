@@ -31,11 +31,11 @@ local function configure_nvim_cmp()
 	local lspkind = require'lspkind'
 	local cmp_under_comparator = require"cmp-under-comparator"
 	local luasnip = require'luasnip'
-	local function has_words_before()
+	--[[local function has_words_before()
 		-- TODO use this approch for line & col elsewhere
 		local line, col = unpack(vim.api.nvim_win_get_cursor(0))
 		return col ~= 0 and vim.api.nvim_buf_get_lines(0, line - 1, line, true)[1]:sub(col, col):match("%s") == nil
-	end
+	end]]
 	local mapping = cmp.mapping
 	local config = cmp.config
 	local setup = cmp.setup
@@ -205,7 +205,9 @@ local configuire_lspconfig = [[
 	local lspconfig=require'lspconfig'
 	local lsp_status = require'lsp-status'
 	local cmp_nvim_lsp = require'cmp_nvim_lsp'
-	local nvim_lsp_installer = require"nvim-lsp-installer"
+	--local nvim_lsp_installer = require"nvim-lsp-installer"
+	local mason = require'mason'
+	local mason_lspconfig = require'mason-lspconfig'
 	local folding = require'folding'
 	local default_args={
 		on_attach = function(...)
@@ -217,32 +219,58 @@ local configuire_lspconfig = [[
 	capabilities = vim.tbl_extend('keep', capabilities, lsp_status.capabilities)
 	capabilities = vim.tbl_extend('keep', capabilities, cmp_nvim_lsp.default_capabilities())
 	default_args.capabilities = capabilities
-	nvim_lsp_installer.on_server_ready(function(server)
-		local options = default_args
-		-- (optional) Customize the options passed to the server
-		if server.name == "pyls_ms" then
-			options = vim.tbl_extend('keep',default_args,{
-				-- lsp_status supports some extensions
-				handlers = lsp_status.extensions.pyls_ms.setup(),
-				settings = { python = { workspaceSymbols = { enabled = true }}},
-			})
-		end
-		-- This setup() function is exactly the same as lspconfig's setup function.
-		-- Refer to https://github.com/neovim/nvim-lspconfig/blob/master/doc/server_configurations.md
-		server:setup(options)
-	end)
-	-- Confirmed to have been used
+	-- Installed manually in system.
 	lspconfig.racket_langserver.setup(default_args)
-	lspconfig.clangd.setup(
-		default_args,
-		vim.tbl_extend('keep',default_args,{
-			-- lsp_status supports some extensions
-			handlers = lsp_status.extensions.clangd.setup(),
-			init_options = {
-				clangdFileStatus = true
+	--lspconfig.clangd.setup( -- Not sure I use this enough to keep it. The LSP is installed though.
+	--	default_args,
+	--	vim.tbl_extend('keep',default_args,{
+	--		-- lsp_status supports some extensions
+	--		handlers = lsp_status.extensions.clangd.setup(),
+	--		init_options = {
+	--			clangdFileStatus = true
+	--		}
+	--	})
+	--)
+	-- Installed through mason
+	mason.setup{
+		ui = {
+			icons = {
+				package_installed = "✓",
+				package_pending = "➜",
+				package_uninstalled = "✗"
 			}
-		})
-	)
+		}
+	}
+	mason_lspconfig.setup{
+		ensure_installed = {}
+	}
+
+	mason_lspconfig.setup_handlers {
+		-- The first entry (without a key) will be the default handler
+		-- and will be called for each installed server that doesn't have
+		-- a dedicated handler.
+		function (server_name) -- default handler (optional)
+			lspconfig[server_name].setup(default_args)
+		end,
+		-- Next, you can provide a dedicated handler for specific servers.
+		-- For example, a handler override for the `rust_analyzer`:
+		--["rust_analyzer"] = function ()
+		--	require("rust-tools").setup {}
+		--end
+	}
+
+	--for _, server in ipairs(mason_lspconfig.get_installed_servers()*) do
+	--	local options = default_args
+	--	-- (optional) Customize the options passed to the server
+	--	if server.name == "pyls_ms" then
+	--		options = vim.tbl_extend('keep',default_args,{
+	--			-- lsp_status supports some extensions
+	--			handlers = lsp_status.extensions.pyls_ms.setup(),
+	--			settings = { python = { workspaceSymbols = { enabled = true }}},
+	--		})
+	--	end
+	--	lspconfig[server.name].setup(options)
+	--end
 ]]
 --end
 
@@ -489,7 +517,7 @@ return require'packer'.startup{function(use)
 	use 'nvim-lua/plenary.nvim'
 	use {
 		'jose-elias-alvarez/null-ls.nvim',
-		--disable = true, -- TODO figure out how to make actual use of this
+		disable = true, -- TODO Make use of 'jay-babu/mason-null-ls.nvim'
 		config = configure_null_ls,
 		requires = "plenary.nvim",
 		--after = 'neovim/nvim-lspconfig',
@@ -516,13 +544,15 @@ return require'packer'.startup{function(use)
 			'lsp-status.nvim',
 			'folding-nvim',
 			'cmp-nvim-lsp',
-			'nvim-lsp-installer'
+			'mason.nvim',
+			'mason-lspconfig.nvim'
 		},
 		module = {
 			'lspconfig',
 			--'lsp-status',
 			'cmp_nvim_lsp',
-			"nvim-lsp-installer",
+			"mason.nvim",
+			'mason-lspconfig.nvim',
 			'folding'
 		}
 	}
@@ -532,8 +562,9 @@ return require'packer'.startup{function(use)
 		requires = 'lspkind-nvim',
 		module = 'lsp-status'
 	}
-	--Automate installing some language-servers
-	use 'williamboman/nvim-lsp-installer'
+	-- Automate installing some language-servers
+	use 'williamboman/mason.nvim'
+	use 'williamboman/mason-lspconfig.nvim'
 	-- Better folding
 	use 'pierreglaser/folding-nvim'
 
