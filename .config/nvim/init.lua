@@ -205,9 +205,10 @@ local configuire_lspconfig = [[
 	local lspconfig=require'lspconfig'
 	local lsp_status = require'lsp-status'
 	local cmp_nvim_lsp = require'cmp_nvim_lsp'
-	--local nvim_lsp_installer = require"nvim-lsp-installer"
 	local mason = require'mason'
 	local mason_lspconfig = require'mason-lspconfig'
+	local null_ls = require 'null-ls'
+	local mason_null_ls = require'mason-null-ls'
 	local folding = require'folding'
 	local default_args={
 		on_attach = function(...)
@@ -221,16 +222,6 @@ local configuire_lspconfig = [[
 	default_args.capabilities = capabilities
 	-- Installed manually in system.
 	lspconfig.racket_langserver.setup(default_args)
-	--lspconfig.clangd.setup( -- Not sure I use this enough to keep it. The LSP is installed though.
-	--	default_args,
-	--	vim.tbl_extend('keep',default_args,{
-	--		-- lsp_status supports some extensions
-	--		handlers = lsp_status.extensions.clangd.setup(),
-	--		init_options = {
-	--			clangdFileStatus = true
-	--		}
-	--	})
-	--)
 	-- Installed through mason
 	mason.setup{
 		ui = {
@@ -241,112 +232,89 @@ local configuire_lspconfig = [[
 			}
 		}
 	}
-	mason_lspconfig.setup{
-		ensure_installed = {}
-	}
-
-	mason_lspconfig.setup_handlers {
-		-- The first entry (without a key) will be the default handler
-		-- and will be called for each installed server that doesn't have
-		-- a dedicated handler.
-		function (server_name) -- default handler (optional)
-			lspconfig[server_name].setup(default_args)
-		end,
-		-- Next, you can provide a dedicated handler for specific servers.
-		-- For example, a handler override for the `rust_analyzer`:
-		--["rust_analyzer"] = function ()
-		--	require("rust-tools").setup {}
-		--end
-	}
-
-	--for _, server in ipairs(mason_lspconfig.get_installed_servers()*) do
-	--	local options = default_args
-	--	-- (optional) Customize the options passed to the server
-	--	if server.name == "pyls_ms" then
-	--		options = vim.tbl_extend('keep',default_args,{
-	--			-- lsp_status supports some extensions
-	--			handlers = lsp_status.extensions.pyls_ms.setup(),
-	--			settings = { python = { workspaceSymbols = { enabled = true }}},
-	--		})
-	--	end
-	--	lspconfig[server.name].setup(options)
-	--end
-]]
---end
-
-local function configure_null_ls()
-	local null_ls = require"null-ls"
-	local builtins = null_ls.builtins
-	local code_actions = builtins.code_actions
-	local diagnostics = builtins.diagnostics
-	local formatting = builtins.formatting
-	local hover = builtins.hover
-	null_ls.setup{
-		-- TODO do this dynamicly
-		sources = {
-			-- https://github.com/jose-elias-alvarez/null-ls.nvim/blob/main/doc/BUILTINS.md
-			-- Style rule: All sources _must_ link to the documentation for each source.
-			-- Must also include what it does.
+	-- Style rule: All sources _must_ link to the documentation for each source.
+	-- Must also include what it does.
+	mason_null_ls.setup{
+		automatic_installation = true,
+		ensure_installed = {
 			--  https://github.com/mantoni/eslint_d.js
 			--  Injects actions to fix ESLint issues or ignore broken rules. Like ESLint, but faster.
 			--   There's an XO specific one too.
 			--   Beware that eslint_d remains running in the background.
-			code_actions.eslint_d, diagnostics.eslint_d,
-			--  https://github.com/lewis6991/gitsigns.nvim
-			--  Injects code actions for Git operations at the current cursor position
-			--   (stage / preview / reset hunks, blame, etc.).
-			--   TODO gutter highlights are broken.
-			--code_actions.gitsigns,
-			-- TODO ltrs or proselint both look cool. Documentation Grammar
-			-- TODO refactoring is usefull
-			-- TODO luasnip (simpler config?)
-
+			'eslint_d',
 			--  https://github.com/get-alex/alex
 			--  Catch insensitive, inconsiderate writing.
-			diagnostics.alex,
+			'alex',
 			--  https://github.com/dotenv-linter/dotenv-linter
 			--  Lightning-fast linter for .env files.
-			diagnostics.dotenv_linter,
+			'dotenv_linter',
 			--  https://github.com/editorconfig-checker/editorconfig-checker
 			--  A tool to verify that your files are in harmony with your `.editorconfig`.
-			diagnostics.editorconfig_checker,
+			'editorconfig_checker',
 			--  https://github.com/fish-shell/fish-shell
 			--  Basic linting is available for fish scripts using `fish --no-execute`.
-			diagnostics.fish,
+			'fish',
 			--  https://github.com/charliermarsh/ruff/
 			--  An extremely fast Python linter, written in Rust.
-			diagnostics.ruff,
+			'ruff',
 			--  https://kampfkarren.github.io/selene/
 			--  Command line tool designed to help write correct and idiomatic Lua code.
-			diagnostics.selene,
+			'selene',
 			--  https://github.com/jose-elias-alvarez/null-ls.nvim/blob/main/doc/BUILTINS.md#todo_comments
-			--  Uses inbuilt Lua code and treesitter to detect lines with TODO comments and show a diagnostic warning on each
+			--  Uses inbuilt Lua code and treesitter to detect lines with TODO comments and show a diagnostic warning on eac
+
 			--   line where it's present.
-			diagnostics.todo_comments,
+			'todo_comments',
 			--  https://www.typescriptlang.org/docs/handbook/compiler-options.html
 			--  Parses diagnostics from the TypeScript compiler.
-			diagnostics.tsc,
+			'tsc',
 			--  https://github.com/Vimjas/vint
 			--  Linter for Vimscript.
-			diagnostics.vint,
+			--'vint, -- Broken. Causes packer bug.
 			--  https://fishshell.com/docs/current/cmds/fish_indent.html
 			--  Indent or otherwise prettify a piece of fish code.
-			formatting.fish_indent,
+			'fish_indent',
 			--  https://github.com/rust-lang/rustfmt
 			--  A tool for formatting rust code according to style guidelines.
-			formatting.rustfmt,
+			'rustfmt',
 			--  https://github.com/anordal/shellharden
 			--  Hardens shell scripts by quoting variables, replacing `function_call` with `$(function_call)`, and more.
-			formatting.shellharden,
+			'shellharden',
 			--  https://github.com/JohnnyMorganz/StyLua
 			--  An opinionated code formatter for Lua.
-			formatting.stylua,
+			'stylua',
 			--  https://github.com/jose-elias-alvarez/null-ls.nvim/blob/main/doc/BUILTINS.md#printenv
 			--  Shows the value for the current environment variable under the cursor.
-			hover.printenv,
+			'printenv',
 		}
 	}
-end
+	null_ls.setup{
+		sources = {
+			-- Anything not supported by mason.
+		}
+	}
+	mason_null_ls.setup_handlers {
+		function(source_name, methods)
+			-- To keep the original functionality of `automatic_setup = true`
+			require("mason-null-ls.automatic_setup")(source_name, methods)
+		end,
+		--stylua = function(source_name, methods)
+		--	null_ls.register(null_ls.builtins.formatting.stylua)
+		--end,
+	}
+	mason_lspconfig.setup{
+		ensure_installed = {}
+	}
+	mason_lspconfig.setup_handlers {
+		function (server_name) -- default handler (optional)
+			lspconfig[server_name].setup(default_args)
+		end,
+		--["rust_analyzer"] = function ()
+		--	require("rust-tools").setup {}
+		--end
+	}
+]]
+--end
 
 local function configure_tabline()
 	require'tabline'.setup {
@@ -517,10 +485,11 @@ return require'packer'.startup{function(use)
 	use 'nvim-lua/plenary.nvim'
 	use {
 		'jose-elias-alvarez/null-ls.nvim',
-		disable = true, -- TODO Make use of 'jay-babu/mason-null-ls.nvim'
-		config = configure_null_ls,
 		requires = "plenary.nvim",
-		--after = 'neovim/nvim-lspconfig',
+	}
+	use {
+		'jay-babu/mason-null-ls.nvim',
+		requires = 'null-ls.nvim',
 	}
 	-- Interactive eval
 	-- use 'Olical/conjure' -- TODO configure this -- this might be a problem 987632498629765296987492
@@ -545,7 +514,8 @@ return require'packer'.startup{function(use)
 			'folding-nvim',
 			'cmp-nvim-lsp',
 			'mason.nvim',
-			'mason-lspconfig.nvim'
+			'mason-lspconfig.nvim',
+			'mason-null-ls.nvim'
 		},
 		module = {
 			'lspconfig',
@@ -553,6 +523,7 @@ return require'packer'.startup{function(use)
 			'cmp_nvim_lsp',
 			"mason.nvim",
 			'mason-lspconfig.nvim',
+			'mason-null-ls.nvim',
 			'folding'
 		}
 	}
