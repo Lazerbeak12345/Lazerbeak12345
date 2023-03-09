@@ -22,10 +22,6 @@ elseif vim.env.VIMRUNNING ~= "2" then
 	vim.env.VIMRUNNING = 1
 end
 
-local function configure_cmp_dictionary()
-	require"cmp_dictionary".setup{dic = {["*"] = "/usr/share/dict/words"}}
-end
-
 local function configure_nvim_cmp()
 	local cmp = require'cmp'
 	local lspkind = require'lspkind'
@@ -262,7 +258,6 @@ local configuire_lspconfig = [[
 			'selene',
 			--  https://github.com/jose-elias-alvarez/null-ls.nvim/blob/main/doc/BUILTINS.md#todo_comments
 			--  Uses inbuilt Lua code and treesitter to detect lines with TODO comments and show a diagnostic warning on eac
-
 			--   line where it's present.
 			'todo_comments',
 			--  https://www.typescriptlang.org/docs/handbook/compiler-options.html
@@ -303,7 +298,19 @@ local configuire_lspconfig = [[
 		--end,
 	}
 	mason_lspconfig.setup{
-		ensure_installed = {}
+        automatic_installation = true,
+		ensure_installed = {
+			"eslint",
+			"html",
+			"jsonls",
+			"tsserver",
+			"lua_ls", -- This is sumneko_lua. Not my favorite.
+			"jedi_language_server", -- For python. LOTS of alternatives.
+			"rust_analyzer", -- TODO does this use the correct version of rust?
+			"svelte",
+			"taplo", -- For TOML
+			"vimls",
+		}
 	}
 	mason_lspconfig.setup_handlers {
 		function (server_name) -- default handler (optional)
@@ -569,7 +576,8 @@ return require'packer'.startup{function(use)
 		config = function ()
 			-- Grab things from rafamadriz/friendly-snippets & etc.
 			require("luasnip.loaders.from_vscode").lazy_load()
-		end
+		end,
+		module = 'luasnip'
 	}
 	use 'saadparwaiz1/cmp_luasnip'
 	--  Pre-configured snippits
@@ -591,17 +599,13 @@ return require'packer'.startup{function(use)
 		config = function()
 			require'crates'.setup()
 		end,
-		requires = {
-			'plenary.nvim'
-		},
+		requires = 'plenary.nvim',
 		event = "BufRead Cargo.toml"
 	}
 	-- package.json completion source
 	use {
 		'David-Kunz/cmp-npm',
-		requires = {
-			'plenary.nvim'
-		},
+		requires = 'plenary.nvim',
 		config = function()
 			require'cmp-npm'.setup{}
 		end,
@@ -626,7 +630,13 @@ return require'packer'.startup{function(use)
 	-- Use /usr/share/dict/words for completion
 	use{
 		'uga-rosa/cmp-dictionary',
-		config = configure_cmp_dictionary,
+		config = function()
+			require"cmp_dictionary".setup{
+				dic = {
+					["*"] = "/usr/share/dict/words"
+				}
+			}
+		end,
 		opt = true -- TODO load in later when cmp runs
 	}
 
