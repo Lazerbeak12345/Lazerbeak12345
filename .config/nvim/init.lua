@@ -206,10 +206,33 @@ local configuire_lspconfig = [[
 	local null_ls = require 'null-ls'
 	local mason_null_ls = require'mason-null-ls'
 	local folding = require'folding'
+	local function lsp_keybindings(_client, bufnr)
+		-- Reccomended keymaps from nvim-lspconfig
+		-- https://github.com/neovim/nvim-lspconfig#suggested-configuration
+		local bufopts = { noremap=true, silent=true, buffer=bufnr }
+		vim.keymap.set('n', 'gD', vim.lsp.buf.declaration, bufopts)
+		vim.keymap.set('n', 'gd', vim.lsp.buf.definition, bufopts)
+		vim.keymap.set('n', 'K', vim.lsp.buf.hover, bufopts)
+		vim.keymap.set('n', 'gi', vim.lsp.buf.implementation, bufopts)
+		vim.keymap.set('n', '<C-k>', vim.lsp.buf.signature_help, bufopts)
+		vim.keymap.set('n', '<space>wa', vim.lsp.buf.add_workspace_folder, bufopts) -- Conflicts with folding TODO 92231023
+		vim.keymap.set('n', '<space>wr', vim.lsp.buf.remove_workspace_folder, bufopts) -- Conflicts with folding TODO 92231023
+		vim.keymap.set('n', '<space>wl', function()
+			print(vim.inspect(vim.lsp.buf.list_workspace_folders()))
+		end, bufopts) -- Conflicts with folding TODO 92231023
+		vim.keymap.set('n', '<space>D', vim.lsp.buf.type_definition, bufopts) -- Conflicts with folding TODO 92231023
+		vim.keymap.set('n', '<space>rn', vim.lsp.buf.rename, bufopts) -- Conflicts with folding TODO 92231023
+		vim.keymap.set('n', '<space>ca', vim.lsp.buf.code_action, bufopts) -- Conflicts with folding TODO 92231023
+		vim.keymap.set('n', 'gr', vim.lsp.buf.references, bufopts)
+		vim.keymap.set('n', '<space>f', function()
+			vim.lsp.buf.format { async = true }
+		end, bufopts) -- Conflicts with folding TODO 92231023
+	end
 	local default_args={
 		on_attach = function(...)
 			lsp_status.on_attach(...)
 			folding.on_attach(...)
+			lsp_keybindings(...)
 		end,
 	}
 	local capabilities = vim.lsp.protocol.make_client_capabilities()
@@ -674,7 +697,7 @@ return require'packer'.startup{function(use)
 
 	vim.keymap.set('n', '<Leader>d', vim.diagnostic.goto_next)
 
-	-- Enable folding with the spacebar
+	-- Enable folding with the spacebar TODO 92231023
 	vim.keymap.set('n', '<space>', 'za')
 
 	-- Go back one file in current buffer
@@ -688,6 +711,16 @@ return require'packer'.startup{function(use)
 
 	-- Make it a tad easier to change the terminal back to a buffer
 	vim.keymap.set('', '<Leader>]', '<C-\\><C-n>')
+
+	-- Reccomended keymaps from nvim-lspconfig
+	-- https://github.com/neovim/nvim-lspconfig#suggested-configuration
+	do
+		local opts = { noremap=true, silent=true }
+		vim.keymap.set('n', '<space>e', vim.diagnostic.open_float, opts) -- Conflicts with folding TODO 92231023
+		vim.keymap.set('n', '[d', vim.diagnostic.goto_prev, opts)
+		vim.keymap.set('n', ']d', vim.diagnostic.goto_next, opts)
+		vim.keymap.set('n', '<space>q', vim.diagnostic.setloclist, opts) -- Conflicts with folding TODO 92231023
+	end
 
 	-- Reccomended settings for nvim-cmp
 	vim.o.completeopt = 'menu,menuone,noselect'
