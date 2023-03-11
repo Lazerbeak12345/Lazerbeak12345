@@ -264,34 +264,18 @@ local configuire_lspconfig = [[
 			--  https://github.com/get-alex/alex
 			--  Catch insensitive, inconsiderate writing.
 			'alex',
-			--  https://github.com/dotenv-linter/dotenv-linter
-			--  Lightning-fast linter for .env files.
-			'dotenv_linter',
 			--  https://github.com/editorconfig-checker/editorconfig-checker
 			--  A tool to verify that your files are in harmony with your `.editorconfig`.
 			'editorconfig_checker',
-			--  https://github.com/fish-shell/fish-shell
-			--  Basic linting is available for fish scripts using `fish --no-execute`.
-			'fish',
 			--  https://github.com/charliermarsh/ruff/
 			--  An extremely fast Python linter, written in Rust.
 			'ruff',
 			--  https://kampfkarren.github.io/selene/
 			--  Command line tool designed to help write correct and idiomatic Lua code.
 			'selene',
-			--  https://github.com/jose-elias-alvarez/null-ls.nvim/blob/main/doc/BUILTINS.md#todo_comments
-			--  Uses inbuilt Lua code and treesitter to detect lines with TODO comments and show a diagnostic warning on eac
-			--   line where it's present.
-			'todo_comments', -- TODO for sure broken
-			--  https://www.typescriptlang.org/docs/handbook/compiler-options.html
-			--  Parses diagnostics from the TypeScript compiler.
-			'tsc',
 			--  https://github.com/Vimjas/vint
 			--  Linter for Vimscript.
 			--'vint, -- Broken. Causes packer bug.
-			--  https://fishshell.com/docs/current/cmds/fish_indent.html
-			--  Indent or otherwise prettify a piece of fish code.
-			'fish_indent',
 			--  https://github.com/rust-lang/rustfmt
 			--  A tool for formatting rust code according to style guidelines.
 			'rustfmt',
@@ -301,14 +285,32 @@ local configuire_lspconfig = [[
 			--  https://github.com/JohnnyMorganz/StyLua
 			--  An opinionated code formatter for Lua.
 			'stylua',
-			--  https://github.com/jose-elias-alvarez/null-ls.nvim/blob/main/doc/BUILTINS.md#printenv
-			--  Shows the value for the current environment variable under the cursor.
-			'printenv',
 		}
 	}
 	null_ls.setup{
+		on_attach = default_args.on_attach,
 		sources = {
 			-- Anything not supported by mason.
+			--
+			--  https://github.com/dotenv-linter/dotenv-linter
+			--  Lightning-fast linter for .env files.
+			null_ls.builtins.diagnostics.dotenv_linter,
+			--  https://github.com/fish-shell/fish-shell
+			--  Basic linting is available for fish scripts using `fish --no-execute`.
+			null_ls.builtins.diagnostics.fish,
+			--  https://github.com/jose-elias-alvarez/null-ls.nvim/blob/main/doc/BUILTINS.md#todo_comments
+			--  Uses inbuilt Lua code and treesitter to detect lines with TODO comments and show a diagnostic warning on eac
+			--   line where it's present.
+			null_ls.builtins.diagnostics.todo_comments,
+			--  https://www.typescriptlang.org/docs/handbook/compiler-options.html
+			--  Parses diagnostics from the TypeScript compiler.
+			null_ls.builtins.diagnostics.tsc,
+			--  https://fishshell.com/docs/current/cmds/fish_indent.html
+			--  Indent or otherwise prettify a piece of fish code.
+			null_ls.builtins.formatting.fish_indent,
+			--  https://github.com/jose-elias-alvarez/null-ls.nvim/blob/main/doc/BUILTINS.md#printenv
+			--  Shows the value for the current environment variable under the cursor.
+			null_ls.builtins.hover.printenv,
 		}
 	}
 	mason_null_ls.setup_handlers {
@@ -566,6 +568,14 @@ return require'packer'.startup{function(use)
 	-- Automate installing some language-servers
 	use 'williamboman/mason.nvim'
 	use 'williamboman/mason-lspconfig.nvim'
+	-- Update command for mason
+	--  https://github.com/RubixDev/mason-update-all#updating-from-cli
+	use{
+		'RubixDev/mason-update-all',
+		config = function ()
+			require'mason-update-all'.setup()
+		end
+	}
 	-- Better folding
 	use 'pierreglaser/folding-nvim'
 
