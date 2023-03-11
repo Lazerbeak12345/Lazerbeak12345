@@ -215,18 +215,18 @@ local configuire_lspconfig = [[
 		vim.keymap.set('n', 'K', vim.lsp.buf.hover, bufopts)
 		vim.keymap.set('n', 'gi', vim.lsp.buf.implementation, bufopts)
 		vim.keymap.set('n', '<C-k>', vim.lsp.buf.signature_help, bufopts)
-		vim.keymap.set('n', '<space>wa', vim.lsp.buf.add_workspace_folder, bufopts) -- Conflicts with folding TODO 92231023
-		vim.keymap.set('n', '<space>wr', vim.lsp.buf.remove_workspace_folder, bufopts) -- Conflicts with folding TODO 92231023
+		vim.keymap.set('n', '<space>wa', vim.lsp.buf.add_workspace_folder, bufopts)
+		vim.keymap.set('n', '<space>wr', vim.lsp.buf.remove_workspace_folder, bufopts)
 		vim.keymap.set('n', '<space>wl', function()
 			print(vim.inspect(vim.lsp.buf.list_workspace_folders()))
-		end, bufopts) -- Conflicts with folding TODO 92231023
-		vim.keymap.set('n', '<space>D', vim.lsp.buf.type_definition, bufopts) -- Conflicts with folding TODO 92231023
-		vim.keymap.set('n', '<space>rn', vim.lsp.buf.rename, bufopts) -- Conflicts with folding TODO 92231023
-		vim.keymap.set('n', '<space>ca', vim.lsp.buf.code_action, bufopts) -- Conflicts with folding TODO 92231023
+		end, bufopts)
+		vim.keymap.set('n', '<space>D', vim.lsp.buf.type_definition, bufopts)
+		vim.keymap.set('n', '<space>rn', vim.lsp.buf.rename, bufopts)
+		vim.keymap.set('n', '<space>ca', vim.lsp.buf.code_action, bufopts)
 		vim.keymap.set('n', 'gr', vim.lsp.buf.references, bufopts)
 		vim.keymap.set('n', '<space>f', function()
 			vim.lsp.buf.format { async = true }
-		end, bufopts) -- Conflicts with folding TODO 92231023
+		end, bufopts)
 	end
 	local default_args={
 		on_attach = function(...)
@@ -282,7 +282,7 @@ local configuire_lspconfig = [[
 			--  https://github.com/jose-elias-alvarez/null-ls.nvim/blob/main/doc/BUILTINS.md#todo_comments
 			--  Uses inbuilt Lua code and treesitter to detect lines with TODO comments and show a diagnostic warning on eac
 			--   line where it's present.
-			'todo_comments',
+			'todo_comments', -- TODO for sure broken
 			--  https://www.typescriptlang.org/docs/handbook/compiler-options.html
 			--  Parses diagnostics from the TypeScript compiler.
 			'tsc',
@@ -695,10 +695,10 @@ return require'packer'.startup{function(use)
 		return luasnip.jumpable(-1) and luasnip.jump(-1) or t'<S-Tab>'
 	end)
 
-	vim.keymap.set('n', '<Leader>d', vim.diagnostic.goto_next)
+	--vim.keymap.set('n', '<Leader>d', vim.diagnostic.goto_next)
 
-	-- Enable folding with the spacebar TODO 92231023
-	vim.keymap.set('n', '<space>', 'za')
+	-- Enable folding with the spacebar (twice now, to allow lspconfig things)
+	vim.keymap.set('n', '<space><space>', 'za')
 
 	-- Go back one file in current buffer
 	vim.keymap.set('n', '<Leader><Leader>', '<c-^>')
@@ -716,10 +716,10 @@ return require'packer'.startup{function(use)
 	-- https://github.com/neovim/nvim-lspconfig#suggested-configuration
 	do
 		local opts = { noremap=true, silent=true }
-		vim.keymap.set('n', '<space>e', vim.diagnostic.open_float, opts) -- Conflicts with folding TODO 92231023
+		vim.keymap.set('n', '<space>e', vim.diagnostic.open_float, opts)
 		vim.keymap.set('n', '[d', vim.diagnostic.goto_prev, opts)
 		vim.keymap.set('n', ']d', vim.diagnostic.goto_next, opts)
-		vim.keymap.set('n', '<space>q', vim.diagnostic.setloclist, opts) -- Conflicts with folding TODO 92231023
+		vim.keymap.set('n', '<space>q', vim.diagnostic.setloclist, opts)
 	end
 
 	-- Reccomended settings for nvim-cmp
