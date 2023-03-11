@@ -707,6 +707,7 @@ return require'packer'.startup{function(use)
 
 	-- Use sys clipboard
 	vim.o.clipboard = 'unnamedplus'
+	-- TODO install `lemonade` or `doitclient` to get SSH clipboard. termux or tmux perhaps, but likely not.
 
 	-- Title magic.
 	vim.o.title = true
@@ -737,6 +738,9 @@ return require'packer'.startup{function(use)
 	-- below two lines no longer work in konsole
 	--vim.o.t_SI = "\\e[3 q" -- insert
 	--vim.o.t_EI = "\\e[1 q" -- command
+
+	-- I needed a ruby nvim plugin awhile back. This fixes it.
+	vim.g.ruby_host_prog = '~/.bin/neovim-ruby-host'
 
 	vim.api.nvim_create_autocmd("TextYankPost", {
 		pattern = "*",
