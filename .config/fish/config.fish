@@ -7,7 +7,9 @@ end
 function update_nvim -d "Update all nvim packages"
 	# https://github.com/RubixDev/mason-update-all#updating-from-cli
 	echo Update Packer plugins
-	nvim --headless -c 'autocmd User PackerComplete quitall' -c 'PackerSync'
+	# Headless tells me nothing
+	# nvim --headless -c 'autocmd User PackerComplete quitall' -c 'PackerSync'
+	nvim -c 'autocmd User PackerComplete quitall' -c 'PackerSync'
 	echo
 	echo Update Mason packages
 	nvim --headless -c 'autocmd User MasonUpdateAllComplete quitall' -c 'MasonUpdateAll'
