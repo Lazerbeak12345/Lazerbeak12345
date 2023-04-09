@@ -24,3 +24,11 @@ git clone --bare https://github.com/Lazerbeak12345/Lazerbeak12345 $HOME/.dotfile
 ```
 
 There's a lot of reasons why this approach is awesome, and perhaps the biggest one is its simplicity.
+
+## Socials
+
+I occasionly use public "Social" media. Usually just private ones, or Discord.
+
+Here's my mastadon, included here mostly because only 2 way links are verified, but 🤷:
+
+<a rel="me" href="https://mastodon.social/@lazerbeak12345">Mastodon</a>
