@@ -241,6 +241,7 @@ local configuire_lspconfig = [[
 	default_args.capabilities = capabilities
 	-- Installed manually in system.
 	lspconfig.racket_langserver.setup(default_args)
+	lspconfig.clangd.setup(default_args) -- Takes custom args too
 	-- Installed through mason
 	mason.setup{
 		ui = {
@@ -285,10 +286,20 @@ local configuire_lspconfig = [[
 			--  https://github.com/JohnnyMorganz/StyLua
 			--  An opinionated code formatter for Lua.
 			'stylua',
+			-- TODO
+			"luacheck",
+		},
+		handlers = {
+			function(source_name, methods)
+				-- To keep the original functionality of `automatic_setup = true`
+				require("mason-null-ls.automatic_setup")(source_name, methods)
+			end,
+			--stylua = function(source_name, methods)
+			--	null_ls.register(null_ls.builtins.formatting.stylua)
+			--end,
 		}
 	}
 	null_ls.setup{
-		on_attach = default_args.on_attach,
 		sources = {
 			-- Anything not supported by mason.
 			--
@@ -312,15 +323,6 @@ local configuire_lspconfig = [[
 			--  Shows the value for the current environment variable under the cursor.
 			null_ls.builtins.hover.printenv,
 		}
-	}
-	mason_null_ls.setup_handlers {
-		function(source_name, methods)
-			-- To keep the original functionality of `automatic_setup = true`
-			require("mason-null-ls.automatic_setup")(source_name, methods)
-		end,
-		--stylua = function(source_name, methods)
-		--	null_ls.register(null_ls.builtins.formatting.stylua)
-		--end,
 	}
 	mason_lspconfig.setup{
         automatic_installation = true,
@@ -684,7 +686,7 @@ return require'packer'.startup{function(use)
 	vim.diagnostic.config{
 		severity_sort = true,
 		virtual_text = {
-			prefix = '🛈'
+			prefix = '🛈 '
 		}
 	}
 
@@ -755,8 +757,8 @@ return require'packer'.startup{function(use)
 	-- Title magic.
 	vim.o.title = true
 
-	-- I don't like presssing more most of the time
-	vim.o.more = false
+	-- I don't like presssing more most of the time -- Breaks :map
+	--vim.o.more = false
 
 	-- This is the global vim refresh interval. Multiple tools, such as
 	-- gitgutter and coc reccomend turning this number down. It's measured in
