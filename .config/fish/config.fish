@@ -55,6 +55,7 @@ set -gx WASMTIME_HOME "$HOME/.wasmtime"
 string match -r ".wasmtime" "$PATH" > /dev/null; or set -gx PATH "$WASMTIME_HOME/bin" $PATH
 set -x VISUAL nvim # Full screen editor
 set -x EDITOR "nvim -e" # Non-visual editor
+set -x GIT_EDITOR $VISUAL # Git uses vim otherwise.
 # Rustup seems to keep dissapearing for months at a time....
 if type --query rustup
 	rustup completions fish > ~/.config/fish/completions/rustup.fish
