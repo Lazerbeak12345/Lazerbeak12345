@@ -45,13 +45,6 @@ local function configure_nvim_cmp()
 			end,
 		},
 		mapping = {
-			-- TODO Can't use `cmp.scroll_docs` alias. Must go through mapping first.
-			-- TODO same for these:
-			-- - `cmp.complete`
-			-- - `cmp.select_next_item`
-			-- - `cmp.select_prev_item`
-			-- - `cmp.abort`
-			-- - `cmp.close`
 			['<C-d>'] = mapping(mapping.scroll_docs(-4), { 'i', 'c' }),
 			['<C-f>'] = mapping(mapping.scroll_docs(4), { 'i', 'c' }),
 			['<C-Space>'] = mapping(mapping.complete(), { 'i', 'c' }),
@@ -312,6 +305,7 @@ local function configuire_lspconfig()
 			--  https://github.com/jose-elias-alvarez/null-ls.nvim/blob/main/doc/BUILTINS.md#todo_comments
 			--  Uses inbuilt Lua code and treesitter to detect lines with TODO comments and show a diagnostic warning on eac
 			--   line where it's present.
+			--  TODO doesn't work at all
 			null_ls.builtins.diagnostics.todo_comments,
 			--  https://www.typescriptlang.org/docs/handbook/compiler-options.html
 			--  Parses diagnostics from the TypeScript compiler.
@@ -395,9 +389,8 @@ local function configure_lualine()
 				'filename',
 				lightline_visual_selection,
 				function()
-					-- TODO because of a bug in packer, we can't get the exact components we
-					-- wish the way we want to using vim.g.lsp_function_name but it's fixed in
-					-- lazy.nvim, so this would work.
+					-- TODO get the exact components we wish the way we want to using
+					-- vim.g.lsp_function_name
 					return lsp_status.status()
 				end
 			}
@@ -577,11 +570,11 @@ local lazy_plugins = {
 		'nvim-lualine/lualine.nvim',
 		config = configure_lualine
 	},
-	{
+	--[[{
 		'kdheepak/tabline.nvim',
-		-- disable = true, -- TODO Buggy
+		-- disable = true, -- TODO Buggy: Tabs are per window when windows should be per tab.
 		config = configure_tabline,
-	},
+	},]]
 	-- The looks of Powerline, but faster
 	-- use{
 	-- 	'itchyny/lightline.vim',
