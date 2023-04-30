@@ -7,10 +7,8 @@ if test -z $NATE_PATH_MODDED
 end
 function update_nvim -d "Update all nvim packages"
 	# https://github.com/RubixDev/mason-update-all#updating-from-cli
-	echo Update Packer plugins
-	# Headless tells me nothing
-	# nvim --headless -c 'autocmd User PackerComplete quitall' -c 'PackerSync'
-	nvim -c 'autocmd User PackerComplete quitall' -c 'PackerSync'
+	echo Update lazy.nvim plugins
+	nvim --headless "+Lazy! sync" +qa
 	echo
 	echo Update Mason packages
 	nvim --headless -c 'autocmd User MasonUpdateAllComplete quitall' -c 'MasonUpdateAll'
