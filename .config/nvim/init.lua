@@ -1,15 +1,17 @@
 local vim = vim -- Hacky workaround for sumneko_lua being sorta dumb right now. I can fix it better later.
--- This new bootstrapping code was copied from https://github.com/wbthomason/packer.nvim#bootstrapping
-local function ensure_packer()
-	local fn = vim.fn
-	local install_path = fn.stdpath('data')..'/site/pack/packer/start/packer.nvim'
-	if fn.empty(fn.glob(install_path)) > 0 then
-		fn.system{'git', 'clone', '--depth', '1', 'https://github.com/wbthomason/packer.nvim', install_path}
-		vim.cmd [[packadd packer.nvim]]
-		return true
-	end
-	return false
+-- copied from https://github.com/folke/lazy.nvim#-installation
+local lazypath = vim.fn.stdpath("data") .. "/lazy/lazy.nvim"
+if not vim.loop.fs_stat(lazypath) then
+  vim.fn.system({
+    "git",
+    "clone",
+    "--filter=blob:none",
+    "https://github.com/folke/lazy.nvim.git",
+    "--branch=stable", -- latest stable release
+    lazypath,
+  })
 end
+vim.opt.rtp:prepend(lazypath)
 
 if vim.env.VIMRUNNING == "1" then
 	print("dummy! read before running (override by setting $VIMRUNNING to \"2\")")
@@ -195,9 +197,7 @@ local function configure_lsp_status()
 	lsp_status.register_progress()
 end
 
--- see https://github.com/wbthomason/packer.nvim/issues/1090
---local function configuire_lspconfig()
-local configuire_lspconfig = [[
+local function configuire_lspconfig()
 	local lspconfig=require'lspconfig'
 	local lsp_status = require'lsp-status'
 	local cmp_nvim_lsp = require'cmp_nvim_lsp'
@@ -347,8 +347,7 @@ local configuire_lspconfig = [[
 		--	require("rust-tools").setup {}
 		--end
 	}
-]]
---end
+end
 
 local function configure_tabline()
 	require'tabline'.setup {
@@ -358,9 +357,7 @@ local function configure_tabline()
 	}
 end
 
--- See https://github.com/wbthomason/packer.nvim/issues/1090
---local function configure_lualine()
-local configure_lualine = [[
+local function configure_lualine()
 	--                                   █ 🙽 🙼 🙿   🙾
 	-- TODO replace mode
 	-- TODO local prepend_ln = function(str)
@@ -398,283 +395,17 @@ local configure_lualine = [[
 				'filename',
 				lightline_visual_selection,
 				function()
-					-- TODO because of https://github.com/wbthomason/packer.nvim/issues/1090
-					-- we can't get the exact components we wish the way we want to using vim.g.lsp_function_name
+					-- TODO because of a bug in packer, we can't get the exact components we
+					-- wish the way we want to using vim.g.lsp_function_name but it's fixed in
+					-- lazy.nvim, so this would work.
 					return lsp_status.status()
 				end
 			}
 		}
 	}
-]]
---end
+end
 
-local packer_bootstrap = ensure_packer()
-
-local packer_config = {
-	profile = {
-		enable = true,
-		-- Amount of load time for plugin to be included in profile
-		threshold = 0,
-	}
-}
-
-return require'packer'.startup{function(use)
-	use 'wbthomason/packer.nvim' -- Self-manage the package manager.
-
-	-- Commenting
-	--Plug 'tpope/vim-commentary'
-	-- The looks of Powerline but faster than:
-	-- - Powerline
-	-- - Airline
-	-- - And the well-known, formerly first-place Lightline
-	use {
-		'nvim-lualine/lualine.nvim',
-		config = configure_lualine,
-		requires = 'nvim-web-devicons',
-		after = 'nvim-base16'
-	}
-	use {
-		'kdheepak/tabline.nvim',
-		disable = true, -- Buggy, and doesn't play well with a particular nvim render bug. (not the cause)
-		config = configure_tabline,
-		requires = {'lualine.nvim','nvim-web-devicons'}
-	}
-	-- The looks of Powerline, but faster
-	use{
-		'itchyny/lightline.vim',
-		disable = true,
-		--config = configure_lightline,
-		requires = {
-			'vim-fugitive',
-			'lsp-status.nvim'
-		}
-	}
-	-- Indent lines
-	use{
-		'thaerkh/vim-indentguides',
-		-- see https://github.com/wbthomason/packer.nvim/issues/1090
-		config = [[
-			vim.g.indentguides_spacechar = '⍿'
-			vim.g.indentguides_tabchar = '⟼'
-			vim.g.indentguides_concealcursor_unaltered = 'nonempty value'
-			--|‖⃒⃓⍿⎸⎹⁞⸾⼁︳︴｜¦❘❙❚⟊⟾⤠⟼
-			--|‖⃒⃓⍿⎸⎹⁞⸾⼁︳︴｜¦❘❙❚⟊⟾⤠⟼
-		]]
-	}
-	-- Super fancy coloring
-	use {
-		'RRethy/nvim-base16',
-		-- see https://github.com/wbthomason/packer.nvim/issues/1090
-		config = [[
-			vim.cmd.colorscheme'base16-default-dark'
-			if false then -- I'm still working this out. Contrast issues right now.
-				vim.api.nvim_create_autocmd("BufEnter", {
-					pattern = "*",
-					callback = function()
-						local hl = vim.api.nvim_get_hl_by_name("Normal", "")
-						hl.background = "NONE"
-						vim.api.nvim_set_hl(0, "Normal", hl)
-						print("fixed bg!")
-					end
-				})
-			end
-		]]
-	}
-
-	-- Git integration
-	--  Genral use
-	use 'tpope/vim-fugitive'
-	--  Line-per-line indicators and chunk selection
-	use 'airblade/vim-gitgutter' -- TODO gitsigns
-	-- Nicer file management
-	use 'preservim/nerdtree'
-	use 'tiagofumo/vim-nerdtree-syntax-highlight'
-	--Plug 'jistr/vim-nerdtree-tabs'
-	use 'Xuyuanp/nerdtree-git-plugin'
-
-	-- Icons
-	use 'ryanoasis/vim-devicons'
-	use 'kyazdani42/nvim-web-devicons'
-	--  LSP breakdown icons and stuff
-	use 'onsails/lspkind-nvim'
-
-	--  This should work on all files (it's python support ain't great)
-	--Plug 'khzaw/vim-conceal'
-	--Plug 'jamestomasino-forks/vim-conceal' " This one has better javascript support
-	--Plug 'Lazerbeak12345/vim-conceal' " This is my blend of a bunch of stuff (my
-	--    fork of above)
-	-- Ease of use
-	use 'vimlab/split-term.vim'
-	use {
-		'airblade/vim-rooter',
-		-- see https://github.com/wbthomason/packer.nvim/issues/1090
-		config = [[
-			vim.g.rooter_change_directory_for_non_project_files = 'current'
-			-- vim.g.rooter_patterns = ['.git', 'mod.conf', 'modpack.conf','game.conf','texture_pack.conf']
-		]]
-	}
-	--  Start Screen
-	use 'mhinz/vim-startify'
-	-- common dependancies of many nvim plugins
-	use 'nvim-lua/plenary.nvim'
-	use {
-		'jose-elias-alvarez/null-ls.nvim',
-		requires = "plenary.nvim",
-	}
-	use {
-		'jay-babu/mason-null-ls.nvim',
-		requires = 'null-ls.nvim',
-	}
-	-- Interactive eval
-	-- use 'Olical/conjure' -- TODO configure this -- this might be a problem 987632498629765296987492
-
-	-- Specific file type compat
-	--  General stuff
-	use 'sheerun/vim-polyglot'
-	--  Eww's configuration language, yuck
-	use 'elkowar/yuck.vim'
-	--  Support editorconfig files
-	--   TODO configure
-	use 'editorconfig/editorconfig-vim'
-
-	-- Language-server protocol
-	-- Must be after language specific things
-	use{
-		'neovim/nvim-lspconfig',
-		config = configuire_lspconfig,
-		-- The config function for this requires these to be present. It's a two way dependancy.
-		requires = {
-			'lsp-status.nvim',
-			'folding-nvim',
-			'cmp-nvim-lsp',
-			'mason.nvim',
-			'mason-lspconfig.nvim',
-			'mason-null-ls.nvim'
-		},
-		module = {
-			'lspconfig',
-			--'lsp-status',
-			'cmp_nvim_lsp',
-			"mason.nvim",
-			'mason-lspconfig.nvim',
-			'mason-null-ls.nvim',
-			'folding'
-		}
-	}
-	use{
-		'nvim-lua/lsp-status.nvim',
-		config = configure_lsp_status,
-		requires = 'lspkind-nvim',
-		module = 'lsp-status'
-	}
-	-- Automate installing some language-servers
-	use 'williamboman/mason.nvim'
-	use 'williamboman/mason-lspconfig.nvim'
-	-- Update command for mason
-	--  https://github.com/RubixDev/mason-update-all#updating-from-cli
-	use{
-		'RubixDev/mason-update-all',
-		config = function ()
-			require'mason-update-all'.setup()
-		end
-	}
-	-- Better folding
-	use 'pierreglaser/folding-nvim'
-
-	-- Completion details (uses LSP)
-	use{
-		'hrsh7th/cmp-nvim-lsp',
-		requires = 'nvim-cmp'
-	}
-	use 'hrsh7th/cmp-buffer'
-	use 'hrsh7th/cmp-path'
-	use{
-		'hrsh7th/nvim-cmp',
-		config = configure_nvim_cmp,
-		requires = {
-			'lspkind-nvim',
-			'cmp-dictionary',
-			'cmp-git',
-			'crates.nvim',
-			'cmp-npm',
-			'LuaSnip'
-		},
-		module_pattern = ".*cmp.*"
-	}
-	-- Lower the text sorting of completions starting with _
-	use 'lukas-reineke/cmp-under-comparator'
-	-- cmdline source
-	use 'hrsh7th/cmp-cmdline'
-	-- Snippet source. (There's others out there too)
-	use {
-		'L3MON4D3/LuaSnip',
-		config = function ()
-			-- Grab things from rafamadriz/friendly-snippets & etc.
-			require("luasnip.loaders.from_vscode").lazy_load()
-		end,
-		module = 'luasnip'
-	}
-	use 'saadparwaiz1/cmp_luasnip'
-	--  Pre-configured snippits
-	use 'rafamadriz/friendly-snippets'
-	-- Git completion source
-	use{
-		'petertriho/cmp-git',
-		config = function()
-			require"cmp_git".setup()
-		end,
-		requires = "plenary.nvim",
-		-- They don't even talk - this is just because I won't need cmp-git until
-		-- after interacting with fugitive anyway
-		after = 'vim-fugitive'
-	}
-	-- crates.io completion source
-	use {
-		'saecki/crates.nvim',
-		config = function()
-			require'crates'.setup()
-		end,
-		requires = 'plenary.nvim',
-		event = "BufRead Cargo.toml"
-	}
-	-- package.json completion source
-	use {
-		'David-Kunz/cmp-npm',
-		requires = 'plenary.nvim',
-		config = function()
-			require'cmp-npm'.setup{}
-		end,
-		event = "BufRead package.json"
-	}
-	-- latex symbol completion support (allows for inserting unicode)
-	use 'kdheepak/cmp-latex-symbols'
-	-- Emoji completion support
-	use 'hrsh7th/cmp-emoji'
-	-- Pandoc completion
-	use 'jc-doyle/cmp-pandoc-references'
-	-- cmdline history completion
-	--Plug 'dmitmel/cmp-cmdline-history'
-	-- Fish completion
-	use 'mtoohey31/cmp-fish'
-	-- conjure intractive eval completion
-	--use 'PaterJason/cmp-conjure' -- TODO add this to cmp -- this might be a problem 987632498629765296987492
-	-- Use LSP symbols for buffer-style search
-	use 'hrsh7th/cmp-nvim-lsp-document-symbol'
-	-- Completion on the vim.lsp apis
-	use 'hrsh7th/cmp-nvim-lua'
-	-- Use /usr/share/dict/words for completion
-	use{
-		'uga-rosa/cmp-dictionary',
-		config = function()
-			require"cmp_dictionary".setup{
-				dic = {
-					["*"] = "/usr/share/dict/words"
-				}
-			}
-		end,
-		opt = true -- TODO load in later when cmp runs
-	}
-
+do -- Keymaps and the like
 	-- refer to https://github.com/nanotee/nvim-lua-guide
 
 	--vim.lsp.set_log_level("debug")
@@ -825,11 +556,233 @@ return require'packer'.startup{function(use)
 	})
 	-- Popup windows tend to be unreadable with a pink background
 	--vim.api.nvim_set_hl(0, "Pmenu", {})
+end
 
-	-- Automatically set up your configuration after cloning packer.nvim
-	-- Put this at the end after all plugins
-	if packer_bootstrap then
-		require('packer').sync()
-	end
-end, config = packer_config }
+local lazy_config = {
+	profile = {
+		enable = true,
+		-- Amount of load time for plugin to be included in profile
+		threshold = 0,
+	}
+}
+
+local lazy_plugins = {
+	-- Commenting
+	--Plug 'tpope/vim-commentary'
+	-- The looks of Powerline but faster than:
+	-- - Powerline
+	-- - Airline
+	-- - And the well-known, formerly first-place Lightline
+	{
+		'nvim-lualine/lualine.nvim',
+		config = configure_lualine
+	},
+	{
+		'kdheepak/tabline.nvim',
+		-- disable = true, -- TODO Buggy
+		config = configure_tabline,
+	},
+	-- The looks of Powerline, but faster
+	-- use{
+	-- 	'itchyny/lightline.vim',
+	-- 	disable = true,
+	-- 	--config = configure_lightline,
+	-- 	requires = {
+	-- 		'vim-fugitive',
+	-- 		'lsp-status.nvim'
+	-- 	}
+	-- }
+	-- Indent lines
+	{
+		'thaerkh/vim-indentguides',
+		config = function ()
+			vim.g.indentguides_spacechar = '⍿'
+			vim.g.indentguides_tabchar = '⟼'
+			vim.g.indentguides_concealcursor_unaltered = 'nonempty value'
+			--|‖⃒⃓⍿⎸⎹⁞⸾⼁︳︴｜¦❘❙❚⟊⟾⤠⟼
+			--|‖⃒⃓⍿⎸⎹⁞⸾⼁︳︴｜¦❘❙❚⟊⟾⤠⟼
+		end
+	},
+	-- Super fancy coloring
+	{
+		'RRethy/nvim-base16',
+		config = function ()
+			vim.cmd.colorscheme'base16-default-dark'
+			if false then -- I'm still working this out. Contrast issues right now.
+				vim.api.nvim_create_autocmd("BufEnter", {
+					pattern = "*",
+					callback = function()
+						local hl = vim.api.nvim_get_hl_by_name("Normal", "")
+						hl.background = "NONE"
+						vim.api.nvim_set_hl(0, "Normal", hl)
+						print("fixed bg!")
+					end
+				})
+			end
+		end
+	},
+
+	-- Git integration
+	--  Genral use
+	'tpope/vim-fugitive',
+	--  Line-per-line indicators and chunk selection
+	'airblade/vim-gitgutter', -- TODO gitsigns
+	-- Nicer file management
+	'preservim/nerdtree',
+	'tiagofumo/vim-nerdtree-syntax-highlight',
+	--Plug 'jistr/vim-nerdtree-tabs'
+	'Xuyuanp/nerdtree-git-plugin',
+
+	-- Icons
+	'ryanoasis/vim-devicons',
+	'kyazdani42/nvim-web-devicons',
+	--  LSP breakdown icons and stuff
+	'onsails/lspkind-nvim',
+
+	--  This should work on all files (it's python support ain't great)
+	--Plug 'khzaw/vim-conceal'
+	--Plug 'jamestomasino-forks/vim-conceal' " This one has better javascript support
+	--Plug 'Lazerbeak12345/vim-conceal' " This is my blend of a bunch of stuff (my
+	--    fork of above)
+	-- Ease of use
+	'vimlab/split-term.vim',
+	{
+		'airblade/vim-rooter',
+		config = function ()
+			vim.g.rooter_change_directory_for_non_project_files = 'current'
+			-- vim.g.rooter_patterns = ['.git', 'mod.conf', 'modpack.conf','game.conf','texture_pack.conf']
+		end
+	},
+	--  Start Screen
+	'mhinz/vim-startify',
+	-- common dependancies of many nvim plugins
+	'nvim-lua/plenary.nvim',
+	'jose-elias-alvarez/null-ls.nvim',
+	'jay-babu/mason-null-ls.nvim',
+	-- Interactive eval
+	-- use 'Olical/conjure' -- TODO configure this -- this might be a problem 987632498629765296987492
+
+	-- Specific file type compat
+	--  General stuff
+	'sheerun/vim-polyglot',
+	--  Eww's configuration language, yuck
+	'elkowar/yuck.vim',
+	--  Support editorconfig files
+	--   TODO configure
+	'editorconfig/editorconfig-vim',
+
+	-- Language-server protocol
+	-- Must be after language specific things
+	{
+		'neovim/nvim-lspconfig',
+		config = configuire_lspconfig,
+		module = {
+			'lspconfig',
+			--'lsp-status',
+			'cmp_nvim_lsp',
+			"mason.nvim",
+			'mason-lspconfig.nvim',
+			'mason-null-ls.nvim',
+			'folding'
+		}
+	},
+	{
+		'nvim-lua/lsp-status.nvim',
+		config = configure_lsp_status,
+		module = 'lsp-status'
+	},
+	-- Automate installing some language-servers
+	'williamboman/mason.nvim',
+	'williamboman/mason-lspconfig.nvim',
+	-- Update command for mason
+	--  https://github.com/RubixDev/mason-update-all#updating-from-cli
+	{
+		'RubixDev/mason-update-all',
+		config = function ()
+			require'mason-update-all'.setup()
+		end
+	},
+	-- Better folding
+	'pierreglaser/folding-nvim',
+
+	-- Completion details (uses LSP)
+	'hrsh7th/cmp-nvim-lsp',
+	'hrsh7th/cmp-buffer',
+	'hrsh7th/cmp-path',
+	{
+		'hrsh7th/nvim-cmp',
+		config = configure_nvim_cmp,
+	},
+	-- Lower the text sorting of completions starting with _
+	'lukas-reineke/cmp-under-comparator',
+	-- cmdline source
+	'hrsh7th/cmp-cmdline',
+	-- Snippet source. (There's others out there too)
+	{
+		'L3MON4D3/LuaSnip',
+		config = function ()
+			-- Grab things from rafamadriz/friendly-snippets & etc.
+			require("luasnip.loaders.from_vscode").lazy_load()
+		end,
+		module = 'luasnip'
+	},
+	'saadparwaiz1/cmp_luasnip',
+	--  Pre-configured snippits
+	'rafamadriz/friendly-snippets',
+	-- Git completion source
+	{
+		'petertriho/cmp-git',
+		config = function()
+			require"cmp_git".setup()
+		end,
+		-- TODO They don't even talk - this is just because I won't need cmp-git until
+		-- after interacting with fugitive anyway
+		--after = 'vim-fugitive'
+	},
+	-- crates.io completion source
+	{
+		'saecki/crates.nvim',
+		config = function()
+			require'crates'.setup()
+		end,
+		event = "BufRead Cargo.toml"
+	},
+	-- package.json completion source
+	{
+		'David-Kunz/cmp-npm',
+		config = function()
+			require'cmp-npm'.setup{}
+		end,
+		event = "BufRead package.json"
+	},
+	-- latex symbol completion support (allows for inserting unicode)
+	'kdheepak/cmp-latex-symbols',
+	-- Emoji completion support
+	'hrsh7th/cmp-emoji',
+	-- Pandoc completion
+	'jc-doyle/cmp-pandoc-references',
+	-- cmdline history completion
+	--Plug 'dmitmel/cmp-cmdline-history'
+	-- Fish completion
+	'mtoohey31/cmp-fish',
+	-- conjure intractive eval completion
+	--use 'PaterJason/cmp-conjure' -- TODO add this to cmp -- this might be a problem 987632498629765296987492
+	-- Use LSP symbols for buffer-style search
+	'hrsh7th/cmp-nvim-lsp-document-symbol',
+	-- Completion on the vim.lsp apis
+	'hrsh7th/cmp-nvim-lua',
+	-- Use /usr/share/dict/words for completion
+	{
+		'uga-rosa/cmp-dictionary',
+		config = function()
+			require"cmp_dictionary".setup{
+				dic = {
+					["*"] = "/usr/share/dict/words"
+				}
+			}
+		end,
+		-- TODO opt = true -- TODO load in later when cmp runs
+	},
+}
+require("lazy").setup(lazy_plugins, lazy_config)
 -- vim.o.ambiwidth="double" -- use this if the arrows are cut off
