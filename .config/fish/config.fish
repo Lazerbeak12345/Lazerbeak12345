@@ -1,6 +1,7 @@
 if test -z $NATE_PATH_MODDED
 	set -xp PATH $HOME/.cargo/bin
 	set -xa PATH $HOME/.radicle/bin
+	set -xa PATH $HOME/.luarocks/bin
 	set -xa PATH $HOME/.bin
 	set -x NATE_PATH_MODDED
 end
