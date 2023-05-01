@@ -26,9 +26,7 @@ end
 
 local function configure_nvim_cmp()
 	local cmp = require'cmp'
-	local lspkind = require'lspkind'
 	local cmp_under_comparator = require"cmp-under-comparator"
-	local luasnip = require'luasnip'
 	--[[local function has_words_before()
 		-- TODO use this approch for line & col elsewhere
 		local line, col = unpack(vim.api.nvim_win_get_cursor(0))
@@ -41,7 +39,7 @@ local function configure_nvim_cmp()
 		--Defaults:https://github.com/hrsh7th/nvim-cmp/blob/main/lua/cmp/config/default.lua
 		snippet = {
 			expand = function(args)
-				luasnip.lsp_expand(args.body)
+				require'luasnip'.lsp_expand(args.body)
 			end,
 		},
 		mapping = {
@@ -122,7 +120,7 @@ local function configure_nvim_cmp()
 			},
 		},
 		formatting = {
-			format = lspkind.cmp_format{
+			format = require'lspkind'.cmp_format{
 				with_text = true,
 				--[[
 				symbol_map = {
@@ -180,20 +178,19 @@ end
 
 local function configure_lsp_status()
 	local lsp_status = require'lsp-status'
-	local lspkind = require'lspkind'
 	lsp_status.config{
 		status_symbol = '', -- The default V breaks some layout stuff.  was the next I used, but it's not needed
 		show_filename = false, -- Takes up too much space, redundant
 		diagnostics = false, -- lualine actually already displays this information
-		kind_labels = lspkind.symbol_map,
+		kind_labels = require'lspkind'.symbol_map,
 	}
 	lsp_status.register_progress()
 end
 
 local function configuire_lspconfig()
 	local lspconfig=require'lspconfig'
-	local lsp_status = require'lsp-status'
 	local cmp_nvim_lsp = require'cmp_nvim_lsp'
+	local lsp_status = require'lsp-status'
 	local mason = require'mason'
 	local mason_lspconfig = require'mason-lspconfig'
 	local null_ls = require 'null-ls'
@@ -357,7 +354,6 @@ local function configure_lualine()
 	-- TODO local prepend_ln = function(str)
 	-- 	return " " .. str
 	-- end
-	local lsp_status = require'lsp-status'
 	local function lightline_visual_selection()
 		local mode = vim.fn.mode()
 		local lines = vim.fn.abs(vim.fn.line("v") - vim.fn.line(".")) + 1
@@ -391,7 +387,7 @@ local function configure_lualine()
 				function()
 					-- TODO get the exact components we wish the way we want to using
 					-- vim.g.lsp_function_name
-					return lsp_status.status()
+					return require'lsp-status'.status()
 				end
 			}
 		}
@@ -594,7 +590,8 @@ local lazy_plugins = {
 			vim.g.indentguides_concealcursor_unaltered = 'nonempty value'
 			--|‖⃒⃓⍿⎸⎹⁞⸾⼁︳︴｜¦❘❙❚⟊⟾⤠⟼
 			--|‖⃒⃓⍿⎸⎹⁞⸾⼁︳︴｜¦❘❙❚⟊⟾⤠⟼
-		end
+		end,
+		event = "BufEnter"
 	},
 	-- Super fancy coloring
 	{
@@ -617,9 +614,12 @@ local lazy_plugins = {
 
 	-- Git integration
 	--  Genral use
-	'tpope/vim-fugitive',
+	{
+		'tpope/vim-fugitive',
+		cmd = { "Git", "G" },
+	},
 	--  Line-per-line indicators and chunk selection
-	'airblade/vim-gitgutter', -- TODO gitsigns
+	{ 'airblade/vim-gitgutter', event = "BufEnter" }, -- TODO gitsigns
 	-- Nicer file management
 	'preservim/nerdtree',
 	'tiagofumo/vim-nerdtree-syntax-highlight',
@@ -627,10 +627,10 @@ local lazy_plugins = {
 	'Xuyuanp/nerdtree-git-plugin',
 
 	-- Icons
-	'ryanoasis/vim-devicons',
-	'kyazdani42/nvim-web-devicons',
+	{ 'ryanoasis/vim-devicons', lazy = true },
+	{ 'kyazdani42/nvim-web-devicons', lazy = true },
 	--  LSP breakdown icons and stuff
-	'onsails/lspkind-nvim',
+	{ 'onsails/lspkind-nvim', lazy = true },
 
 	--  This should work on all files (it's python support ain't great)
 	--Plug 'khzaw/vim-conceal'
@@ -649,17 +649,17 @@ local lazy_plugins = {
 	--  Start Screen
 	'mhinz/vim-startify',
 	-- common dependancies of many nvim plugins
-	'nvim-lua/plenary.nvim',
-	'jose-elias-alvarez/null-ls.nvim',
-	'jay-babu/mason-null-ls.nvim',
+	{ 'nvim-lua/plenary.nvim', lazy = true },
+	{ 'jose-elias-alvarez/null-ls.nvim', event = "BufEnter" },
+	{ 'jay-babu/mason-null-ls.nvim', event = "BufEnter" },
 	-- Interactive eval
 	-- use 'Olical/conjure' -- TODO configure this -- this might be a problem 987632498629765296987492
 
 	-- Specific file type compat
-	--  General stuff
-	'sheerun/vim-polyglot',
+	--  General stuff (syntax, etc)
+	{ 'sheerun/vim-polyglot', event = "BufEnter" },
 	--  Eww's configuration language, yuck
-	'elkowar/yuck.vim',
+	{ 'elkowar/yuck.vim', event = "BufEnter" },
 	--  Support editorconfig files
 	--   TODO configure
 	'editorconfig/editorconfig-vim',
@@ -677,39 +677,34 @@ local lazy_plugins = {
 			'mason-lspconfig.nvim',
 			'mason-null-ls.nvim',
 			'folding'
-		}
+		},
+		event = "BufEnter",
 	},
 	{
 		'nvim-lua/lsp-status.nvim',
 		config = configure_lsp_status,
-		module = 'lsp-status'
+		module = 'lsp-status',
+		event = "BufEnter",
+		lazy = true
 	},
 	-- Automate installing some language-servers
-	'williamboman/mason.nvim',
-	'williamboman/mason-lspconfig.nvim',
+	{ 'williamboman/mason.nvim', event = "BufEnter" },
+	{ 'williamboman/mason-lspconfig.nvim', event = "BufEnter" },
 	-- Update command for mason
 	--  https://github.com/RubixDev/mason-update-all#updating-from-cli
-	{
-		'RubixDev/mason-update-all',
-		config = function ()
-			require'mason-update-all'.setup()
-		end
-	},
+	{ 'RubixDev/mason-update-all', config = function () require'mason-update-all'.setup() end, event = "BufEnter" },
 	-- Better folding
 	'pierreglaser/folding-nvim',
 
 	-- Completion details (uses LSP)
-	'hrsh7th/cmp-nvim-lsp',
-	'hrsh7th/cmp-buffer',
-	'hrsh7th/cmp-path',
-	{
-		'hrsh7th/nvim-cmp',
-		config = configure_nvim_cmp,
-	},
+	{ 'hrsh7th/cmp-nvim-lsp', event = "VeryLazy" },
+	{ 'hrsh7th/cmp-buffer', event = "VeryLazy" },
+	{ 'hrsh7th/cmp-path', event = "VeryLazy" },
+	{ 'hrsh7th/nvim-cmp', config = configure_nvim_cmp, event = "VeryLazy" },
 	-- Lower the text sorting of completions starting with _
-	'lukas-reineke/cmp-under-comparator',
+	{ 'lukas-reineke/cmp-under-comparator', event = "VeryLazy" },
 	-- cmdline source
-	'hrsh7th/cmp-cmdline',
+	{ 'hrsh7th/cmp-cmdline', event = "VeryLazy" },
 	-- Snippet source. (There's others out there too)
 	{
 		'L3MON4D3/LuaSnip',
@@ -717,20 +712,22 @@ local lazy_plugins = {
 			-- Grab things from rafamadriz/friendly-snippets & etc.
 			require("luasnip.loaders.from_vscode").lazy_load()
 		end,
-		module = 'luasnip'
+		dependancies = "friendly-snippets",
+		lazy = true
 	},
-	'saadparwaiz1/cmp_luasnip',
+	{ 'saadparwaiz1/cmp_luasnip', event = "VeryLazy" },
 	--  Pre-configured snippits
-	'rafamadriz/friendly-snippets',
+	{ 'rafamadriz/friendly-snippets', lazy = true },
 	-- Git completion source
 	{
 		'petertriho/cmp-git',
 		config = function()
 			require"cmp_git".setup()
 		end,
-		-- TODO They don't even talk - this is just because I won't need cmp-git until
+		-- They don't even talk - this is just because I won't need cmp-git until
 		-- after interacting with fugitive anyway
-		--after = 'vim-fugitive'
+		--dependancies = 'vim-fugitive'
+		cmd = { "Git", "G" },
 	},
 	-- crates.io completion source
 	{
@@ -749,21 +746,21 @@ local lazy_plugins = {
 		event = "BufRead package.json"
 	},
 	-- latex symbol completion support (allows for inserting unicode)
-	'kdheepak/cmp-latex-symbols',
+	{ 'kdheepak/cmp-latex-symbols', event = "VeryLazy" },
 	-- Emoji completion support
-	'hrsh7th/cmp-emoji',
+	{ 'hrsh7th/cmp-emoji', event = "VeryLazy" },
 	-- Pandoc completion
-	'jc-doyle/cmp-pandoc-references',
+	{ 'jc-doyle/cmp-pandoc-references', event = "VeryLazy" },
 	-- cmdline history completion
 	--Plug 'dmitmel/cmp-cmdline-history'
 	-- Fish completion
-	'mtoohey31/cmp-fish',
+	{ 'mtoohey31/cmp-fish', event = "VeryLazy" },
 	-- conjure intractive eval completion
 	--use 'PaterJason/cmp-conjure' -- TODO add this to cmp -- this might be a problem 987632498629765296987492
 	-- Use LSP symbols for buffer-style search
-	'hrsh7th/cmp-nvim-lsp-document-symbol',
+	{ 'hrsh7th/cmp-nvim-lsp-document-symbol', event = "VeryLazy" },
 	-- Completion on the vim.lsp apis
-	'hrsh7th/cmp-nvim-lua',
+	{ 'hrsh7th/cmp-nvim-lua', event = "VeryLazy" },
 	-- Use /usr/share/dict/words for completion
 	{
 		'uga-rosa/cmp-dictionary',
@@ -774,7 +771,8 @@ local lazy_plugins = {
 				}
 			}
 		end,
-		-- TODO opt = true -- TODO load in later when cmp runs
+		event = "VeryLazy",
+		lazy = true -- TODO load in later when cmp runs
 	},
 }
 require("lazy").setup(lazy_plugins, lazy_config)
