@@ -583,6 +583,7 @@ local lazy_plugins = {
 	-- }
 	-- Indent lines
 	{
+		-- TODO not maintained
 		'thaerkh/vim-indentguides',
 		config = function ()
 			vim.g.indentguides_spacechar = '⍿'
@@ -616,19 +617,19 @@ local lazy_plugins = {
 	--  Genral use
 	{
 		'tpope/vim-fugitive',
-		cmd = { "Git", "G" },
+		event = "VeryLazy",
 	},
 	--  Line-per-line indicators and chunk selection
 	{ 'airblade/vim-gitgutter', event = "BufEnter" }, -- TODO gitsigns
 	-- Nicer file management
 	'preservim/nerdtree',
-	'tiagofumo/vim-nerdtree-syntax-highlight',
+	{ 'tiagofumo/vim-nerdtree-syntax-highlight', event = "BufEnter" },
 	--Plug 'jistr/vim-nerdtree-tabs'
-	'Xuyuanp/nerdtree-git-plugin',
+	{ 'Xuyuanp/nerdtree-git-plugin', event = "BufEnter" }, -- TODO not maintained
 
 	-- Icons
 	{ 'ryanoasis/vim-devicons', lazy = true },
-	{ 'kyazdani42/nvim-web-devicons', lazy = true },
+	{ 'nvim-tree/nvim-web-devicons', lazy = true },
 	--  LSP breakdown icons and stuff
 	{ 'onsails/lspkind-nvim', lazy = true },
 
@@ -638,7 +639,10 @@ local lazy_plugins = {
 	--Plug 'Lazerbeak12345/vim-conceal' " This is my blend of a bunch of stuff (my
 	--    fork of above)
 	-- Ease of use
-	'vimlab/split-term.vim',
+	{
+		'vimlab/split-term.vim',
+		cmd = { "Term", "VTerm", "TTerm" }
+	},
 	{
 		'airblade/vim-rooter',
 		config = function ()
@@ -713,38 +717,18 @@ local lazy_plugins = {
 			require("luasnip.loaders.from_vscode").lazy_load()
 		end,
 		dependancies = "friendly-snippets",
-		lazy = true
+		event = "VeryLazy"
 	},
 	{ 'saadparwaiz1/cmp_luasnip', event = "VeryLazy" },
 	--  Pre-configured snippits
-	{ 'rafamadriz/friendly-snippets', lazy = true },
+	--    TODO bug with Lazy: lazy library dependancies aren't loaded if depended upon by an event-type-lazy
+	{ 'rafamadriz/friendly-snippets', event = "VeryLazy" },
 	-- Git completion source
-	{
-		'petertriho/cmp-git',
-		config = function()
-			require"cmp_git".setup()
-		end,
-		-- They don't even talk - this is just because I won't need cmp-git until
-		-- after interacting with fugitive anyway
-		--dependancies = 'vim-fugitive'
-		cmd = { "Git", "G" },
-	},
+	{ 'petertriho/cmp-git', config = function() require"cmp_git".setup() end, event = "VeryLazy" },
 	-- crates.io completion source
-	{
-		'saecki/crates.nvim',
-		config = function()
-			require'crates'.setup()
-		end,
-		event = "BufRead Cargo.toml"
-	},
+	{ 'saecki/crates.nvim', config = function() require'crates'.setup() end, event = "BufRead Cargo.toml" },
 	-- package.json completion source
-	{
-		'David-Kunz/cmp-npm',
-		config = function()
-			require'cmp-npm'.setup{}
-		end,
-		event = "BufRead package.json"
-	},
+	{ 'David-Kunz/cmp-npm', config = function() require'cmp-npm'.setup{} end, event = "BufRead package.json" },
 	-- latex symbol completion support (allows for inserting unicode)
 	{ 'kdheepak/cmp-latex-symbols', event = "VeryLazy" },
 	-- Emoji completion support
@@ -771,8 +755,7 @@ local lazy_plugins = {
 				}
 			}
 		end,
-		event = "VeryLazy",
-		lazy = true -- TODO load in later when cmp runs
+		event = "VeryLazy"
 	},
 }
 require("lazy").setup(lazy_plugins, lazy_config)
