@@ -403,16 +403,12 @@ do -- Keymaps and the like
 	vim.g.vimsyn_embed = 'l'
 
 	-- Inline diagnostic alerts
-	vim.diagnostic.config{
-		severity_sort = true,
-		virtual_text = {
-			prefix = '🛈 '
-		}
-	}
+	vim.diagnostic.config{ severity_sort = true, virtual_text = { prefix = '🛈 ' } }
 
 	-- see the docstrings for folded code
 	vim.g.SimpylFold_docstring_preview = 1
 
+	-- TODO not needed anymore, there's an arg in vim.keymap.set for this
 	local function t(str)
 		return vim.api.nvim_replace_termcodes(str, true, true, true)
 	end
@@ -437,12 +433,11 @@ do -- Keymaps and the like
 
 	-- Map <Esc> to exit terminal-mode (stolen from nvim's :help terminal-input then modified for lua)
 	vim.keymap.set('t', '<Esc>', '<C-\\><C-n>')
+	-- Make it a tad easier to change the terminal back to a buffer
+	vim.keymap.set('', '<Leader>]', '<C-\\><C-n>')
 
 	-- Keyboard shortcut to open nerd tree via currently disabled mod
 	--vim.keymap.set('', '<Leader>n', '<Plug>NERDTreeTabsToggle<CR>')
-
-	-- Make it a tad easier to change the terminal back to a buffer
-	vim.keymap.set('', '<Leader>]', '<C-\\><C-n>')
 
 	-- Reccomended keymaps from nvim-lspconfig
 	-- https://github.com/neovim/nvim-lspconfig#suggested-configuration
@@ -623,9 +618,9 @@ local lazy_plugins = {
 	{ 'airblade/vim-gitgutter', event = "BufEnter" }, -- TODO gitsigns
 	-- Nicer file management
 	'preservim/nerdtree',
-	{ 'tiagofumo/vim-nerdtree-syntax-highlight', event = "BufEnter" },
+	'tiagofumo/vim-nerdtree-syntax-highlight',
 	--Plug 'jistr/vim-nerdtree-tabs'
-	{ 'Xuyuanp/nerdtree-git-plugin', event = "BufEnter" }, -- TODO not maintained
+	'Xuyuanp/nerdtree-git-plugin', -- TODO not maintained
 
 	-- Icons
 	{ 'ryanoasis/vim-devicons', lazy = true },
@@ -724,7 +719,12 @@ local lazy_plugins = {
 	--    TODO bug with Lazy: lazy library dependancies aren't loaded if depended upon by an event-type-lazy
 	{ 'rafamadriz/friendly-snippets', event = "VeryLazy" },
 	-- Git completion source
-	{ 'petertriho/cmp-git', config = function() require"cmp_git".setup() end, event = "VeryLazy" },
+	{
+		'petertriho/cmp-git',
+		config = function() require"cmp_git".setup() end,
+		event = "VeryLazy",
+		dependancies = "nvim-cmp"
+	},
 	-- crates.io completion source
 	{ 'saecki/crates.nvim', config = function() require'crates'.setup() end, event = "BufRead Cargo.toml" },
 	-- package.json completion source
