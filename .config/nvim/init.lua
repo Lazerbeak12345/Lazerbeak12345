@@ -340,14 +340,6 @@ local function configuire_lspconfig()
 	}
 end
 
-local function configure_tabline()
-	require'tabline'.setup {
-		options = {
-			show_tabs_only = true,
-		}
-	}
-end
-
 local function configure_lualine()
 	--                                   █ 🙽 🙼 🙿   🙾
 	-- TODO replace mode
@@ -564,7 +556,13 @@ local lazy_plugins = {
 	--[[{
 		'kdheepak/tabline.nvim',
 		-- disable = true, -- TODO Buggy: Tabs are per window when windows should be per tab.
-		config = configure_tabline,
+		config = function ()
+			require'tabline'.setup {
+				options = {
+					show_tabs_only = true,
+				}
+			}
+		end
 	},]]
 	-- The looks of Powerline, but faster
 	-- use{
@@ -610,20 +608,19 @@ local lazy_plugins = {
 
 	-- Git integration
 	--  Genral use
-	{
-		'tpope/vim-fugitive',
-		event = "VeryLazy",
-	},
+	'tpope/vim-fugitive',
 	--  Line-per-line indicators and chunk selection
 	{ 'airblade/vim-gitgutter', event = "BufEnter" }, -- TODO gitsigns
 	-- Nicer file management
 	'preservim/nerdtree',
 	'tiagofumo/vim-nerdtree-syntax-highlight',
 	--Plug 'jistr/vim-nerdtree-tabs'
-	'Xuyuanp/nerdtree-git-plugin', -- TODO not maintained
+	{ 'Xuyuanp/nerdtree-git-plugin', dependancies = 'nerdtree' }, -- TODO not maintained
 
 	-- Icons
-	{ 'ryanoasis/vim-devicons', lazy = true },
+	--   TODO find alternative that adds the icons to each of these dependancies
+	{ 'ryanoasis/vim-devicons', dependancies = { 'nerdtree', 'vim-startify' } },
+	--  An incompatible fork of the above.
 	{ 'nvim-tree/nvim-web-devicons', lazy = true },
 	--  LSP breakdown icons and stuff
 	{ 'onsails/lspkind-nvim', lazy = true },
@@ -634,10 +631,7 @@ local lazy_plugins = {
 	--Plug 'Lazerbeak12345/vim-conceal' " This is my blend of a bunch of stuff (my
 	--    fork of above)
 	-- Ease of use
-	{
-		'vimlab/split-term.vim',
-		cmd = { "Term", "VTerm", "TTerm" }
-	},
+	{ 'vimlab/split-term.vim', cmd = { "Term", "VTerm", "TTerm" } },
 	{
 		'airblade/vim-rooter',
 		config = function ()
