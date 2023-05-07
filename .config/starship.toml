@@ -28,15 +28,15 @@ format = "$symbol [${ram}( ⮀  ${swap})]($style) "
 disabled = false
 [shell]
 disabled = false
-bash_indicator = "🐚🐚"
+bash_indicator = ""
 fish_indicator = "🐟"
 zsh_indicator = "Z🐚"
-powershell_indicator = "ﲵ"
-ion_indicator = "⚛ "
+powershell_indicator = ""
+ion_indicator = "⚛🐚"
 elvish_indicator = "λ"
 tcsh_indicator = "🐚"
 xonsh_indicator = "X🐚"
-cmd_indicator = "ﲵ"
+cmd_indicator = ""
 nu_indicator = ">🐚"
 unknown_indicator = "🐚?"
 [shlvl]
