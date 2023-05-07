@@ -535,11 +535,7 @@ do -- Keymaps and the like
 end
 
 local lazy_config = {
-	profile = {
-		enable = true,
-		-- Amount of load time for plugin to be included in profile
-		threshold = 0,
-	}
+	lazy = true
 }
 
 local lazy_plugins = {
@@ -549,10 +545,7 @@ local lazy_plugins = {
 	-- - Powerline
 	-- - Airline
 	-- - And the well-known, formerly first-place Lightline
-	{
-		'nvim-lualine/lualine.nvim',
-		config = configure_lualine
-	},
+	{ 'nvim-lualine/lualine.nvim', config = configure_lualine },
 	--[[{
 		'kdheepak/tabline.nvim',
 		-- disable = true, -- TODO Buggy: Tabs are per window when windows should be per tab.
@@ -612,18 +605,18 @@ local lazy_plugins = {
 	--  Line-per-line indicators and chunk selection
 	{ 'airblade/vim-gitgutter', event = "BufEnter" }, -- TODO gitsigns
 	-- Nicer file management
-	'preservim/nerdtree',
-	'tiagofumo/vim-nerdtree-syntax-highlight',
+	{ 'preservim/nerdtree', lazy = false },
+	{ 'tiagofumo/vim-nerdtree-syntax-highlight', lazy = false },
 	--Plug 'jistr/vim-nerdtree-tabs'
 	{ 'Xuyuanp/nerdtree-git-plugin', dependancies = 'nerdtree' }, -- TODO not maintained
 
 	-- Icons
 	--   TODO find alternative that adds the icons to each of these dependancies
-	{ 'ryanoasis/vim-devicons', dependancies = { 'nerdtree', 'vim-startify' } },
+	{ 'ryanoasis/vim-devicons', dependancies = { 'nerdtree', 'vim-startify' }, lazy = false },
 	--  An incompatible fork of the above.
-	{ 'nvim-tree/nvim-web-devicons', lazy = true },
+	'nvim-tree/nvim-web-devicons',
 	--  LSP breakdown icons and stuff
-	{ 'onsails/lspkind-nvim', lazy = true },
+	'onsails/lspkind-nvim',
 
 	--  This should work on all files (it's python support ain't great)
 	--Plug 'khzaw/vim-conceal'
@@ -642,7 +635,7 @@ local lazy_plugins = {
 	--  Start Screen
 	'mhinz/vim-startify',
 	-- common dependancies of many nvim plugins
-	{ 'nvim-lua/plenary.nvim', lazy = true },
+	'nvim-lua/plenary.nvim',
 	{ 'jose-elias-alvarez/null-ls.nvim', event = "BufEnter" },
 	{ 'jay-babu/mason-null-ls.nvim', event = "BufEnter" },
 	-- Interactive eval
@@ -677,8 +670,7 @@ local lazy_plugins = {
 		'nvim-lua/lsp-status.nvim',
 		config = configure_lsp_status,
 		module = 'lsp-status',
-		event = "BufEnter",
-		lazy = true
+		event = "BufEnter"
 	},
 	-- Automate installing some language-servers
 	{ 'williamboman/mason.nvim', event = "BufEnter" },
