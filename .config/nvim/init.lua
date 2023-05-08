@@ -534,9 +534,7 @@ do -- Keymaps and the like
 	--vim.api.nvim_set_hl(0, "Pmenu", {})
 end
 
-local lazy_config = {
-	lazy = true
-}
+local lazy_config = { defaults = { lazy = true } }
 
 local lazy_plugins = {
 	-- Commenting
@@ -545,7 +543,7 @@ local lazy_plugins = {
 	-- - Powerline
 	-- - Airline
 	-- - And the well-known, formerly first-place Lightline
-	{ 'nvim-lualine/lualine.nvim', config = configure_lualine },
+	{ 'nvim-lualine/lualine.nvim', config = configure_lualine, lazy = false },
 	--[[{
 		'kdheepak/tabline.nvim',
 		-- disable = true, -- TODO Buggy: Tabs are per window when windows should be per tab.
@@ -596,19 +594,20 @@ local lazy_plugins = {
 					end
 				})
 			end
-		end
+		end,
+		lazy = false
 	},
 
 	-- Git integration
 	--  Genral use
-	'tpope/vim-fugitive',
+	{ 'tpope/vim-fugitive', event = "VeryLazy" },
 	--  Line-per-line indicators and chunk selection
 	{ 'airblade/vim-gitgutter', event = "BufEnter" }, -- TODO gitsigns
 	-- Nicer file management
 	{ 'preservim/nerdtree', lazy = false },
 	{ 'tiagofumo/vim-nerdtree-syntax-highlight', lazy = false },
 	--Plug 'jistr/vim-nerdtree-tabs'
-	{ 'Xuyuanp/nerdtree-git-plugin', dependencies = 'nerdtree' }, -- TODO not maintained
+	{ 'Xuyuanp/nerdtree-git-plugin', lazy = false }, -- TODO not maintained
 
 	-- Icons
 	--   TODO find alternative that adds the icons to each of these dependencies
@@ -630,14 +629,15 @@ local lazy_plugins = {
 		config = function ()
 			vim.g.rooter_change_directory_for_non_project_files = 'current'
 			-- vim.g.rooter_patterns = ['.git', 'mod.conf', 'modpack.conf','game.conf','texture_pack.conf']
-		end
+		end,
+		event = "VeryLazy"
 	},
 	--  Start Screen
 	'mhinz/vim-startify',
 	-- common dependencie of many nvim plugins
 	'nvim-lua/plenary.nvim',
-	{ 'jose-elias-alvarez/null-ls.nvim', event = "BufEnter" },
-	{ 'jay-babu/mason-null-ls.nvim', event = "BufEnter" },
+	{ 'jose-elias-alvarez/null-ls.nvim', event = "VeryLazy" },
+	{ 'jay-babu/mason-null-ls.nvim', event = "VeryLazy" },
 	-- Interactive eval
 	-- use 'Olical/conjure' -- TODO configure this -- this might be a problem 987632498629765296987492
 
@@ -648,7 +648,7 @@ local lazy_plugins = {
 	{ 'elkowar/yuck.vim', event = "BufEnter" },
 	--  Support editorconfig files
 	--   TODO configure
-	'editorconfig/editorconfig-vim',
+	--'editorconfig/editorconfig-vim',
 
 	-- Language-server protocol
 	-- Must be after language specific things
@@ -664,17 +664,17 @@ local lazy_plugins = {
 			'mason-null-ls.nvim',
 			'folding'
 		},
-		event = "BufEnter",
+		event = "VeryLazy",
 	},
 	{
 		'nvim-lua/lsp-status.nvim',
 		config = configure_lsp_status,
 		module = 'lsp-status',
-		event = "BufEnter"
+		dependencies = "lualine.nvim"
 	},
 	-- Automate installing some language-servers
-	{ 'williamboman/mason.nvim', event = "BufEnter" },
-	{ 'williamboman/mason-lspconfig.nvim', event = "BufEnter" },
+	{ 'williamboman/mason.nvim', event = "VeryLazy" },
+	{ 'williamboman/mason-lspconfig.nvim', event = "VeryLazy" },
 	-- Update command for mason
 	--  https://github.com/RubixDev/mason-update-all#updating-from-cli
 	{ 'RubixDev/mason-update-all', config = function () require'mason-update-all'.setup() end, event = "BufEnter" },
@@ -682,14 +682,34 @@ local lazy_plugins = {
 	'pierreglaser/folding-nvim',
 
 	-- Completion details (uses LSP)
-	{ 'hrsh7th/cmp-nvim-lsp', event = "VeryLazy" },
-	{ 'hrsh7th/cmp-buffer', event = "VeryLazy" },
-	{ 'hrsh7th/cmp-path', event = "VeryLazy" },
-	{ 'hrsh7th/nvim-cmp', config = configure_nvim_cmp, event = "VeryLazy" },
+	{ 'hrsh7th/cmp-nvim-lsp', dependencies  = "nvim-cmp" },
+	'hrsh7th/cmp-buffer',
+	'hrsh7th/cmp-path',
+	{
+		'hrsh7th/nvim-cmp',
+		config = configure_nvim_cmp,
+		dependencies  = {
+			'cmp-nvim-lua',
+			'cmp-nvim-lsp-document-symbol',
+			'cmp_luasnip',
+			'LuaSnip',
+			'cmp-under-comparator',
+			'cmp-path',
+			'cmp-pandoc-references',
+			'cmp-latex-symbols',
+			'cmp-git',
+			'cmp-fish',
+			'cmp-emoji',
+			'cmp-dictionary',
+			'cmp-buffer',
+			'cmp-cmdline',
+			'cmp-dictionary'
+		}
+	},
 	-- Lower the text sorting of completions starting with _
-	{ 'lukas-reineke/cmp-under-comparator', event = "VeryLazy" },
+	'lukas-reineke/cmp-under-comparator',
 	-- cmdline source
-	{ 'hrsh7th/cmp-cmdline', event = "VeryLazy" },
+	'hrsh7th/cmp-cmdline',
 	-- Snippet source. (There's others out there too)
 	{
 		'L3MON4D3/LuaSnip',
@@ -697,18 +717,15 @@ local lazy_plugins = {
 			-- Grab things from rafamadriz/friendly-snippets & etc.
 			require("luasnip.loaders.from_vscode").lazy_load()
 		end,
-		dependencies = "friendly-snippets",
-		event = "VeryLazy"
+		dependencies = "friendly-snippets"
 	},
-	{ 'saadparwaiz1/cmp_luasnip', event = "VeryLazy" },
+	'saadparwaiz1/cmp_luasnip',
 	--  Pre-configured snippits
-	--    TODO bug with Lazy: lazy library dependencies aren't loaded if depended upon by an event-type-lazy
-	{ 'rafamadriz/friendly-snippets', event = "VeryLazy" },
+	'rafamadriz/friendly-snippets',
 	-- Git completion source
 	{
 		'petertriho/cmp-git',
 		config = function() require"cmp_git".setup() end,
-		event = "VeryLazy",
 		dependencies = "nvim-cmp"
 	},
 	-- crates.io completion source
@@ -716,21 +733,21 @@ local lazy_plugins = {
 	-- package.json completion source
 	{ 'David-Kunz/cmp-npm', config = function() require'cmp-npm'.setup{} end, event = "BufRead package.json" },
 	-- latex symbol completion support (allows for inserting unicode)
-	{ 'kdheepak/cmp-latex-symbols', event = "VeryLazy" },
+	'kdheepak/cmp-latex-symbols',
 	-- Emoji completion support
-	{ 'hrsh7th/cmp-emoji', event = "VeryLazy" },
+	'hrsh7th/cmp-emoji',
 	-- Pandoc completion
-	{ 'jc-doyle/cmp-pandoc-references', event = "VeryLazy" },
+	'jc-doyle/cmp-pandoc-references',
 	-- cmdline history completion
 	--Plug 'dmitmel/cmp-cmdline-history'
 	-- Fish completion
-	{ 'mtoohey31/cmp-fish', event = "VeryLazy" },
+	'mtoohey31/cmp-fish',
 	-- conjure intractive eval completion
 	--use 'PaterJason/cmp-conjure' -- TODO add this to cmp -- this might be a problem 987632498629765296987492
 	-- Use LSP symbols for buffer-style search
-	{ 'hrsh7th/cmp-nvim-lsp-document-symbol', event = "VeryLazy" },
+	'hrsh7th/cmp-nvim-lsp-document-symbol',
 	-- Completion on the vim.lsp apis
-	{ 'hrsh7th/cmp-nvim-lua', event = "VeryLazy" },
+	'hrsh7th/cmp-nvim-lua',
 	-- Use /usr/share/dict/words for completion
 	{
 		'uga-rosa/cmp-dictionary',
@@ -741,7 +758,7 @@ local lazy_plugins = {
 				}
 			}
 		end,
-		event = "VeryLazy"
+		-- event = "VeryLazy"
 	},
 }
 require("lazy").setup(lazy_plugins, lazy_config)
