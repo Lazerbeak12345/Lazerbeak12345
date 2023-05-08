@@ -608,11 +608,11 @@ local lazy_plugins = {
 	{ 'preservim/nerdtree', lazy = false },
 	{ 'tiagofumo/vim-nerdtree-syntax-highlight', lazy = false },
 	--Plug 'jistr/vim-nerdtree-tabs'
-	{ 'Xuyuanp/nerdtree-git-plugin', dependancies = 'nerdtree' }, -- TODO not maintained
+	{ 'Xuyuanp/nerdtree-git-plugin', dependencies = 'nerdtree' }, -- TODO not maintained
 
 	-- Icons
-	--   TODO find alternative that adds the icons to each of these dependancies
-	{ 'ryanoasis/vim-devicons', dependancies = { 'nerdtree', 'vim-startify' }, lazy = false },
+	--   TODO find alternative that adds the icons to each of these dependencies
+	{ 'ryanoasis/vim-devicons', dependencies = { 'nerdtree', 'vim-startify' }, lazy = false },
 	--  An incompatible fork of the above.
 	'nvim-tree/nvim-web-devicons',
 	--  LSP breakdown icons and stuff
@@ -634,7 +634,7 @@ local lazy_plugins = {
 	},
 	--  Start Screen
 	'mhinz/vim-startify',
-	-- common dependancies of many nvim plugins
+	-- common dependencie of many nvim plugins
 	'nvim-lua/plenary.nvim',
 	{ 'jose-elias-alvarez/null-ls.nvim', event = "BufEnter" },
 	{ 'jay-babu/mason-null-ls.nvim', event = "BufEnter" },
@@ -697,19 +697,19 @@ local lazy_plugins = {
 			-- Grab things from rafamadriz/friendly-snippets & etc.
 			require("luasnip.loaders.from_vscode").lazy_load()
 		end,
-		dependancies = "friendly-snippets",
+		dependencies = "friendly-snippets",
 		event = "VeryLazy"
 	},
 	{ 'saadparwaiz1/cmp_luasnip', event = "VeryLazy" },
 	--  Pre-configured snippits
-	--    TODO bug with Lazy: lazy library dependancies aren't loaded if depended upon by an event-type-lazy
+	--    TODO bug with Lazy: lazy library dependencies aren't loaded if depended upon by an event-type-lazy
 	{ 'rafamadriz/friendly-snippets', event = "VeryLazy" },
 	-- Git completion source
 	{
 		'petertriho/cmp-git',
 		config = function() require"cmp_git".setup() end,
 		event = "VeryLazy",
-		dependancies = "nvim-cmp"
+		dependencies = "nvim-cmp"
 	},
 	-- crates.io completion source
 	{ 'saecki/crates.nvim', config = function() require'crates'.setup() end, event = "BufRead Cargo.toml" },
