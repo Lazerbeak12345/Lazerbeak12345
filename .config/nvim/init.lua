@@ -10,6 +10,15 @@ if not vim.loop.fs_stat(lazypath) then
     "--branch=stable", -- latest stable release
     lazypath,
   })
+  local sitepath = vim.fn.stdpath("data") .. "/site"
+  local packer_compiled = vim.fn.stdpath("config") .. "/plugin/packer_compiled.lua"
+  local packer_install_path = sitepath .. "../pack/packer/start/packer.nvim"
+  if vim.loop.fs_stat(sitepath) and vim.loop.fs_stat(packer_compiled) and vim.loop.fs_stat(packer_install_path) then
+	  print("Migrating from packer...")
+	  vim.cmd.sleep()
+	  vim.fn.delete(sitepath)
+	  vim.fn.delete(packer_compiled)
+  end
 end
 vim.opt.rtp:prepend(lazypath)
 
@@ -232,12 +241,13 @@ local function configuire_lspconfig()
 	-- Installed manually in system.
 	lspconfig.racket_langserver.setup(default_args)
 	lspconfig.clangd.setup(default_args) -- Takes custom args too
+	-- TODO lsp-status has custom support for clangd and pyls_ms
 	-- Installed through mason
 	mason.setup{
 		ui = {
 			icons = {
 				package_installed = "✓",
-				package_pending = "➜",
+				package_pending = "➜", -- TODO? ⟳
 				package_uninstalled = "✗"
 			}
 		}
@@ -322,7 +332,7 @@ local function configuire_lspconfig()
 			"html",
 			"jsonls",
 			"tsserver",
-			"lua_ls", -- This is sumneko_lua. Not my favorite.
+			"lua_ls", -- This is sumneko_lua. Not my favorite. TODO needs to know the root dir for nvim/init.lua
 			"jedi_language_server", -- For python. LOTS of alternatives.
 			"rust_analyzer", -- TODO does this use the correct version of rust?
 			"svelte",
@@ -330,6 +340,7 @@ local function configuire_lspconfig()
 			"vimls",
 		}
 	}
+	-- TODO inline into above (key "handlers")
 	mason_lspconfig.setup_handlers {
 		function (server_name) -- default handler (optional)
 			lspconfig[server_name].setup(default_args)
@@ -376,11 +387,11 @@ local function configure_lualine()
 			lualine_c = {
 				'filename',
 				lightline_visual_selection,
-				function()
-					-- TODO get the exact components we wish the way we want to using
-					-- vim.g.lsp_function_name
-					return require'lsp-status'.status()
-				end
+				require'lsp-status'.status,
+				{
+					require'lazy.status'.updates,
+					cond = require'lazy.status'.has_updates
+				}
 			}
 		}
 	}
@@ -603,7 +614,7 @@ local lazy_plugins = {
 	{ 'tpope/vim-fugitive', event = "VeryLazy" },
 	--  Line-per-line indicators and chunk selection
 	{ 'airblade/vim-gitgutter', event = "BufEnter" }, -- TODO gitsigns
-	-- Nicer file management
+	-- Nicer file management TODO very slow. loads of *tree* replacements
 	{ 'preservim/nerdtree', lazy = false },
 	{ 'tiagofumo/vim-nerdtree-syntax-highlight', lazy = false },
 	--Plug 'jistr/vim-nerdtree-tabs'
