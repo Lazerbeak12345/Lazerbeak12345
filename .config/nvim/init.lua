@@ -37,7 +37,6 @@ local function configure_nvim_cmp()
 	local cmp = require'cmp'
 	local cmp_under_comparator = require"cmp-under-comparator"
 	--[[local function has_words_before()
-		-- TODO use this approch for line & col elsewhere
 		local line, col = unpack(vim.api.nvim_win_get_cursor(0))
 		return col ~= 0 and vim.api.nvim_buf_get_lines(0, line - 1, line, true)[1]:sub(col, col):match("%s") == nil
 	end]]
@@ -241,7 +240,7 @@ local function configuire_lspconfig()
 	-- Installed manually in system.
 	lspconfig.racket_langserver.setup(default_args)
 	lspconfig.clangd.setup(default_args) -- Takes custom args too
-	-- TODO lsp-status has custom support for clangd and pyls_ms
+	-- TODO lsp-status has custom support for clangd
 	-- Installed through mason
 	mason.setup{
 		ui = {
@@ -333,21 +332,21 @@ local function configuire_lspconfig()
 			"jsonls",
 			"tsserver",
 			"lua_ls", -- This is sumneko_lua. Not my favorite. TODO needs to know the root dir for nvim/init.lua
+			-- TODO lsp-status has custom support for pyls_ms
 			"jedi_language_server", -- For python. LOTS of alternatives.
 			"rust_analyzer", -- TODO does this use the correct version of rust?
 			"svelte",
 			"taplo", -- For TOML
 			"vimls",
+		},
+		handlers = {
+			function (server_name) -- default handler (optional)
+				lspconfig[server_name].setup(default_args)
+			end,
+			--["rust_analyzer"] = function ()
+			--	require("rust-tools").setup {}
+			--end
 		}
-	}
-	-- TODO inline into above (key "handlers")
-	mason_lspconfig.setup_handlers {
-		function (server_name) -- default handler (optional)
-			lspconfig[server_name].setup(default_args)
-		end,
-		--["rust_analyzer"] = function ()
-		--	require("rust-tools").setup {}
-		--end
 	}
 end
 
@@ -411,20 +410,15 @@ do -- Keymaps and the like
 	-- see the docstrings for folded code
 	vim.g.SimpylFold_docstring_preview = 1
 
-	-- TODO not needed anymore, there's an arg in vim.keymap.set for this
-	local function t(str)
-		return vim.api.nvim_replace_termcodes(str, true, true, true)
-	end
-
-	--TODO chance of race conditions. Also, I can't type tab anymore.
+	--TODO chance of race conditions.
 	vim.keymap.set('i', '<Tab>', function ()
 		local luasnip = require'luasnip'
-		return luasnip.expand_or_jumpable() and luasnip.expand_or_jump() or t'<Tab>'
-	end)
+		return luasnip.expand_or_jumpable() and luasnip.expand_or_jump() or '<Tab>'
+	end, { expr = true})
 	vim.keymap.set('i', '<S-Tab>', function ()
 		local luasnip = require'luasnip'
-		return luasnip.jumpable(-1) and luasnip.jump(-1) or t'<S-Tab>'
-	end)
+		return luasnip.jumpable(-1) and luasnip.jump(-1) or '<S-Tab>'
+	end, { expr = true})
 
 	--vim.keymap.set('n', '<Leader>d', vim.diagnostic.goto_next)
 
@@ -495,13 +489,6 @@ do -- Keymaps and the like
 	--enable syntax highlighting (optimised for dark backgrounds)
 	--vim.o.background='dark'
 
-	-- TODO broken
-	-- Always underline the current line
-	-- change cursor on insert mode. doesn't always work
-	-- below two lines no longer work in konsole
-	--vim.o.t_SI = "\\e[3 q" -- insert
-	--vim.o.t_EI = "\\e[1 q" -- command
-
 	-- I needed a ruby nvim plugin awhile back. This fixes it.
 	vim.g.ruby_host_prog = '~/.bin/neovim-ruby-host'
 
@@ -527,12 +514,6 @@ do -- Keymaps and the like
 			vim.o.lisp = true
 		end
 	})
-	--[[ Highlight bad whitespace
-	vim.api.nvim_create_autocmd({"BufRead","BufNewFile"},{
-		pattern = {"*.py","*.pyw","*.c","*.h","*.js","*.ts","*.html","*.htm",".vimrc","*.vim"},
-		-- TODO convert this
-		command = "match BadWhitespace /\s\+$/"
-	})]]
 	-- Disable numbers on terminal only.
 	vim.api.nvim_create_autocmd({ "TermOpen" }, {
 		pattern = "*",
@@ -616,14 +597,20 @@ local lazy_plugins = {
 	--  Line-per-line indicators and chunk selection
 	{ 'airblade/vim-gitgutter', event = "BufEnter" }, -- TODO gitsigns
 	-- Nicer file management TODO very slow. loads of *tree* replacements
-	{ 'preservim/nerdtree', lazy = false },
-	{ 'tiagofumo/vim-nerdtree-syntax-highlight', lazy = false },
+	--   Can be replaced with (in no particular order, not including everything)
+	--   - nvim-neo-tree/neo-tree.nvim
+	--   - nvim-tree/nvim-tree.lua
+	--   - nvim-treesitter/nvim-treesitter
+	--   - Xuyuanp/yanil
+	--   - vimfiler
+	'preservim/nerdtree',
+	{ 'tiagofumo/vim-nerdtree-syntax-highlight', lazy = false, dependencies = 'nerdtree' },
 	--Plug 'jistr/vim-nerdtree-tabs'
-	{ 'Xuyuanp/nerdtree-git-plugin', lazy = false }, -- TODO not maintained
+	{ 'Xuyuanp/nerdtree-git-plugin', dependencies = 'nerdtree' }, -- TODO not maintained
 
 	-- Icons
 	--   TODO find alternative that adds the icons to each of these dependencies
-	{ 'ryanoasis/vim-devicons', dependencies = { 'nerdtree', 'vim-startify' }, lazy = false },
+	{ 'ryanoasis/vim-devicons', dependencies = { 'nerdtree', 'vim-startify', 'nerdtree-git-plugin' }, lazy = false },
 	--  An incompatible fork of the above.
 	'nvim-tree/nvim-web-devicons',
 	--  LSP breakdown icons and stuff
