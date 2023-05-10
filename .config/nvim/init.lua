@@ -591,6 +591,7 @@ local lazy_plugins = {
 	},
 	-- Super fancy coloring
 	{
+		-- TODO pick better one
 		'RRethy/nvim-base16',
 		config = function ()
 			vim.cmd.colorscheme'base16-default-dark'
