@@ -58,35 +58,30 @@ local function configure_nvim_cmp()
 				i = mapping.abort(),
 				c = mapping.close(),
 			},
-			['<Tab>'] = mapping.confirm{ select = true },
-			-- TODO better (non race condition) way of doing the tabs. (see the other
-			--  place below that luasnip is used in the context of a keymap
 			-- https://github.com/hrsh7th/nvim-cmp/wiki/Example-mappings#luasnip
-			--[[['<Tab>'] = cmp.mapping(function (fallback)
+			['<Tab>'] = cmp.mapping(function (fallback)
 				if cmp.visible() then
-					print"tabbed! cmp visible"
-					--cmp.mapping.select_next_item()
-					cmp.mapping.confirm{ select = true }
-				elseif luasnip.expand_or_jumpable() then
-					print"tabbed! luasnip expand or jumpable"
-					luasnip.expand_or_jump()
-				elseif has_words_before() then
-					print"tabbed! has words before"
-					cmp.mapping.complete()
+					cmp.confirm{ select = true }
+				elseif require'luasnip'.expand_or_jumpable() then
+					require'luasnip'.expand_or_jump()
+				-- TODO there's currently no way to tell if there's even a possible completion here. If there is, we should use
+				--  that, and use the fallback otherwise. See https://github.com/hrsh7th/nvim-cmp/issues/602
+				--elseif has_words_before() then
+				--	print"tabbed! has words before"
+				--	cmp.mapping.complete()
 				else
-					print"tabbed! fallback"
 					fallback()
 				end
 			end, { 'i', 's' }),
 			['<S-Tab>'] = cmp.mapping(function (fallback)
 				if cmp.visible() then
 					cmp.mapping.select_prev_item()
-				elseif luasnip.jumpable(-1) then
-					luasnip.jump(-1)
+				elseif require'luasnip'.jumpable(-1) then
+					require'luasnip'.jump(-1)
 				else
 					fallback()
 				end
-			end, { 'i', 's' }),]]
+			end, { 'i', 's' }),
 			['<C-j>'] = mapping(mapping.select_next_item(), { 'i', 'c' }),
 			['<C-k>'] = mapping(mapping.select_prev_item(), { 'i', 'c' })
 		},
@@ -409,16 +404,6 @@ do -- Keymaps and the like
 
 	-- see the docstrings for folded code
 	vim.g.SimpylFold_docstring_preview = 1
-
-	--TODO chance of race conditions.
-	vim.keymap.set('i', '<Tab>', function ()
-		local luasnip = require'luasnip'
-		return luasnip.expand_or_jumpable() and luasnip.expand_or_jump() or '<Tab>'
-	end, { expr = true})
-	vim.keymap.set('i', '<S-Tab>', function ()
-		local luasnip = require'luasnip'
-		return luasnip.jumpable(-1) and luasnip.jump(-1) or '<S-Tab>'
-	end, { expr = true})
 
 	--vim.keymap.set('n', '<Leader>d', vim.diagnostic.goto_next)
 
