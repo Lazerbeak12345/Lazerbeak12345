@@ -234,8 +234,10 @@ local function configuire_lspconfig()
 	default_args.capabilities = capabilities
 	-- Installed manually in system.
 	lspconfig.racket_langserver.setup(default_args)
-	lspconfig.clangd.setup(default_args) -- Takes custom args too
-	-- TODO lsp-status has custom support for clangd
+	lspconfig.clangd.setup(vim.tbl_extend('keep', capabilities, {
+		handlers = lsp_status.extensions.clangd.setup(),
+		init_options = { clangdFileStatus = true }
+	}))
 	-- Installed through mason
 	mason.setup{
 		ui = {
@@ -322,12 +324,13 @@ local function configuire_lspconfig()
 	mason_lspconfig.setup{
         automatic_installation = true,
 		ensure_installed = {
-			"eslint",
+			"eslint", -- TODO is it needed? null_ls
 			"html",
 			"jsonls",
 			"tsserver",
 			"lua_ls", -- This is sumneko_lua. Not my favorite. TODO needs to know the root dir for nvim/init.lua
-			-- TODO lsp-status has custom support for pyls_ms
+			-- TODO swap for ruff-lsp (using https://github.com/charliermarsh/ruff-lsp#example-neovim) and pyright or just
+			--       pyright because of null_ls
 			"jedi_language_server", -- For python. LOTS of alternatives.
 			"rust_analyzer", -- TODO does this use the correct version of rust?
 			"svelte",
@@ -684,7 +687,6 @@ local lazy_plugins = {
 			'cmp-git',
 			'cmp-fish',
 			'cmp-emoji',
-			'cmp-dictionary',
 			'cmp-buffer',
 			'cmp-cmdline',
 			'cmp-dictionary'
