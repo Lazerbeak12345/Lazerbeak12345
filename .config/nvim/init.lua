@@ -35,15 +35,11 @@ end
 
 local function configure_nvim_cmp()
 	local cmp = require'cmp'
-	local cmp_under_comparator = require"cmp-under-comparator"
 	--[[local function has_words_before()
 		local line, col = unpack(vim.api.nvim_win_get_cursor(0))
 		return col ~= 0 and vim.api.nvim_buf_get_lines(0, line - 1, line, true)[1]:sub(col, col):match("%s") == nil
 	end]]
-	local mapping = cmp.mapping
-	local config = cmp.config
-	local setup = cmp.setup
-	setup{
+	cmp.setup{
 		--Defaults:https://github.com/hrsh7th/nvim-cmp/blob/main/lua/cmp/config/default.lua
 		snippet = {
 			expand = function(args)
@@ -51,12 +47,12 @@ local function configure_nvim_cmp()
 			end,
 		},
 		mapping = {
-			['<C-d>'] = mapping(mapping.scroll_docs(-4), { 'i', 'c' }),
-			['<C-f>'] = mapping(mapping.scroll_docs(4), { 'i', 'c' }),
-			['<C-Space>'] = mapping(mapping.complete(), { 'i', 'c' }),
-			['<C-e>'] = mapping{
-				i = mapping.abort(),
-				c = mapping.close(),
+			['<C-d>'] = cmp.mapping(cmp.mapping.scroll_docs(-4), { 'i', 'c' }),
+			['<C-f>'] = cmp.mapping(cmp.mapping.scroll_docs(4), { 'i', 'c' }),
+			['<C-Space>'] = cmp.mapping(cmp.mapping.complete(), { 'i', 'c' }),
+			['<C-e>'] = cmp.mapping{
+				i = cmp.mapping.abort(),
+				c = cmp.mapping.close(),
 			},
 			-- https://github.com/hrsh7th/nvim-cmp/wiki/Example-mappings#luasnip
 			['<Tab>'] = cmp.mapping(function (fallback)
@@ -82,10 +78,10 @@ local function configure_nvim_cmp()
 					fallback()
 				end
 			end, { 'i', 's' }),
-			['<C-j>'] = mapping(mapping.select_next_item(), { 'i', 'c' }),
-			['<C-k>'] = mapping(mapping.select_prev_item(), { 'i', 'c' })
+			['<C-j>'] = cmp.mapping(cmp.mapping.select_next_item(), { 'i', 'c' }),
+			['<C-k>'] = cmp.mapping(cmp.mapping.select_prev_item(), { 'i', 'c' })
 		},
-		sources = config.sources({
+		sources = cmp.config.sources({
 			{ name = 'nvim_lsp' },
 			{ name = 'luasnip' },
 			{ name = 'latex_symbols' },
@@ -99,10 +95,7 @@ local function configure_nvim_cmp()
 			{ name = "fish" },
 			{ name = "path" },
 		}, {
-			{
-				name = "dictionary",
-				keyword_length = 2,
-			},
+			{ name = "dictionary", keyword_length = 2 },
 			{ name = 'nvim_lua' },
 			{ name = 'buffer' },
 			{ name = 'cmdline' },
@@ -111,62 +104,38 @@ local function configure_nvim_cmp()
 		}]]),
 		sorting = {
 			comparators = {
-				config.compare.offset,
-				config.compare.exact,
-				config.compare.score,
-				config.compare.recently_used,
-				cmp_under_comparator.under,
-				config.compare.kind,
-				config.compare.sort_text,
-				config.compare.length,
-				config.compare.order,
+				cmp.config.compare.offset,
+				cmp.config.compare.exact,
+				cmp.config.compare.score,
+				cmp.config.compare.recently_used,
+				require'cmp-under-comparator'.under,
+				cmp.config.compare.kind,
+				cmp.config.compare.sort_text,
+				cmp.config.compare.length,
+				cmp.config.compare.order,
 			},
 		},
 		formatting = {
 			format = require'lspkind'.cmp_format{
-				with_text = true,
-				--[[
-				symbol_map = {
-					-- Also effects anything else using lspkind
-					Constructor = '🏗 ',
-					Variable = lspkind.presets.default.Field,
-					File = '🗎',
-					Unit = '🞕',
-					Reference = '►',
-					Constant = 'π',
-					Struct = 'ﱖ',
-				},]]
-				menu = {
-					buffer                   = "[Buffer]",
-					nvim_lsp                 = "[LSP]",
-					nvim_lua                 = "[Lua]",
-					latex_symbols            = "[Latex]",
-					luasnip                  = "[LuaSnip]",
-					emoji                    = "[Emoji]",
-					git                      = "[Git]",
-					crates                   = "[Crates]",
-					npm                      = "[NPM]",
-					pandoc_references        = "[Pandoc]",
-					fish                     = "[Fish]",
-					path                     = "[Path]",
-					cmdline_history          = "[CmdHistory]",
-					cmdline                  = "[Cmd]",
-					nvim_lsp_document_symbol = "[LSPSymbol]",
-					dictionary               = "[Dict]",
-				}
+				mode = 'symbol_text',
+				before = function (entry, vim_item)
+					-- Not as pretty as before but much more reliable
+					vim_item.menu = "[" .. entry.source.name .. "]"
+					return vim_item
+				end
 			},
 		},
 	}
 	-- Use buffer source (then history) for `/` and `?` (if you enabled `native_menu`, this won't work anymore).
-	setup.cmdline({'/', '?'}, {
-		sources = config.sources(
+	cmp.setup.cmdline({'/', '?'}, {
+		sources = cmp.config.sources(
 			{ { name = 'buffer' } },
 			{ { name = 'cmdline_history' } }
 		)
 	})
 	-- Use cmdline & path source for ':' (if you enabled `native_menu`, this won't work anymore).
-	setup.cmdline(':', {
-		sources = config.sources(
+	cmp.setup.cmdline(':', {
+		sources = cmp.config.sources(
 			{ { name = 'path' } },
 			{
 				{ name = 'cmdline' },
@@ -174,7 +143,7 @@ local function configure_nvim_cmp()
 			}
 		)
 	})
-	setup.cmdline({'@', '='}, {
+	cmp.setup.cmdline({'@', '='}, {
 		sources = { { name = 'cmdline_history' } }
 	})
 end
