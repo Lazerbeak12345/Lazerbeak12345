@@ -212,7 +212,7 @@ local function configuire_lspconfig()
 		ui = {
 			icons = {
 				package_installed = "✓",
-				package_pending = "➜", -- TODO? ⟳
+				package_pending = "➜",
 				package_uninstalled = "✗"
 			}
 		}
@@ -251,7 +251,8 @@ local function configuire_lspconfig()
 			--  https://github.com/JohnnyMorganz/StyLua
 			--  An opinionated code formatter for Lua.
 			'stylua',
-			-- TODO
+			--  https://github.com/mpeterv/luacheck
+			--  A tool for linting and static analysis of Lua code.
 			"luacheck",
 		},
 		handlers = {
@@ -277,7 +278,7 @@ local function configuire_lspconfig()
 			--  https://github.com/jose-elias-alvarez/null-ls.nvim/blob/main/doc/BUILTINS.md#todo_comments
 			--  Uses inbuilt Lua code and treesitter to detect lines with TODO comments and show a diagnostic warning on eac
 			--   line where it's present.
-			--  TODO doesn't work at all
+			--  TODO doesn't work at all. Does load.
 			null_ls.builtins.diagnostics.todo_comments,
 			--  https://www.typescriptlang.org/docs/handbook/compiler-options.html
 			--  Parses diagnostics from the TypeScript compiler.
