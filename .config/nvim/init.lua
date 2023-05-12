@@ -160,14 +160,6 @@ local function configure_lsp_status()
 end
 
 local function configuire_lspconfig()
-	local lspconfig=require'lspconfig'
-	local cmp_nvim_lsp = require'cmp_nvim_lsp'
-	local lsp_status = require'lsp-status'
-	local mason = require'mason'
-	local mason_lspconfig = require'mason-lspconfig'
-	local null_ls = require 'null-ls'
-	local mason_null_ls = require'mason-null-ls'
-	local folding = require'folding'
 	local function lsp_keybindings(_client, bufnr)
 		-- Reccomended keymaps from nvim-lspconfig
 		-- https://github.com/neovim/nvim-lspconfig#suggested-configuration
@@ -192,23 +184,23 @@ local function configuire_lspconfig()
 	end
 	local default_args={
 		on_attach = function(...)
-			lsp_status.on_attach(...)
-			folding.on_attach(...)
+			require'lsp-status'.on_attach(...)
+			require'folding'.on_attach(...)
 			lsp_keybindings(...)
 		end,
 	}
 	local capabilities = vim.lsp.protocol.make_client_capabilities()
-	capabilities = vim.tbl_extend('keep', capabilities, lsp_status.capabilities)
-	capabilities = vim.tbl_extend('keep', capabilities, cmp_nvim_lsp.default_capabilities())
+	capabilities = vim.tbl_extend('keep', capabilities, require'lsp-status'.capabilities)
+	capabilities = vim.tbl_extend('keep', capabilities, require'cmp_nvim_lsp'.default_capabilities())
 	default_args.capabilities = capabilities
 	-- Installed manually in system.
-	lspconfig.racket_langserver.setup(default_args)
-	lspconfig.clangd.setup(vim.tbl_extend('keep', capabilities, {
-		handlers = lsp_status.extensions.clangd.setup(),
+	require'lspconfig'.racket_langserver.setup(default_args)
+	require'lspconfig'.clangd.setup(vim.tbl_extend('keep', capabilities, {
+		handlers = require'lsp-status'.extensions.clangd.setup(),
 		init_options = { clangdFileStatus = true }
 	}))
 	-- Installed through mason
-	mason.setup{
+	require'mason'.setup{
 		ui = {
 			icons = {
 				package_installed = "✓",
@@ -219,7 +211,7 @@ local function configuire_lspconfig()
 	}
 	-- Style rule: All sources _must_ link to the documentation for each source.
 	-- Must also include what it does.
-	mason_null_ls.setup{
+	require'mason-null-ls'.setup{
 		automatic_installation = true,
 		ensure_installed = {
 			--  https://github.com/mantoni/eslint_d.js
@@ -258,40 +250,40 @@ local function configuire_lspconfig()
 		handlers = {
 			function(source_name, methods)
 				-- To keep the original functionality of `automatic_setup = true`
-				require("mason-null-ls.automatic_setup")(source_name, methods)
+				require'mason-null-ls.automatic_setup'(source_name, methods)
 			end,
 			--stylua = function(source_name, methods)
 			--	null_ls.register(null_ls.builtins.formatting.stylua)
 			--end,
 		}
 	}
-	null_ls.setup{
+	require'null-ls'.setup{
 		sources = {
 			-- Anything not supported by mason.
 			--
 			--  https://github.com/dotenv-linter/dotenv-linter
 			--  Lightning-fast linter for .env files.
-			null_ls.builtins.diagnostics.dotenv_linter,
+			require'null-ls'.builtins.diagnostics.dotenv_linter,
 			--  https://github.com/fish-shell/fish-shell
 			--  Basic linting is available for fish scripts using `fish --no-execute`.
-			null_ls.builtins.diagnostics.fish,
+			require'null-ls'.builtins.diagnostics.fish,
 			--  https://github.com/jose-elias-alvarez/null-ls.nvim/blob/main/doc/BUILTINS.md#todo_comments
 			--  Uses inbuilt Lua code and treesitter to detect lines with TODO comments and show a diagnostic warning on eac
 			--   line where it's present.
 			--  TODO doesn't work at all. Does load.
-			null_ls.builtins.diagnostics.todo_comments,
+			require'null-ls'.builtins.diagnostics.todo_comments,
 			--  https://www.typescriptlang.org/docs/handbook/compiler-options.html
 			--  Parses diagnostics from the TypeScript compiler.
-			null_ls.builtins.diagnostics.tsc,
+			require'null-ls'.builtins.diagnostics.tsc,
 			--  https://fishshell.com/docs/current/cmds/fish_indent.html
 			--  Indent or otherwise prettify a piece of fish code.
-			null_ls.builtins.formatting.fish_indent,
+			require'null-ls'.builtins.formatting.fish_indent,
 			--  https://github.com/jose-elias-alvarez/null-ls.nvim/blob/main/doc/BUILTINS.md#printenv
 			--  Shows the value for the current environment variable under the cursor.
-			null_ls.builtins.hover.printenv,
+			require'null-ls'.builtins.hover.printenv,
 		}
 	}
-	mason_lspconfig.setup{
+	require'mason-lspconfig'.setup{
         automatic_installation = true,
 		ensure_installed = {
 			"eslint", -- TODO is it needed? null_ls
@@ -309,7 +301,7 @@ local function configuire_lspconfig()
 		},
 		handlers = {
 			function (server_name) -- default handler (optional)
-				lspconfig[server_name].setup(default_args)
+				require'lspconfig'[server_name].setup(default_args)
 			end,
 			--["rust_analyzer"] = function ()
 			--	require("rust-tools").setup {}
