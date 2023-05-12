@@ -610,8 +610,7 @@ local lazy_plugins = {
 			'cmp_nvim_lsp',
 			"mason.nvim",
 			'mason-lspconfig.nvim',
-			'mason-null-ls.nvim',
-			'folding'
+			'mason-null-ls.nvim'
 		},
 		event = "VeryLazy",
 	},
@@ -626,88 +625,62 @@ local lazy_plugins = {
 	{ 'williamboman/mason-lspconfig.nvim', event = "VeryLazy" },
 	-- Update command for mason
 	--  https://github.com/RubixDev/mason-update-all#updating-from-cli
-	{ 'RubixDev/mason-update-all', config = function () require'mason-update-all'.setup() end, event = "BufEnter" },
+	{ 'RubixDev/mason-update-all', opts = {}, event = "BufEnter" },
 	-- Better folding
 	'pierreglaser/folding-nvim',
 
 	-- Completion details (uses LSP)
-	{ 'hrsh7th/cmp-nvim-lsp', dependencies  = "nvim-cmp" },
-	'hrsh7th/cmp-buffer',
-	'hrsh7th/cmp-path',
 	{
-		'hrsh7th/nvim-cmp',
-		config = configure_nvim_cmp,
-		dependencies  = {
-			'cmp-nvim-lua',
-			'cmp-nvim-lsp-document-symbol',
-			'cmp_luasnip',
-			'LuaSnip',
-			'cmp-under-comparator',
-			'cmp-path',
-			'cmp-pandoc-references',
-			'cmp-latex-symbols',
-			'cmp-git',
-			'cmp-fish',
-			'cmp-emoji',
-			'cmp-buffer',
-			'cmp-cmdline',
-			'cmp-dictionary'
+		'hrsh7th/cmp-nvim-lsp',
+		dependencies = {
+			'hrsh7th/nvim-cmp',
+			config = configure_nvim_cmp,
+			dependencies  = {
+				'saadparwaiz1/cmp_luasnip',
+				-- Snippet source. (There's others out there too)
+				{
+					'L3MON4D3/LuaSnip',
+					config = function ()
+						-- Grab things from rafamadriz/friendly-snippets & etc.
+						require("luasnip.loaders.from_vscode").lazy_load()
+					end,
+					dependencies = {
+						--  Pre-configured snippits
+						'rafamadriz/friendly-snippets',
+					}
+				},
+				'hrsh7th/cmp-cmdline',
+				'hrsh7th/cmp-path',
+				'hrsh7th/cmp-buffer',
+				-- Lower the text sorting of completions starting with _
+				'lukas-reineke/cmp-under-comparator',
+				-- Git completion source
+				{ 'petertriho/cmp-git', opts = {} },
+				-- latex symbol completion support (allows for inserting unicode)
+				'kdheepak/cmp-latex-symbols',
+				-- Emoji completion support
+				'hrsh7th/cmp-emoji',
+				-- Pandoc completion
+				'jc-doyle/cmp-pandoc-references',
+				-- cmdline history completion
+				--Plug 'dmitmel/cmp-cmdline-history'
+				-- Fish completion
+				'mtoohey31/cmp-fish',
+				-- Use LSP symbols for buffer-style search
+				'hrsh7th/cmp-nvim-lsp-document-symbol',
+				-- Completion on the vim.lsp apis
+				'hrsh7th/cmp-nvim-lua',
+				-- Use /usr/share/dict/words for completion
+				{ 'uga-rosa/cmp-dictionary', opts = { dic = { ["*"] = "/usr/share/dict/words" } } }
+			}
 		}
 	},
-	-- Lower the text sorting of completions starting with _
-	'lukas-reineke/cmp-under-comparator',
-	-- cmdline source
-	'hrsh7th/cmp-cmdline',
-	-- Snippet source. (There's others out there too)
-	{
-		'L3MON4D3/LuaSnip',
-		config = function ()
-			-- Grab things from rafamadriz/friendly-snippets & etc.
-			require("luasnip.loaders.from_vscode").lazy_load()
-		end,
-		dependencies = "friendly-snippets"
-	},
-	'saadparwaiz1/cmp_luasnip',
-	--  Pre-configured snippits
-	'rafamadriz/friendly-snippets',
-	-- Git completion source
-	{
-		'petertriho/cmp-git',
-		config = function() require"cmp_git".setup() end,
-		dependencies = "nvim-cmp"
-	},
 	-- crates.io completion source
-	{ 'saecki/crates.nvim', config = function() require'crates'.setup() end, event = "BufRead Cargo.toml" },
+	{ 'saecki/crates.nvim', opts = {}, event = "BufRead Cargo.toml" },
 	-- package.json completion source
-	{ 'David-Kunz/cmp-npm', config = function() require'cmp-npm'.setup{} end, event = "BufRead package.json" },
-	-- latex symbol completion support (allows for inserting unicode)
-	'kdheepak/cmp-latex-symbols',
-	-- Emoji completion support
-	'hrsh7th/cmp-emoji',
-	-- Pandoc completion
-	'jc-doyle/cmp-pandoc-references',
-	-- cmdline history completion
-	--Plug 'dmitmel/cmp-cmdline-history'
-	-- Fish completion
-	'mtoohey31/cmp-fish',
+	{ 'David-Kunz/cmp-npm', opts = {}, event = "BufRead package.json" },
 	-- conjure intractive eval completion
 	--use 'PaterJason/cmp-conjure' -- TODO add this to cmp -- this might be a problem 987632498629765296987492
-	-- Use LSP symbols for buffer-style search
-	'hrsh7th/cmp-nvim-lsp-document-symbol',
-	-- Completion on the vim.lsp apis
-	'hrsh7th/cmp-nvim-lua',
-	-- Use /usr/share/dict/words for completion
-	{
-		'uga-rosa/cmp-dictionary',
-		config = function()
-			require"cmp_dictionary".setup{
-				dic = {
-					["*"] = "/usr/share/dict/words"
-				}
-			}
-		end,
-		-- event = "VeryLazy"
-	},
 }
 require("lazy").setup(lazy_plugins, lazy_config)
 -- vim.o.ambiwidth="double" -- use this if the arrows are cut off
