@@ -267,11 +267,6 @@ local function configuire_lspconfig()
 			--  https://github.com/fish-shell/fish-shell
 			--  Basic linting is available for fish scripts using `fish --no-execute`.
 			require'null-ls'.builtins.diagnostics.fish,
-			--  https://github.com/jose-elias-alvarez/null-ls.nvim/blob/main/doc/BUILTINS.md#todo_comments
-			--  Uses inbuilt Lua code and treesitter to detect lines with TODO comments and show a diagnostic warning on eac
-			--   line where it's present.
-			--  TODO doesn't work at all. Does load.
-			require'null-ls'.builtins.diagnostics.todo_comments,
 			--  https://www.typescriptlang.org/docs/handbook/compiler-options.html
 			--  Parses diagnostics from the TypeScript compiler.
 			require'null-ls'.builtins.diagnostics.tsc,
@@ -394,6 +389,16 @@ do -- Keymaps and the like
 		vim.keymap.set('n', '[d', vim.diagnostic.goto_prev, opts)
 		vim.keymap.set('n', ']d', vim.diagnostic.goto_next, opts)
 		vim.keymap.set('n', '<space>q', vim.diagnostic.setloclist, opts)
+	end
+
+	do -- https://github.com/folke/todo-comments.nvim#jumping
+		vim.keymap.set("n", "]t", function()
+			require'todo-comments'.jump_next()
+		end, { desc = "Next todo comment" })
+
+		vim.keymap.set("n", "[t", function()
+			require'todo-comments'.jump_prev()
+		end, { desc = "Previous todo comment" })
 	end
 
 	-- Reccomended settings for nvim-cmp
@@ -521,6 +526,7 @@ local lazy_plugins = {
 		event = "BufEnter"
 	},
 	-- Super fancy coloring
+	{ 'nvim-treesitter/nvim-treesitter', opts = {}, build = ':TSUpdate', event = 'VeryLazy' },
 	{
 		-- TODO pick better one
 		'RRethy/nvim-base16',
@@ -598,6 +604,27 @@ local lazy_plugins = {
 	--  Support editorconfig files
 	--   TODO configure
 	--'editorconfig/editorconfig-vim',
+	{
+		"folke/todo-comments.nvim",
+		dependencies = "nvim-lua/plenary.nvim",
+		opts = {
+			keywords = {
+				-- matches the word, so break it on purpose
+				['F'..'IX'] = { icon = "" },
+				['T'..'ODO'] = { icon = "" },
+				['H'..'ACK'] = { icon = "" },
+				['W'..'ARN'] = { icon = "" },
+				['T'..'EST'] = { icon = "" },
+				['P'..'ERF'] = { icon = "󰓅" },
+				['N'..'OTE'] = { icon = "󱇗" }
+			},
+			-- vim regex
+			highlight = { after = "", pattern = [[.*<(KEYWORDS)\s*:?]] },
+			-- ripgrep regex
+			search = { pattern = [[\b(KEYWORDS):?]] }, -- TODO false positives. it it big enough of a problem? Fixable?
+		},
+		event = "VeryLazy"
+	},
 
 	-- Language-server protocol
 	-- Must be after language specific things
