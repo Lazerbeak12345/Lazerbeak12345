@@ -30,17 +30,18 @@ end
 function workonc -d "Open up an editor on the given configuration dir"
 	nvim ~/.config/$argv[1]
 end
-alias more less
-alias vim nvim
 alias dotfiles "/usr/bin/git --git-dir=$HOME/.dotfiles --work-tree=$HOME"
-if status -i
+if status is-interactive
+	alias more less
+	alias vim nvim
 	alias ls exa
 	alias tree 'exa -T'
 	alias cls clear
-	abbr -ag nivm nvim
-	abbr -ag vnim nvim
-	abbr -ag wo workon
-	abbr -ag woc workonc
+	abbr --add nivm nvim
+	abbr --add vnim nvim
+	abbr --add wo workon
+	abbr --add woc workonc
+	abbr --add dotf dotfiles
 end
 function fish_greeting
 	echo TODO:
