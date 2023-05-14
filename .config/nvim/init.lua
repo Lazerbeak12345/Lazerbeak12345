@@ -214,11 +214,6 @@ local function configuire_lspconfig()
 	require'mason-null-ls'.setup{
 		automatic_installation = true,
 		ensure_installed = {
-			--  https://github.com/mantoni/eslint_d.js
-			--  Injects actions to fix ESLint issues or ignore broken rules. Like ESLint, but faster.
-			--   There's an XO specific one too.
-			--   Beware that eslint_d remains running in the background.
-			'eslint_d',
 			--  https://github.com/get-alex/alex
 			--  Catch insensitive, inconsiderate writing.
 			'alex',
@@ -281,7 +276,7 @@ local function configuire_lspconfig()
 	require'mason-lspconfig'.setup{
         automatic_installation = true,
 		ensure_installed = {
-			"eslint", -- TODO is it needed? null_ls
+			"eslint",
 			"html",
 			"jsonls",
 			"tsserver",
