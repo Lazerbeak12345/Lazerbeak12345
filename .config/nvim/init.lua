@@ -195,10 +195,13 @@ local function configuire_lspconfig()
 	default_args.capabilities = capabilities
 	-- Installed manually in system.
 	require'lspconfig'.racket_langserver.setup(default_args)
-	require'lspconfig'.clangd.setup(vim.tbl_extend('keep', capabilities, {
-		handlers = require'lsp-status'.extensions.clangd.setup(),
-		init_options = { clangdFileStatus = true }
-	}))
+	require'lspconfig'.clangd.setup({
+		on_attach = default_args.on_attach,
+		capabilities = vim.tbl_extend('keep', capabilities, {
+			handlers = require'lsp-status'.extensions.clangd.setup(),
+			init_options = { clangdFileStatus = true }
+		})
+	})
 	-- Installed through mason
 	require'mason'.setup{
 		ui = {
@@ -634,7 +637,7 @@ local lazy_plugins = {
 			'mason-lspconfig.nvim',
 			'mason-null-ls.nvim'
 		},
-		event = "VeryLazy",
+		event = "VeryLazy"
 	},
 	{
 		'nvim-lua/lsp-status.nvim',
