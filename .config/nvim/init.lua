@@ -223,9 +223,6 @@ local function configuire_lspconfig()
 			--  https://github.com/editorconfig-checker/editorconfig-checker
 			--  A tool to verify that your files are in harmony with your `.editorconfig`.
 			'editorconfig_checker',
-			--  https://github.com/charliermarsh/ruff/
-			--  An extremely fast Python linter, written in Rust.
-			'ruff',
 			--  https://kampfkarren.github.io/selene/
 			--  Command line tool designed to help write correct and idiomatic Lua code.
 			'selene',
@@ -283,10 +280,12 @@ local function configuire_lspconfig()
 			"html",
 			"jsonls",
 			"tsserver",
-			"lua_ls", -- This is sumneko_lua. Not my favorite. TODO needs to know the root dir for nvim/init.lua
-			-- TODO swap for ruff-lsp (using https://github.com/charliermarsh/ruff-lsp#example-neovim) and pyright or just
-			--       pyright because of null_ls
-			"jedi_language_server", -- For python. LOTS of alternatives.
+			-- This is sumneko_lua. Not my favorite.
+			-- TODO needs to know the root dir for nvim/init.lua (the neovim config file)
+			--  INFO this only fails when the first buffer is the neovim config file. Other times it's on single-file mode.
+			"lua_ls",
+			"ruff_lsp", -- Super fast python linting & etc.
+			"pyright", -- Everything else python LSP
 			"rust_analyzer", -- TODO does this use the correct version of rust?
 			"svelte",
 			"taplo", -- For TOML
@@ -299,6 +298,15 @@ local function configuire_lspconfig()
 			--["rust_analyzer"] = function ()
 			--	require("rust-tools").setup {}
 			--end
+			ruff_lsp = function ()
+				require'lspconfig'.ruff_lsp.setup {
+					on_attach = default_args.on_attach,
+					capabilities = vim.tbl_extend('keep', capabilities, {
+						-- Pyright does it better
+						hoverProvider = false
+					})
+				}
+			end
 		}
 	}
 end
@@ -669,10 +677,8 @@ local lazy_plugins = {
 						-- Grab things from rafamadriz/friendly-snippets & etc.
 						require("luasnip.loaders.from_vscode").lazy_load()
 					end,
-					dependencies = {
-						--  Pre-configured snippits
-						'rafamadriz/friendly-snippets',
-					}
+					--  Pre-configured snippits
+					'rafamadriz/friendly-snippets'
 				},
 				'hrsh7th/cmp-cmdline',
 				'hrsh7th/cmp-path',
