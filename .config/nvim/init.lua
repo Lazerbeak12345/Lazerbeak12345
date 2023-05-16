@@ -340,8 +340,9 @@ local function configure_lualine()
 	require'lualine'.setup{
 		options = {
 			-- Don't be fooled. Nice theme, but not using base16 at all.
-			-- TODO This has become a problem. My phone's shell doesn't support truecolor.
-			theme = 'base16'
+			-- This has became a problem. My phone's shell doesn't support truecolor.
+			--theme = 'base16'
+			theme = 'auto' -- Default theme
 		},
 		sections = {
 			lualine_c = {
@@ -354,6 +355,7 @@ local function configure_lualine()
 				}
 			}
 		}
+		-- TODO extensions for integration
 	}
 end
 
