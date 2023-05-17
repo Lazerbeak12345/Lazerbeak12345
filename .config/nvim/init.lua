@@ -12,7 +12,7 @@ if not vim.loop.fs_stat(lazypath) then
   })
   local sitepath = vim.fn.stdpath("data") .. "/site"
   local packer_compiled = vim.fn.stdpath("config") .. "/plugin/packer_compiled.lua"
-  local packer_install_path = sitepath .. "../pack/packer"
+  local packer_install_path = sitepath .. "/pack/packer"
   if vim.loop.fs_stat(sitepath) and vim.loop.fs_stat(packer_compiled) and vim.loop.fs_stat(packer_install_path) then
 	  print("Migrating from packer...")
 	  vim.cmd.sleep()
