@@ -314,7 +314,6 @@ end
 
 local function configure_lualine()
 	--                                   █ 🙽 🙼 🙿   🙾
-	-- TODO replace mode
 	-- TODO local prepend_ln = function(str)
 	-- 	return " " .. str
 	-- end
