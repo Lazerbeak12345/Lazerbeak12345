@@ -283,10 +283,11 @@ local function configuire_lspconfig()
 			-- This is sumneko_lua. Not my favorite.
 			-- TODO needs to know the root dir for nvim/init.lua (the neovim config file)
 			--  INFO this only fails when the first buffer is the neovim config file. Other times it's on single-file mode.
+			--   INFO this can be short-term fixed by running :LspStart lua_ls when editing this file
 			"lua_ls",
 			"ruff_lsp", -- Super fast python linting & etc.
 			"pyright", -- Everything else python LSP
-			"rust_analyzer", -- TODO does this use the correct version of rust?
+			"rust_analyzer",
 			"svelte",
 			"taplo", -- For TOML
 			"vimls",
