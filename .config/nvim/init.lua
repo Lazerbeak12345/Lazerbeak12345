@@ -313,30 +313,7 @@ local function configuire_lspconfig()
 end
 
 local function configure_lualine()
-	--                                   █ 🙽 🙼 🙿   🙾
-	-- TODO local prepend_ln = function(str)
-	-- 	return " " .. str
-	-- end
-	local function lightline_visual_selection()
-		local mode = vim.fn.mode()
-		local lines = vim.fn.abs(vim.fn.line("v") - vim.fn.line(".")) + 1
-		local lines_str = '↕' .. lines
-		local cols = vim.fn.abs(vim.fn.col("v") - vim.fn.col(".")) + 1
-		local cols_str = '↔' .. cols
-		if mode == 'v' or mode == 's' then
-			if lines == 1 then
-				return cols_str
-			else
-				return lines_str
-			end
-		elseif mode == 'V' or mode == 'S' then
-			return lines_str
-		elseif mode == '' then
-			return lines_str .. ' ' .. cols_str
-		else
-			return ''
-		end
-	end
+	--                                     █ 🙽 🙼 🙿   🙾   TODO these should work.
 	require'lualine'.setup{
 		options = {
 			-- Don't be fooled. Nice theme, but not using base16 at all.
@@ -347,15 +324,16 @@ local function configure_lualine()
 		sections = {
 			lualine_c = {
 				'filename',
-				lightline_visual_selection,
+				'searchcount',
 				require'lsp-status'.status,
 				{
 					require'lazy.status'.updates,
 					cond = require'lazy.status'.has_updates
 				}
 			}
-		}
-		-- TODO extensions for integration
+		},
+		-- Each extension "changes statusline appearance for a window/buffer with specified filetypes"
+		extensions = { 'fugitive', 'lazy', 'nerdtree' }
 	}
 end
 
@@ -564,7 +542,6 @@ local lazy_plugins = {
 	--   Can be replaced with (in no particular order, not including everything)
 	--   - nvim-neo-tree/neo-tree.nvim
 	--   - nvim-tree/nvim-tree.lua
-	--   - nvim-treesitter/nvim-treesitter
 	--   - Xuyuanp/yanil
 	--   - vimfiler
 	'preservim/nerdtree',
