@@ -477,11 +477,16 @@ local lazy_plugins = {
 	-- - Airline
 	-- - And the well-known, formerly first-place Lightline
 	{ 'nvim-lualine/lualine.nvim', config = configure_lualine, lazy = false },
-	{
+	--[[{
 		'kdheepak/tabline.nvim',
-		opts = { options = { show_tabs_only = true } },
-		dependencies = { 'lualine.nvim', 'nvim-web-devicons' }
-	},
+		-- Has 2 issues
+		-- 1. Sometimes each buffer sees a completly differnt tabline
+		--    - One case is if luealine tabline support is used.
+		-- 2. Lists all buffers, not just currently focused buffer per tab (even with setting)
+		opts = {},
+		dependencies = { 'lualine.nvim', 'nvim-web-devicons' },
+		lazy = false
+	},]]
 	--[[{
 		'romgrk/barbar.nvim',
 		-- TODO lists all buffers, not just currently focused buffer per tab (not currently configurable)
