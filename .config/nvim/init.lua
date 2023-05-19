@@ -477,16 +477,22 @@ local lazy_plugins = {
 	-- - Airline
 	-- - And the well-known, formerly first-place Lightline
 	{ 'nvim-lualine/lualine.nvim', config = configure_lualine, lazy = false },
-	--[[{
+	{
 		'kdheepak/tabline.nvim',
-		-- disable = true, -- TODO Buggy: Tabs are per window when windows should be per tab.
-		config = function ()
-			require'tabline'.setup {
-				options = {
-					show_tabs_only = true,
-				}
-			}
-		end
+		opts = { options = { show_tabs_only = true } },
+		dependencies = { 'lualine.nvim', 'nvim-web-devicons' }
+	},
+	--[[{
+		'romgrk/barbar.nvim',
+		-- TODO lists all buffers, not just currently focused buffer per tab (not currently configurable)
+		--  NOTE  feature requested here https://github.com/romgrk/barbar.nvim/issues/497
+		dependencies = {
+			--'lewis6991/gitsigns.nvim', -- OPTIONAL: for git status
+			'nvim-tree/nvim-web-devicons' -- OPTIONAL: for file icons
+		},
+		init = function() vim.g.barbar_auto_setup = false end,
+		opts = { auto_hide = true },
+		lazy = false
 	},]]
 	-- The looks of Powerline, but faster
 	-- use{
