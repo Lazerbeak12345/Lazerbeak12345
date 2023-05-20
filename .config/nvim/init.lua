@@ -403,9 +403,8 @@ do -- Keymaps and the like
 	vim.o.shiftwidth = 4
 	vim.o.backspace = 'indent,eol,start'
 
-	-- Use sys clipboard
+	-- Use sys clipboard (overriden by 'ojroques/nvim-osc52', this is a fallback)
 	vim.o.clipboard = 'unnamedplus'
-	-- TODO install `lemonade` or `doitclient` to get SSH clipboard. termux or tmux perhaps, but likely not.
 
 	-- Title magic.
 	vim.o.title = true
@@ -542,6 +541,26 @@ local lazy_plugins = {
 			end
 		end,
 		lazy = false
+	},
+
+	{
+		-- Copy clipboard even if over ssh
+		'ojroques/nvim-osc52',
+		config = function ()
+			-- Use this plugin as a clipboard provider
+			local function copy(lines, _)
+				require'osc52'.copy(table.concat(lines, '\n'))
+			end
+			local function paste()
+				return {vim.fn.split(vim.fn.getreg'', '\n'), vim.fn.getregtype''}
+			end
+			vim.g.clipboard = {
+				name = 'osc52',
+				copy = {['+'] = copy, ['*'] = copy},
+				paste = {['+'] = paste, ['*'] = paste}
+			}
+		end,
+		event = "BufEnter"
 	},
 
 	-- Git integration
