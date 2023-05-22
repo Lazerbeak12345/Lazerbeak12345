@@ -1,20 +1,20 @@
 local vim = vim -- Hacky workaround for sumneko_lua being sorta dumb right now. I can fix it better later.
 -- copied from https://github.com/folke/lazy.nvim#-installation
-local lazypath = vim.fn.stdpath("data") .. "/lazy/lazy.nvim"
+local lazypath = vim.fn.stdpath'data' .. "/lazy/lazy.nvim"
 if not vim.loop.fs_stat(lazypath) then
-	vim.fn.system({
+	vim.fn.system{
 		"git",
 		"clone",
 		"--filter=blob:none",
 		"https://github.com/folke/lazy.nvim.git",
 		"--branch=stable", -- latest stable release
 		lazypath
-	})
-	local sitepath = vim.fn.stdpath("data") .. "/site"
-	local packer_compiled = vim.fn.stdpath("config") .. "/plugin/packer_compiled.lua"
+	}
+	local sitepath = vim.fn.stdpath'data' .. "/site"
+	local packer_compiled = vim.fn.stdpath'config' .. "/plugin/packer_compiled.lua"
 	local packer_install_path = sitepath .. "/pack/packer"
 	if vim.loop.fs_stat(sitepath) and vim.loop.fs_stat(packer_compiled) and vim.loop.fs_stat(packer_install_path) then
-		print("Migrating from packer...")
+		print"Migrating from packer..."
 		vim.cmd.sleep()
 		vim.fn.delete(sitepath)
 		vim.fn.delete(packer_compiled)
