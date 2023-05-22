@@ -314,6 +314,7 @@ end
 
 local function configure_lualine()
 	--                                     █ 🙽 🙼 🙿   🙾   TODO these should work.
+	-- https://github.com/ryanoasis/nerd-fonts/issues/1190
 	require'lualine'.setup{
 		options = {
 			-- Don't be fooled. Nice theme, but not using base16 at all.
@@ -403,8 +404,8 @@ do -- Keymaps and the like
 	vim.o.shiftwidth = 4
 	vim.o.backspace = 'indent,eol,start'
 
-	-- Use sys clipboard (overriden by 'ojroques/nvim-osc52', this is a fallback)
-	vim.o.clipboard = 'unnamedplus'
+	-- Use sys clipboard
+	vim.o.clipboard = vim.o.clipboard .. 'unnamedplus'
 
 	-- Title magic.
 	vim.o.title = true
@@ -488,8 +489,8 @@ local lazy_plugins = {
 	},]]
 	--[[{
 		'romgrk/barbar.nvim',
-		-- TODO lists all buffers, not just currently focused buffer per tab (not currently configurable)
-		--  NOTE  feature requested here https://github.com/romgrk/barbar.nvim/issues/497
+		-- TODO lists all buffers, not just currently focused buffer per tab (not configurable as an option)
+		--  NOTE  feature rejected here https://github.com/romgrk/barbar.nvim/issues/497
 		dependencies = {
 			--'lewis6991/gitsigns.nvim', -- OPTIONAL: for git status
 			'nvim-tree/nvim-web-devicons' -- OPTIONAL: for file icons
@@ -510,16 +511,21 @@ local lazy_plugins = {
 	-- }
 	-- Indent lines
 	{
-		-- TODO not maintained
-		'thaerkh/vim-indentguides',
+		'lukas-reineke/indent-blankline.nvim',
+		event = "VeryLazy",
 		config = function ()
-			vim.g.indentguides_spacechar = '⍿'
-			vim.g.indentguides_tabchar = '⟼'
-			vim.g.indentguides_concealcursor_unaltered = 'nonempty value'
-			--|‖⃒⃓⍿⎸⎹⁞⸾⼁︳︴｜¦❘❙❚⟊⟾⤠⟼
-			--|‖⃒⃓⍿⎸⎹⁞⸾⼁︳︴｜¦❘❙❚⟊⟾⤠⟼
-		end,
-		event = "BufEnter"
+			vim.opt.list = true
+			vim.opt.listchars:append "lead:⋅"
+			require'indent_blankline'.setup {
+				context_char = '¦',
+				context_char_blankline = '¦',
+				use_treesitter = true,
+				use_treesitter_scope = true,
+				show_current_context = true,
+				show_current_context_start = true,
+				context_highlight_list = {'Label'},
+			}
+		end
 	},
 	-- Super fancy coloring
 	{ 'nvim-treesitter/nvim-treesitter', opts = {}, build = ':TSUpdate', event = 'VeryLazy' },
@@ -543,15 +549,20 @@ local lazy_plugins = {
 		lazy = false
 	},
 
-	{
-		-- Copy clipboard even if over ssh
+	--[[{
+		-- Copy clipboard even if over ssh TODO still broken
 		'ojroques/nvim-osc52',
 		config = function ()
 			-- Use this plugin as a clipboard provider
+			--vim.keymap.set('n', '<leader>c', require('osc52').copy_operator, {expr = true})
+			--vim.keymap.set('n', '<leader>cc', '<leader>c_', {remap = true})
+			--vim.keymap.set('v', '<leader>c', require('osc52').copy_visual)
 			local function copy(lines, _)
 				require'osc52'.copy(table.concat(lines, '\n'))
+				print'copied!'
 			end
 			local function paste()
+				print'pasting!'
 				return {vim.fn.split(vim.fn.getreg'', '\n'), vim.fn.getregtype''}
 			end
 			vim.g.clipboard = {
@@ -559,9 +570,11 @@ local lazy_plugins = {
 				copy = {['+'] = copy, ['*'] = copy},
 				paste = {['+'] = paste, ['*'] = paste}
 			}
+			--vim.keymap.set('n', '<leader>c', '"+y')
+			--vim.keymap.set('n', '<leader>cc', '"+yy')
 		end,
 		event = "BufEnter"
-	},
+	},]]
 
 	-- Git integration
 	--  Genral use
@@ -617,7 +630,7 @@ local lazy_plugins = {
 	--  Eww's configuration language, yuck
 	{ 'elkowar/yuck.vim', event = "BufEnter" },
 	--  Support editorconfig files
-	--   TODO configure
+	--   TODO configure (or is it alraady working without??)
 	--'editorconfig/editorconfig-vim',
 	{
 		"folke/todo-comments.nvim",
