@@ -317,9 +317,6 @@ local function configure_lualine()
 	-- https://github.com/ryanoasis/nerd-fonts/issues/1190
 	require'lualine'.setup{
 		options = {
-			-- Don't be fooled. Nice theme, but not using base16 at all.
-			-- This has became a problem. My phone's shell doesn't support truecolor.
-			--theme = 'base16'
 			theme = 'auto' -- Default theme
 		},
 		sections = {
@@ -530,25 +527,14 @@ local lazy_plugins = {
 	-- Super fancy coloring
 	{ 'nvim-treesitter/nvim-treesitter', opts = {}, build = ':TSUpdate', event = 'VeryLazy' },
 	{
-		-- TODO pick better one
-		'RRethy/nvim-base16',
+		-- TODO (low prio) match this and the cmd theme
+		'rebelot/kanagawa.nvim',
+		lazy = false,
+		priority = 1000,
 		config = function ()
-			vim.cmd.colorscheme'base16-default-dark'
-			if false then -- I'm still working this out. Contrast issues right now.
-				vim.api.nvim_create_autocmd("BufEnter", {
-					pattern = "*",
-					callback = function()
-						local hl = vim.api.nvim_get_hl_by_name("Normal", "")
-						hl.background = "NONE"
-						vim.api.nvim_set_hl(0, "Normal", hl)
-						print("fixed bg!")
-					end
-				})
-			end
-		end,
-		lazy = false
+			vim.cmd.colorscheme'kanagawa'
+		end
 	},
-
 	--[[{
 		-- Copy clipboard even if over ssh TODO still broken
 		'ojroques/nvim-osc52',
@@ -613,7 +599,7 @@ local lazy_plugins = {
 			vim.g.rooter_change_directory_for_non_project_files = 'current'
 			-- vim.g.rooter_patterns = ['.git', 'mod.conf', 'modpack.conf','game.conf','texture_pack.conf']
 		end,
-		event = "VeryLazy"
+		lazy = false
 	},
 	--  Start Screen
 	'mhinz/vim-startify',
@@ -731,6 +717,7 @@ local lazy_plugins = {
 	-- crates.io completion source
 	{ 'saecki/crates.nvim', opts = {}, event = "BufRead Cargo.toml" },
 	-- package.json completion source
+	--  TODO some plugins (like this one?) need to only be enabled when npm is found. Fish and other commands too.
 	{ 'David-Kunz/cmp-npm', opts = {}, event = "BufRead package.json" },
 	-- conjure intractive eval completion
 	--use 'PaterJason/cmp-conjure' -- TODO add this to cmp -- this might be a problem 987632498629765296987492
