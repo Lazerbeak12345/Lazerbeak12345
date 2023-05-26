@@ -282,8 +282,9 @@ local function configuire_lspconfig()
 			"tsserver",
 			-- This is sumneko_lua. Not my favorite.
 			-- TODO needs to know the root dir for nvim/init.lua (the neovim config file)
-			--  INFO this only fails when the first buffer is the neovim config file. Other times it's on single-file mode.
-			--   INFO this can be short-term fixed by running :LspStart lua_ls when editing this file
+			--  only fails when the first buffer is the neovim config file. Other times it's on single-file mode.
+			--  Not related to rooter
+			-- can be short-term fixed by running :LspStart lua_ls when editing this file
 			"lua_ls",
 			"ruff_lsp", -- Super fast python linting & etc.
 			"pyright", -- Everything else python LSP
@@ -512,20 +513,32 @@ local lazy_plugins = {
 		event = "VeryLazy",
 		config = function ()
 			vim.opt.list = true
-			vim.opt.listchars:append "lead:⋅"
+			vim.opt.listchars:append"lead:⋅"
+			vim.opt.listchars:append"tab:  "
 			require'indent_blankline'.setup {
-				context_char = '¦',
-				context_char_blankline = '¦',
+				show_first_indent_level = false,
 				use_treesitter = true,
-				use_treesitter_scope = true,
 				show_current_context = true,
-				show_current_context_start = true,
-				context_highlight_list = {'Label'},
+				context_highlight_list = {'Label'}
 			}
+			vim.cmd.IndentBlanklineRefresh()
 		end
 	},
 	-- Super fancy coloring
-	{ 'nvim-treesitter/nvim-treesitter', opts = {}, build = ':TSUpdate', event = 'VeryLazy' },
+	{
+		'nvim-treesitter/nvim-treesitter',
+		--opts = ,
+		config = function ()
+			require'nvim-treesitter.configs'.setup{
+				--ensure_installed = { },
+				ensure_installed = "all", -- Very slow to install everything
+				sync_install = true,
+				auto_install = true
+			}
+		end,
+		build = ':TSUpdate',
+		event = 'VeryLazy'
+	},
 	{
 		-- TODO (low prio) match this and the cmd theme
 		'rebelot/kanagawa.nvim',
