@@ -274,7 +274,7 @@ local function configuire_lspconfig()
 		}
 	}
 	require'mason-lspconfig'.setup{
-        automatic_installation = true,
+		automatic_installation = true,
 		ensure_installed = {
 			"eslint",
 			"html",
@@ -323,12 +323,14 @@ local function configure_lualine()
 		sections = {
 			lualine_c = {
 				'filename',
-				'searchcount',
-				require'lsp-status'.status,
+				'searchcount', -- TODO hide the other searchcount
+				require'lsp-status'.status, -- TODO broken
 				{
+					-- TODO might be broken
 					require'lazy.status'.updates,
 					cond = require'lazy.status'.has_updates
 				}
+				-- TODO https://github.com/nvim-treesitter/nvim-treesitter#statusline-indicator
 			}
 		},
 		-- Each extension "changes statusline appearance for a window/buffer with specified filetypes"
@@ -530,13 +532,54 @@ local lazy_plugins = {
 		--opts = ,
 		config = function ()
 			require'nvim-treesitter.configs'.setup{
-				--ensure_installed = { },
-				ensure_installed = "all", -- Very slow to install everything
+				ensure_installed = {
+					"bash",
+					"c",
+					"cmake",
+					"commonlisp",
+					"cpp",
+					"css",
+					"diff",
+					"dot",
+					"fennel",
+					"fish",
+					"gdscript",
+					"git_config",
+					"git_rebase",
+					"gitattributes",
+					"gitcommit",
+					"gitignore",
+					"godot_resource",
+					"html",
+					"javascript",
+					"json",
+					"json5",
+					"jsonc",
+					"lua",
+					"make",
+					"markdown",
+					"markdown_inline",
+					"python",
+					"racket",
+					"rust",
+					"scheme",
+					"scss",
+					"svelte",
+					"toml",
+					"tsx",
+					"typescript",
+					"vim",
+					"vimdoc",
+					"vue",
+					"yaml",
+					"yuck",
+				},
+				--ensure_installed = "all", -- Very slow to install everything
 				sync_install = true,
 				auto_install = true
 			}
 		end,
-		build = ':TSUpdate',
+		build = ':TSUpdateSync',
 		event = 'VeryLazy'
 	},
 	{
