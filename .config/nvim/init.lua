@@ -316,6 +316,7 @@ end
 local function configure_lualine()
 	--                                     █ 🙽 🙼 🙿   🙾   TODO these should work.
 	-- https://github.com/ryanoasis/nerd-fonts/issues/1190
+	vim.opt.shortmess:append'S' -- Do not show search count message when searching e.g. '[1/5]'
 	require'lualine'.setup{
 		options = {
 			theme = 'auto' -- Default theme
@@ -323,7 +324,7 @@ local function configure_lualine()
 		sections = {
 			lualine_c = {
 				'filename',
-				'searchcount', -- TODO hide the other searchcount
+				'searchcount',
 				require'lsp-status'.status, -- TODO broken
 				{
 					-- TODO might be broken
