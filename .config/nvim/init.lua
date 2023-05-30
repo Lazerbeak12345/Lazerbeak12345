@@ -318,21 +318,41 @@ local function configure_lualine()
 	-- https://github.com/ryanoasis/nerd-fonts/issues/1190
 	vim.opt.shortmess:append'S' -- Do not show search count message when searching e.g. '[1/5]'
 	require'lualine'.setup{
-		options = {
-			theme = 'auto' -- Default theme
-		},
 		sections = {
+			lualine_b = {
+				-- TODO: do this with mason
+				{
+					function () return require'lazy.status'.updates() end,
+					cond = function () return require'lazy.status'.has_updates() end
+				},
+				'hostname', 'branch', 'diff', 'diagnostics'
+				-- TODO: todo count https://github.com/folke/todo-comments.nvim/issues/197
+			},
 			lualine_c = {
 				'filename',
-				'searchcount',
-				require'lsp-status'.status, -- TODO broken
-				{
-					-- TODO might be broken
-					require'lazy.status'.updates,
-					cond = require'lazy.status'.has_updates
-				}
-				-- TODO https://github.com/nvim-treesitter/nvim-treesitter#statusline-indicator
-			}
+				'selectioncount',
+				function () return require'lsp-status'.status() end
+			},
+			lualine_y = { 'searchcount', 'progress' }
+		},
+		tabline = {
+			lualine_b = {{
+				'tabs',
+				mode = 1,
+				max_length = function () return vim.o.columns end,
+				fmt = function (name, context)
+					-- Show ~ if buffer is modified in tab
+					local buflist = vim.fn.tabpagebuflist(context.tabnr)
+					local winnr = vim.fn.tabpagewinnr(context.tabnr)
+					local bufnr = buflist[winnr]
+					local mod = vim.fn.getbufvar(bufnr, '&mod')
+
+					return name .. (mod == 1 and ' ~' or '')
+				end,
+				cond = function ()
+					return vim.fn.tabpagenr'$' > 1 -- Only show if gt 1 -- TODO hide tabline completely if empty
+				end
+			}}
 		},
 		-- Each extension "changes statusline appearance for a window/buffer with specified filetypes"
 		extensions = { 'fugitive', 'lazy', 'nerdtree' }
@@ -468,7 +488,7 @@ do -- Keymaps and the like
 	--vim.api.nvim_set_hl(0, "Pmenu", {})
 end
 
-local lazy_config = { defaults = { lazy = true } }
+local lazy_config = { defaults = { lazy = true }, checker = { enabled = true, notify = false } }
 
 local lazy_plugins = {
 	-- Commenting
@@ -478,28 +498,6 @@ local lazy_plugins = {
 	-- - Airline
 	-- - And the well-known, formerly first-place Lightline
 	{ 'nvim-lualine/lualine.nvim', config = configure_lualine, lazy = false },
-	--[[{
-		'kdheepak/tabline.nvim',
-		-- Has 2 issues
-		-- 1. Sometimes each buffer sees a completly differnt tabline
-		--    - One case is if luealine tabline support is used.
-		-- 2. Lists all buffers, not just currently focused buffer per tab (even with setting)
-		opts = {},
-		dependencies = { 'lualine.nvim', 'nvim-web-devicons' },
-		lazy = false
-	},]]
-	--[[{
-		'romgrk/barbar.nvim',
-		-- TODO lists all buffers, not just currently focused buffer per tab (not configurable as an option)
-		--  NOTE  feature rejected here https://github.com/romgrk/barbar.nvim/issues/497
-		dependencies = {
-			--'lewis6991/gitsigns.nvim', -- OPTIONAL: for git status
-			'nvim-tree/nvim-web-devicons' -- OPTIONAL: for file icons
-		},
-		init = function() vim.g.barbar_auto_setup = false end,
-		opts = { auto_hide = true },
-		lazy = false
-	},]]
 	-- The looks of Powerline, but faster
 	-- use{
 	-- 	'itchyny/lightline.vim',
