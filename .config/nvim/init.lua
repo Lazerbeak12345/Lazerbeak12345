@@ -425,8 +425,8 @@ do -- Keymaps and the like
 	vim.o.shiftwidth = 4
 	vim.o.backspace = 'indent,eol,start'
 
-	-- Use sys clipboard
-	vim.o.clipboard = vim.o.clipboard .. 'unnamedplus'
+	-- Use sys clipboard (see osc52 for ssh clipboard)
+	vim.o.clipboard = 'unnamedplus'
 
 	-- Title magic.
 	vim.o.title = true
@@ -590,32 +590,41 @@ local lazy_plugins = {
 			vim.cmd.colorscheme'kanagawa'
 		end
 	},
-	--[[{
-		-- Copy clipboard even if over ssh TODO still broken
+	{
+		-- Copy clipboard even if over ssh
 		'ojroques/nvim-osc52',
 		config = function ()
-			-- Use this plugin as a clipboard provider
-			--vim.keymap.set('n', '<leader>c', require('osc52').copy_operator, {expr = true})
-			--vim.keymap.set('n', '<leader>cc', '<leader>c_', {remap = true})
-			--vim.keymap.set('v', '<leader>c', require('osc52').copy_visual)
-			local function copy(lines, _)
-				require'osc52'.copy(table.concat(lines, '\n'))
-				print'copied!'
-			end
-			local function paste()
-				print'pasting!'
-				return {vim.fn.split(vim.fn.getreg'', '\n'), vim.fn.getregtype''}
-			end
-			vim.g.clipboard = {
-				name = 'osc52',
-				copy = {['+'] = copy, ['*'] = copy},
-				paste = {['+'] = paste, ['*'] = paste}
-			}
+			require'osc52'.setup{}
+			-- Setup a few keymaps so I can copy even if the rest of this plugin is broken
+			vim.keymap.set('n', '<leader>c', require'osc52'.copy_operator, {expr = true})
+			vim.keymap.set('n', '<leader>cc', '<leader>c_', {remap = true})
+			vim.keymap.set('n', '<leader>C', '<leader>c', {remap = true})
+			vim.keymap.set('v', '<leader>c', require'osc52'.copy_visual)
+			vim.keymap.set('v', '<leader>C', '<leader>c', {remap = true})
+			-- Copy text yanked into + (this does work, but hard to use)
+			--local function copy()
+			--	if vim.v.event.operator == 'y' and vim.v.event.regname == '+' then
+			--		require'osc52'.copy_register'+'
+			--	end
+			--end
+			--vim.api.nvim_create_autocmd('TextYankPost', {callback = copy})
+			-- Use this plugin as a clipboard provider TODO doesn't seem to work
+			--local function copy(lines, _)
+			--	require'osc52'.copy(table.concat(lines, '\n'))
+			--end
+			--local function paste()
+			--	return {vim.fn.split(vim.fn.getreg'', '\n'), vim.fn.getregtype''}
+			--end
+			--vim.g.clipboard = {
+			--	name = 'osc52',
+			--	copy = {['+'] = copy, ['*'] = copy},
+			--	paste = {['+'] = paste, ['*'] = paste}
+			--}
 			--vim.keymap.set('n', '<leader>c', '"+y')
 			--vim.keymap.set('n', '<leader>cc', '"+yy')
 		end,
 		event = "BufEnter"
-	},]]
+	},
 
 	-- Git integration
 	--  Genral use
