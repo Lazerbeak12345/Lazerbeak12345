@@ -314,10 +314,14 @@ local function configuire_lspconfig()
 end
 
 local function configure_lualine()
-	--                                     █ 🙽 🙼 🙿   🙾   TODO these should work.
+	--                                        █ 🙽 🙼 🙿   🙾
 	-- https://github.com/ryanoasis/nerd-fonts/issues/1190
 	vim.opt.shortmess:append'S' -- Do not show search count message when searching e.g. '[1/5]'
 	require'lualine'.setup{
+		options = {
+			component_separators = { left = '', right = ''},
+			section_separators = { left = ' ', right = ' '}
+		},
 		sections = {
 			lualine_b = {
 				-- TODO: do this with mason
