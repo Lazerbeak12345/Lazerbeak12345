@@ -359,7 +359,7 @@ local function configure_lualine()
 			}}
 		},
 		-- Each extension "changes statusline appearance for a window/buffer with specified filetypes"
-		extensions = { 'fugitive', 'lazy', 'nerdtree' }
+		extensions = { 'fugitive', 'lazy', 'neo-tree' }
 	}
 end
 
@@ -687,20 +687,22 @@ local lazy_plugins = {
 		},
 		event = "BufEnter"
 	},
-	-- Nicer file management TODO very slow. loads of *tree* replacements
-	--   Can be replaced with (in no particular order, not including everything)
-	--   - nvim-neo-tree/neo-tree.nvim
-	--   - nvim-tree/nvim-tree.lua
-	--   - Xuyuanp/yanil
-	--   - vimfiler
-	'preservim/nerdtree',
-	{ 'tiagofumo/vim-nerdtree-syntax-highlight', lazy = false, dependencies = 'nerdtree' },
-	--Plug 'jistr/vim-nerdtree-tabs'
-	{ 'Xuyuanp/nerdtree-git-plugin', dependencies = 'nerdtree' }, -- TODO not maintained
+	-- Even nicer file management
+	{
+		'nvim-neo-tree/neo-tree.nvim',
+		branch = "v2.x",
+		dependencies = { "nvim-lua/plenary.nvim", "nvim-tree/nvim-web-devicons", "MunifTanjim/nui.nvim" },
+		config = function ()
+			vim.g.neo_tree_remove_legacy_commands = 1
+			vim.g.loaded_netrwPlugin = 1 -- Don't load both this and the builtin tree
+			require'neo-tree'.setup{}
+		end,
+		lazy = false
+	},
 
 	-- Icons
-	--   TODO find alternative that adds the icons to each of these dependencies
-	{ 'ryanoasis/vim-devicons', dependencies = { 'nerdtree', 'vim-startify', 'nerdtree-git-plugin' }, lazy = false },
+	--   TODO find alternative that adds the icons to this dependency
+	{ 'ryanoasis/vim-devicons', dependencies = 'vim-startify', lazy = false },
 	--  An incompatible fork of the above.
 	'nvim-tree/nvim-web-devicons',
 	--  LSP breakdown icons and stuff
