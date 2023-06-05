@@ -696,7 +696,37 @@ local lazy_plugins = {
 		config = function ()
 			vim.g.neo_tree_remove_legacy_commands = 1
 			vim.g.loaded_netrwPlugin = 1 -- Don't load both this and the builtin tree
-			require'neo-tree'.setup{}
+			local completion_kinds = require'lspkind'.symbol_map -- Completion-kinds:Document-kinds not a 1:1 map
+			require'neo-tree'.setup{
+				-- The icons only need to be specified in neo-tree v2
+				default_component_configs = {
+					icon = { folder_empty = "󰜌", folder_empty_open = "󰜌" },
+					git_status = { symbols = { renamed   = "󰁕", unstaged  = "󰄱" } }
+				},
+				document_symbols = { kinds = {
+					File = { icon = completion_kinds.File, hl = "Tag" },
+					Namespace = { icon = completion_kinds.Module, hl = "Include" },
+					Package = { icon = "󰏖", hl = "Label" },
+					Class = { icon = completion_kinds.Class, hl = "Include" },
+					Property = { icon = completion_kinds.Property, hl = "@property" },
+					Enum = { icon = completion_kinds.Enum, hl = "@number" },
+					Function = { icon = completion_kinds.Function, hl = "Function" },
+					String = { icon = completion_kinds.Text, hl = "String" },
+					Number = { icon = completion_kinds.Value, hl = "Number" },
+					Array = { icon = "󰅪", hl = "Type" },
+					Object = { icon = "󰅩", hl = "Type" },
+					Key = { icon = completion_kinds.Keyword, hl = "" },
+					Struct = { icon = completion_kinds.Struct, hl = "Type" },
+					Operator = { icon = completion_kinds.Operator, hl = "Operator" },
+					TypeParameter = { icon = completion_kinds.TypeParameter, hl = "Type" },
+					StaticMethod = { icon = completion_kinds.Method, hl = 'Function' }
+				} },
+				-- Add this section only if you've configured source selector. (I havent)
+				source_selector = { sources = {
+					{ source = "filesystem", display_name = " 󰉓 Files " },
+					{ source = "git_status", display_name = " 󰊢 Git " },
+				} },
+			}
 		end,
 		lazy = false
 	},
