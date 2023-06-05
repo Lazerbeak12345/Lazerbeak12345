@@ -354,13 +354,14 @@ local function configure_lualine()
 					return name .. (mod == 1 and ' ~' or '')
 				end,
 				cond = function ()
-					return vim.fn.tabpagenr'$' > 1 -- Only show if gt 1 -- TODO hide tabline completely if empty
+					return vim.fn.tabpagenr'$' > 1
 				end
 			}}
 		},
 		-- Each extension "changes statusline appearance for a window/buffer with specified filetypes"
 		extensions = { 'fugitive', 'lazy', 'neo-tree' }
 	}
+	vim.opt.showtabline = 1 --(visible if more than 1 tab)
 end
 
 do -- Keymaps and the like
