@@ -732,9 +732,6 @@ local lazy_plugins = {
 	},
 
 	-- Icons
-	--   TODO find alternative that adds the icons to this dependency
-	{ 'ryanoasis/vim-devicons', dependencies = 'vim-startify', lazy = false },
-	--  An incompatible fork of the above.
 	'nvim-tree/nvim-web-devicons',
 	--  LSP breakdown icons and stuff
 	'onsails/lspkind-nvim',
@@ -754,8 +751,13 @@ local lazy_plugins = {
 		end,
 		lazy = false
 	},
-	--  Start Screen
-	'mhinz/vim-startify',
+	--  Start Screen -- TODO: configure compatible plugins
+	{
+		'goolord/alpha-nvim', dependencies = 'nvim-tree/nvim-web-devicons', lazy = false,
+		config = function () require'alpha'.setup(require'alpha.themes.startify'.config) end
+	},
+
+
 	-- common dependencie of many nvim plugins
 	'nvim-lua/plenary.nvim',
 	{ 'jose-elias-alvarez/null-ls.nvim', event = "VeryLazy" },
