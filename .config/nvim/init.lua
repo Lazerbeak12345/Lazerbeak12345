@@ -767,7 +767,7 @@ local lazy_plugins = {
 		end,
 		lazy = false
 	},
-	--  Start Screen -- TODO: configure compatible plugins
+	--  Start Screen
 	{
 		'goolord/alpha-nvim', dependencies = 'nvim-tree/nvim-web-devicons', lazy = false,
 		config = function () require'alpha'.setup(require'alpha.themes.startify'.config) end
