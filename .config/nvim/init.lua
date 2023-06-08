@@ -491,6 +491,22 @@ do -- Keymaps and the like
 	})
 	-- Popup windows tend to be unreadable with a pink background
 	--vim.api.nvim_set_hl(0, "Pmenu", {})
+	vim.g.indent_blankline_filetype_exclude = { 'alpha', 'lspinfo', 'checkhealth', 'help', 'man', '' }
+	-- TODO this doesn't work. (And I have no idea why. I'll just live with it for now. The above is only defined in this
+	-- ugly way to facilitate this.
+	--vim.api.nvim_create_autocmd({ "BufNewFile", "BufRead" }, {
+	--	--pattern = exclude,
+	--	pattern = "*",
+	--	callback = function ()
+	--		print"asdf"
+	--		for _, v in pairs(vim.g.indent_blankline_filetype_exclude) do
+	--			if v == vim.bo.filetype then
+	--				--vim.opt.list = false
+	--				--vim.bo.list = false
+	--			end
+	--		end
+	--	end
+	--})
 end
 
 local lazy_config = { defaults = { lazy = true }, checker = { enabled = true, notify = false } }
