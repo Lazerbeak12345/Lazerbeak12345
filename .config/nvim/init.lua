@@ -281,8 +281,7 @@ local function configuire_lspconfig()
 			"jsonls",
 			"tsserver",
 			-- This is sumneko_lua. Not my favorite.
-			-- TODO needs to know the root dir for nvim/init.lua (the neovim config file)
-			--  only fails when the first buffer is the neovim config file. Other times it's on single-file mode.
+			-- TODO needs to know the root dir only fails to find it on it's own when the first buffer is a lua file.
 			--  Not related to rooter
 			-- can be short-term fixed by running :LspStart lua_ls when editing this file
 			"lua_ls",
@@ -786,9 +785,6 @@ local lazy_plugins = {
 	{ 'sheerun/vim-polyglot', event = "BufEnter" },
 	--  Eww's configuration language, yuck
 	{ 'elkowar/yuck.vim', event = "BufEnter" },
-	--  Support editorconfig files
-	--   TODO configure (or is it alraady working without??)
-	--'editorconfig/editorconfig-vim',
 	{
 		"folke/todo-comments.nvim",
 		dependencies = "nvim-lua/plenary.nvim",
@@ -889,7 +885,7 @@ local lazy_plugins = {
 	{ 'saecki/crates.nvim', opts = {}, event = "BufRead Cargo.toml" },
 	-- package.json completion source
 	--  TODO some plugins (like this one?) need to only be enabled when npm is found. Fish and other commands too.
-	{ 'David-Kunz/cmp-npm', opts = {}, event = "BufRead package.json" },
+	{ 'David-Kunz/cmp-npm', opts = {}, dependencies = 'plenary.nvim', event = "BufRead package.json" },
 	-- conjure intractive eval completion
 	--use 'PaterJason/cmp-conjure' -- TODO add this to cmp -- this might be a problem 987632498629765296987492
 }
