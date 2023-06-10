@@ -778,7 +778,10 @@ local lazy_plugins = {
 	{ 'jose-elias-alvarez/null-ls.nvim', event = "VeryLazy" },
 	{ 'jay-babu/mason-null-ls.nvim', event = "VeryLazy" },
 	-- Interactive eval
-	-- use 'Olical/conjure' -- TODO configure this -- this might be a problem 987632498629765296987492
+	-- use 'Olical/conjure'
+	--  TODO configure this
+	--  this might be a problem 987632498629765296987492
+	--  This should be added after DAP (due to feature overlap and complexity)
 
 	-- Specific file type compat
 	--  General stuff (syntax, etc)
@@ -850,7 +853,7 @@ local lazy_plugins = {
 					'L3MON4D3/LuaSnip',
 					config = function ()
 						-- Grab things from rafamadriz/friendly-snippets & etc.
-						require("luasnip.loaders.from_vscode").lazy_load()
+						require"luasnip.loaders.from_vscode".lazy_load()
 					end,
 					--  Pre-configured snippits
 					'rafamadriz/friendly-snippets'
@@ -870,8 +873,6 @@ local lazy_plugins = {
 				'jc-doyle/cmp-pandoc-references',
 				-- cmdline history completion
 				--Plug 'dmitmel/cmp-cmdline-history'
-				-- Fish completion
-				'mtoohey31/cmp-fish',
 				-- Use LSP symbols for buffer-style search
 				'hrsh7th/cmp-nvim-lsp-document-symbol',
 				-- Completion on the vim.lsp apis
@@ -886,6 +887,15 @@ local lazy_plugins = {
 	-- package.json completion source
 	--  TODO some plugins (like this one?) need to only be enabled when npm is found. Fish and other commands too.
 	{ 'David-Kunz/cmp-npm', opts = {}, dependencies = 'plenary.nvim', event = "BufRead package.json" },
+	-- Fish completion
+	{
+		'mtoohey31/cmp-fish',
+		ft = "fish", -- Only load on fish filetype
+		cond = function ()
+			-- Only load if fish is present
+			return os.execute"command -v fish" == 0
+		end
+	},
 	-- conjure intractive eval completion
 	--use 'PaterJason/cmp-conjure' -- TODO add this to cmp -- this might be a problem 987632498629765296987492
 }
