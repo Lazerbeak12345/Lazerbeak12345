@@ -290,8 +290,9 @@ local function configuire_lspconfig()
 		"taplo", -- For TOML
 		"vimls"
 	}
-	local has_npm, _, _ = os.execute"command -v npm"
-	if not has_npm then
+	local check_npm = io.popen"command -v npm"
+	check_npm:read"*all"
+	if check_npm:close() then -- if npm not found
 		local lsp_attempt_installed = lsp_installed
 		lsp_installed = {}
 		for _, lspconfig_name in ipairs(lsp_attempt_installed) do

@@ -42,6 +42,7 @@ if status is-interactive
 	abbr --add wo workon
 	abbr --add woc workonc
 	abbr --add dotf dotfiles
+	abbr --add dof dotfiles
 end
 function fish_greeting
 	echo TODO:
