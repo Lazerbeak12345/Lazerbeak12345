@@ -729,8 +729,17 @@ local lazy_plugins = {
 			vim.g.loaded_netrwPlugin = 1 -- Don't load both this and the builtin tree
 			local completion_kinds = require'lspkind'.symbol_map -- Completion-kinds:Document-kinds not a 1:1 map
 			require'neo-tree'.setup{
-				-- The icons only need to be specified in neo-tree v2
+				-- These icons below only need to be specified in neo-tree v2
 				default_component_configs = {
+					diagnostics = {
+						symbols = {
+							-- Just these icons still need set even after that upgrade
+							error = " ",
+							warn = " ",
+							info =" ",
+							hint = ""
+						}
+					},
 					icon = { folder_empty = "󰜌", folder_empty_open = "󰜌" },
 					git_status = { symbols = { renamed   = "󰁕", unstaged  = "󰄱" } }
 				},
