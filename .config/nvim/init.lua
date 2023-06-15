@@ -533,7 +533,7 @@ local lazy_plugins = {
 	-- - Powerline
 	-- - Airline
 	-- - And the well-known, formerly first-place Lightline
-	{ 'nvim-lualine/lualine.nvim', config = configure_lualine, lazy = false },
+	{ 'nvim-lualine/lualine.nvim', config = configure_lualine, event = "BufEnter" },
 	-- The looks of Powerline, but faster
 	-- use{
 	-- 	'itchyny/lightline.vim',
