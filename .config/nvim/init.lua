@@ -872,8 +872,7 @@ local lazy_plugins = {
 						require"luasnip.loaders.from_vscode".lazy_load()
 					end,
 					--  Pre-configured snippits
-					--  TODO not correct dependencies
-					'rafamadriz/friendly-snippets'
+					dependencies = 'rafamadriz/friendly-snippets'
 				},
 				'hrsh7th/cmp-cmdline',
 				'hrsh7th/cmp-path',
