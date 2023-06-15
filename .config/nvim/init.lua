@@ -292,7 +292,8 @@ local function configuire_lspconfig()
 	}
 	local check_npm = io.popen"command -v npm"
 	check_npm:read"*all"
-	if check_npm:close() then -- if npm not found
+	local _, _, has_npm = check_npm:close()
+	if not has_npm then -- if npm not found
 		local lsp_attempt_installed = lsp_installed
 		lsp_installed = {}
 		for _, lspconfig_name in ipairs(lsp_attempt_installed) do
@@ -871,6 +872,7 @@ local lazy_plugins = {
 						require"luasnip.loaders.from_vscode".lazy_load()
 					end,
 					--  Pre-configured snippits
+					--  TODO not correct dependencies
 					'rafamadriz/friendly-snippets'
 				},
 				'hrsh7th/cmp-cmdline',
