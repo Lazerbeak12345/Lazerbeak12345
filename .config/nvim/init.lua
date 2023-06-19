@@ -291,8 +291,11 @@ local function configuire_lspconfig()
 		"vimls"
 	}
 	local check_npm = io.popen"command -v npm"
-	check_npm:read"*all"
-	local _, _, has_npm = check_npm:close()
+	local has_npm = nil
+	if check_npm then
+		check_npm:read"*all"
+		has_npm = ({check_npm:close()})[3]
+	end
 	if not has_npm then -- if npm not found
 		local lsp_attempt_installed = lsp_installed
 		lsp_installed = {}
