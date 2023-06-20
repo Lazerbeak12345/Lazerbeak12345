@@ -274,20 +274,22 @@ local function configuire_lspconfig()
 		}
 	}
 	local lsp_installed = {
-		"eslint",
-		"html",
-		"jsonls",
-		"tsserver",
 		-- This is sumneko_lua. Not my favorite.
 		-- TODO needs to know the root dir only fails to find it on it's own when the first buffer is a lua file.
 		--  Not related to rooter
 		-- can be short-term fixed by running :LspStart lua_ls when editing this file
 		"lua_ls",
 		"ruff_lsp", -- Super fast python linting & etc.
-		"pyright", -- Everything else python LSP
 		"rust_analyzer",
-		"svelte",
 		"taplo", -- For TOML
+	}
+	local lsp_installed_npm = { -- TODO: make this automatic
+		"eslint",
+		"html",
+		"jsonls",
+		"tsserver",
+		"pyright", -- Everything else python LSP
+		"svelte",
 		"vimls"
 	}
 	local check_npm = io.popen"command -v npm"
@@ -296,19 +298,9 @@ local function configuire_lspconfig()
 		check_npm:read"*all"
 		has_npm = ({check_npm:close()})[3]
 	end
-	if not has_npm then -- if npm not found
-		local lsp_attempt_installed = lsp_installed
-		lsp_installed = {}
-		for _, lspconfig_name in ipairs(lsp_attempt_installed) do
-			-- HACK: use mason-lspconfig's internal api to
-			-- 1. Convert the lspconfig name of each package into the mason name
-			local mason_name = require"mason-lspconfig.mappings.server".lspconfig_to_package[lspconfig_name]
-			-- 2. Get the source id of each package's spec, and see if the string is something like id in
-			-- https://json.schemastore.org/mason-registry.json/components/sources/npm
-			if require'mason-registry'.get_package(mason_name).spec.source.id:find"^pkg:npm/.+@.+" then
-				-- 3. If it wasn't an npm package, install it
-				lsp_installed[#lsp_installed+1] = lspconfig_name
-			end
+	if has_npm then
+		for _, name in ipairs(lsp_installed_npm) do
+			lsp_installed[#lsp_installed+1] = name
 		end
 	end
 	require'mason-lspconfig'.setup{
