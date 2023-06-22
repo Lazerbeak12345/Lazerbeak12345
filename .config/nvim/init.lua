@@ -907,7 +907,6 @@ local lazy_plugins = {
 	-- crates.io completion source
 	{ 'saecki/crates.nvim', opts = {}, event = "BufRead Cargo.toml" },
 	-- package.json completion source
-	--  TODO some plugins (like this one?) need to only be enabled when npm is found. Fish and other commands too.
 	{ 'David-Kunz/cmp-npm', opts = {}, dependencies = 'plenary.nvim', event = "BufRead package.json" },
 	-- Fish completion
 	{
@@ -915,7 +914,13 @@ local lazy_plugins = {
 		ft = "fish", -- Only load on fish filetype
 		cond = function ()
 			-- Only load if fish is present
-			return os.execute"command -v fish" == 0
+			local check_fish = io.popen"command -v fish"
+			local has_fish = nil
+			if check_fish then
+				check_fish:read"*all"
+				has_fish = ({check_fish:close()})[3]
+			end
+			return has_fish and true or false -- Convert from truthy to bool
 		end
 	},
 	-- conjure intractive eval completion
