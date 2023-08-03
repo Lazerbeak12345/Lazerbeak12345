@@ -282,6 +282,7 @@ local function configuire_lspconfig()
 		"ruff_lsp", -- Super fast python linting & etc.
 		"rust_analyzer",
 		"taplo", -- For TOML
+		"marksman" -- For markdown
 	}
 	local lsp_installed_npm = { -- TODO: make this automatic
 		"eslint",
