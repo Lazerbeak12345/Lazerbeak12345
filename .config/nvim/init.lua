@@ -340,7 +340,8 @@ local function configure_lualine()
 					function () return require'lazy.status'.updates() end,
 					cond = function () return require'lazy.status'.has_updates() end
 				},
-				'hostname', 'branch', 'diff', 'diagnostics'
+				--'hostname',
+				'branch', 'diff', 'diagnostics'
 				-- TODO: todo count https://github.com/folke/todo-comments.nvim/issues/197
 			},
 			lualine_c = {
