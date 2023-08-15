@@ -214,65 +214,21 @@ local function configuire_lspconfig()
 	}
 	-- Style rule: All sources _must_ link to the documentation for each source.
 	-- Must also include what it does.
-	require'mason-null-ls'.setup{
+	-- TODO
+	--[[require'mason-null-ls'.setup{
 		automatic_installation = true,
-		ensure_installed = {
-			--  https://github.com/get-alex/alex
-			--  Catch insensitive, inconsiderate writing.
-			'alex',
-			--  https://github.com/editorconfig-checker/editorconfig-checker
-			--  A tool to verify that your files are in harmony with your `.editorconfig`.
-			'editorconfig_checker',
-			--  https://kampfkarren.github.io/selene/
-			--  Command line tool designed to help write correct and idiomatic Lua code.
-			'selene',
-			--  https://github.com/Vimjas/vint
-			--  Linter for Vimscript.
-			--'vint, -- Broken. Causes packer bug.
-			--  https://github.com/rust-lang/rustfmt
-			--  A tool for formatting rust code according to style guidelines.
-			'rustfmt',
-			--  https://github.com/anordal/shellharden
-			--  Hardens shell scripts by quoting variables, replacing `function_call` with `$(function_call)`, and more.
-			'shellharden',
-			--  https://github.com/JohnnyMorganz/StyLua
-			--  An opinionated code formatter for Lua.
-			'stylua',
-			--  https://github.com/mpeterv/luacheck
-			--  A tool for linting and static analysis of Lua code.
-			"luacheck",
-		},
-		handlers = {
-			function(source_name, methods)
-				-- To keep the original functionality of `automatic_setup = true`
-				require'mason-null-ls.automatic_setup'(source_name, methods)
-			end,
-			--stylua = function(source_name, methods)
-			--	null_ls.register(null_ls.builtins.formatting.stylua)
-			--end,
-		}
+		ensure_installed = { 'alex', 'editorconfig_checker', 'selene', 'rustfmt', 'shellharden', 'stylua', "luacheck" },
+		handlers = { function(source_name, methods) require'mason-null-ls.automatic_setup'(source_name, methods) end }
 	}
 	require'null-ls'.setup{
 		sources = {
-			-- Anything not supported by mason.
-			--
-			--  https://github.com/dotenv-linter/dotenv-linter
-			--  Lightning-fast linter for .env files.
 			require'null-ls'.builtins.diagnostics.dotenv_linter,
-			--  https://github.com/fish-shell/fish-shell
-			--  Basic linting is available for fish scripts using `fish --no-execute`.
 			require'null-ls'.builtins.diagnostics.fish,
-			--  https://www.typescriptlang.org/docs/handbook/compiler-options.html
-			--  Parses diagnostics from the TypeScript compiler.
 			require'null-ls'.builtins.diagnostics.tsc,
-			--  https://fishshell.com/docs/current/cmds/fish_indent.html
-			--  Indent or otherwise prettify a piece of fish code.
 			require'null-ls'.builtins.formatting.fish_indent,
-			--  https://github.com/jose-elias-alvarez/null-ls.nvim/blob/main/doc/BUILTINS.md#printenv
-			--  Shows the value for the current environment variable under the cursor.
-			require'null-ls'.builtins.hover.printenv,
+			require'null-ls'.builtins.hover.printenv
 		}
-	}
+	}]]
 	local lsp_installed = {
 		-- This is sumneko_lua. Not my favorite.
 		-- TODO needs to know the root dir only fails to find it on it's own when the first buffer is a lua file.
@@ -799,8 +755,8 @@ local lazy_plugins = {
 
 	-- common dependencie of many nvim plugins
 	'nvim-lua/plenary.nvim',
-	{ 'jose-elias-alvarez/null-ls.nvim', event = "VeryLazy" },
-	{ 'jay-babu/mason-null-ls.nvim', event = "VeryLazy" },
+	--{ 'jose-elias-alvarez/null-ls.nvim', event = "VeryLazy" }, -- TODO
+	--{ 'jay-babu/mason-null-ls.nvim', event = "VeryLazy" }, -- TODO
 	-- Interactive eval
 	-- use 'Olical/conjure'
 	--  TODO configure this
@@ -845,7 +801,7 @@ local lazy_plugins = {
 			'cmp_nvim_lsp',
 			"mason.nvim",
 			'mason-lspconfig.nvim',
-			'mason-null-ls.nvim'
+			-- 'mason-null-ls.nvim' TODO
 		},
 		event = "VeryLazy"
 	},
