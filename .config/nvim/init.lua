@@ -94,11 +94,11 @@ local function configure_nvim_cmp()
 			{ name = 'nvim_lsp_document_symbol' },
 			{ name = "fish" },
 			{ name = "path" },
-		}, {
-			{ name = "dictionary", keyword_length = 2 },
+			{ name = "dictionary", keyword_length = 2 }, -- TODO: seems broken
 			{ name = 'nvim_lua' },
+		}, {
 			{ name = 'buffer' },
-			{ name = 'cmdline' },
+			{ name = 'cmdline', keyword_length = 2 },
 		}--[[, {
 			{ name = 'cmdline_history', options = { history_type = ':' } },
 		}]]),
@@ -736,7 +736,7 @@ local lazy_plugins = {
 							error = " ",
 							warn = " ",
 							info =" ",
-							hint = ""
+							hint = "" -- TODO: This icon isn't displaying correctly.
 						}
 					},
 					icon = { folder_empty = "󰜌", folder_empty_open = "󰜌" },
@@ -902,7 +902,14 @@ local lazy_plugins = {
 				-- Completion on the vim.lsp apis
 				'hrsh7th/cmp-nvim-lua',
 				-- Use /usr/share/dict/words for completion
-				{ 'uga-rosa/cmp-dictionary', opts = { dic = { ["*"] = "/usr/share/dict/words" } } }
+				{
+					'uga-rosa/cmp-dictionary',
+					config = function ()
+						local dict = require"cmp_dictionary"
+						dict.setup{ debug = true }
+						dict.switcher{ spelling = { en = "/usr/share/dict/words" } }
+					end
+				}
 			}
 		}
 	},
