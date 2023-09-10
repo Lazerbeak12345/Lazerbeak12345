@@ -34,6 +34,7 @@ elseif vim.env.VIMRUNNING ~= "2" then
 end
 
 local function configure_nvim_cmp()
+	-- TODO nvim-lsp source is broken
 	local cmp = require'cmp'
 	--[[local function has_words_before()
 		local line, col = unpack(vim.api.nvim_win_get_cursor(0))
@@ -215,6 +216,9 @@ local function configuire_lspconfig()
 	-- Style rule: All sources _must_ link to the documentation for each source.
 	-- Must also include what it does.
 	-- TODO
+	--  - https://github.com/garcia5/dotfiles/commit/c9311e8028874083a8479d8f53953235d62efb13
+	--  - https://github.com/elentok/dotfiles/commit/343cd0fee34c104732b37925b95f42d32d559803
+	--  - https://github.com/nvimdev/guard.nvim
 	--[[require'mason-null-ls'.setup{
 		automatic_installation = true,
 		ensure_installed = { 'alex', 'editorconfig_checker', 'selene', 'rustfmt', 'shellharden', 'stylua', "luacheck" },
@@ -417,6 +421,7 @@ do -- Keymaps and the like
 	-- Enable folding
 	vim.o.foldmethod = 'syntax'
 	--vim.o.foldmethod = 'indent'
+	--TODO set foldexpr to nvim_treesitter#foldexpr() https://www.reddit.com/r/neovim/comments/15jxqgn/i_dont_get_why_treesitter_is_a_big_deal_and_at/jv2u0eq/?utm_source=share&utm_medium=web3x&utm_name=web3xcss&utm_term=1&utm_content=share_button
 	vim.o.foldlevel=99
 	vim.o.foldminlines = 3
 
