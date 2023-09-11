@@ -215,24 +215,34 @@ local function configuire_lspconfig()
 	}
 	-- Style rule: All sources _must_ link to the documentation for each source.
 	-- Must also include what it does.
-	-- TODO
-	--  - https://github.com/garcia5/dotfiles/commit/c9311e8028874083a8479d8f53953235d62efb13
-	--  - https://github.com/elentok/dotfiles/commit/343cd0fee34c104732b37925b95f42d32d559803
-	--  - https://github.com/nvimdev/guard.nvim
-	--[[require'mason-null-ls'.setup{
-		automatic_installation = true,
-		ensure_installed = { 'alex', 'editorconfig_checker', 'selene', 'rustfmt', 'shellharden', 'stylua', "luacheck" },
-		handlers = { function(source_name, methods) require'mason-null-ls.automatic_setup'(source_name, methods) end }
-	}
-	require'null-ls'.setup{
-		sources = {
-			require'null-ls'.builtins.diagnostics.dotenv_linter,
-			require'null-ls'.builtins.diagnostics.fish,
-			require'null-ls'.builtins.diagnostics.tsc,
-			require'null-ls'.builtins.formatting.fish_indent,
-			require'null-ls'.builtins.hover.printenv
+	-- https://github.com/nvimdev/guard.nvim -- Linter chains (for if efm doesn't work)
+	local function efm ()
+		local function efm_formatter(name)
+			return require("efmls-configs.formatters." .. name)
+		end
+		local function efm_linter(name)
+			return require("efmls-configs.linters." .. name)
+		end
+		local default_langs = require"efmls-configs.defaults".languages()
+		require'lspconfig'.efm.setup{
+			on_attach = default_args.on_attach,
+			capabilities = capabilities,
+			settings = {
+				-- TODO can this be used elsewhere?
+				rootMarkers = {".git/"},
+				languages = vim.tbl_extend("force", default_langs, {
+					rust = { efm_formatter"rustfmt" },
+					-- We want both luacheck and selene.
+					lua = vim.tbl_extend("keep", default_langs.lua, { efm_linter"selene" }),
+					sh = { efm_formatter"shellharden" },
+					fish = { efm_linter"fish", efm_formatter"fish_indent" }
+					-- TODO alex, editorconfig_checker
+					-- TODO automatic_installation?
+					-- TODO dotenv_linter, tsc, printenv
+				})
+			}
 		}
-	}]]
+	end
 	local lsp_installed = {
 		-- This is sumneko_lua. Not my favorite.
 		-- TODO needs to know the root dir only fails to find it on it's own when the first buffer is a lua file.
@@ -242,7 +252,8 @@ local function configuire_lspconfig()
 		"ruff_lsp", -- Super fast python linting & etc.
 		"rust_analyzer",
 		"taplo", -- For TOML
-		"marksman" -- For markdown
+		"marksman", -- For markdown
+		"efm"
 	}
 	local lsp_installed_npm = { -- TODO: make this automatic
 		"eslint",
@@ -279,7 +290,8 @@ local function configuire_lspconfig()
 						hoverProvider = false
 					})
 				}
-			end
+			end,
+			efm = efm
 		}
 	}
 end
@@ -760,8 +772,12 @@ local lazy_plugins = {
 
 	-- common dependencie of many nvim plugins
 	'nvim-lua/plenary.nvim',
-	--{ 'jose-elias-alvarez/null-ls.nvim', event = "VeryLazy" }, -- TODO
-	--{ 'jay-babu/mason-null-ls.nvim', event = "VeryLazy" }, -- TODO
+	{
+		'creativenull/efmls-configs-nvim',
+		--version = 'v1.1.1',
+		--dependencies = { 'neovim/nvim-lspconfig' },
+		event = "VeryLazy"
+	},
 	-- Interactive eval
 	-- use 'Olical/conjure'
 	--  TODO configure this
@@ -806,8 +822,8 @@ local lazy_plugins = {
 			'cmp_nvim_lsp',
 			"mason.nvim",
 			'mason-lspconfig.nvim',
-			-- 'mason-null-ls.nvim' TODO
 		},
+		dependencies = 'creativenull/efmls-configs-nvim',
 		event = "VeryLazy"
 	},
 	{
