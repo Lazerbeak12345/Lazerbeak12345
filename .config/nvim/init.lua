@@ -322,7 +322,10 @@ local function configure_lualine()
 			lualine_c = {
 				'filename',
 				'selectioncount',
-				function () return require'lsp-status'.status() end
+				function () return require'lsp-status'.status() end,
+				function ()
+					return vim.fn['nvim_treesitter#statusline']{indicator_size=20}
+				end
 			},
 			lualine_y = { 'searchcount', 'progress' }
 		},
@@ -434,11 +437,13 @@ do -- Keymaps and the like
 	vim.o.updatetime = 1000
 
 	-- Enable folding
-	vim.o.foldmethod = 'syntax'
-	--vim.o.foldmethod = 'indent'
-	--TODO set foldexpr to nvim_treesitter#foldexpr() https://www.reddit.com/r/neovim/comments/15jxqgn/i_dont_get_why_treesitter_is_a_big_deal_and_at/jv2u0eq/?utm_source=share&utm_medium=web3x&utm_name=web3xcss&utm_term=1&utm_content=share_button
-	vim.o.foldlevel=99
-	vim.o.foldminlines = 3
+	--vim.o.foldmethod = 'syntax'
+	----vim.o.foldmethod = 'indent'
+	----TODO set foldexpr to nvim_treesitter#foldexpr() https://www.reddit.com/r/neovim/comments/15jxqgn/i_dont_get_why_treesitter_is_a_big_deal_and_at/jv2u0eq/?utm_source=share&utm_medium=web3x&utm_name=web3xcss&utm_term=1&utm_content=share_button
+	vim.wo.foldmethod= 'expr'
+	vim.wo.foldexpr = 'v:lua.vim.treesitter.foldexpr()'
+	vim.wo.foldlevel=99
+	vim.wo.foldminlines = 3
 
 	-- Load file automatically when changes happen
 	vim.o.autoread = true
