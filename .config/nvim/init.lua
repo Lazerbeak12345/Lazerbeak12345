@@ -216,6 +216,9 @@ local function configuire_lspconfig()
 	-- Style rule: All sources _must_ link to the documentation for each source.
 	-- Must also include what it does.
 	-- https://github.com/nvimdev/guard.nvim -- Linter chains (for if efm doesn't work)
+	require'mason-tool-installer'.setup{
+		ensure_installed = { 'selene', 'rustfmt', 'shellharden', 'stylua', 'luacheck' },
+	}
 	local function efm ()
 		local function efm_formatter(name)
 			return require("efmls-configs.formatters." .. name)
@@ -775,7 +778,7 @@ local lazy_plugins = {
 	{
 		'creativenull/efmls-configs-nvim',
 		--version = 'v1.1.1',
-		--dependencies = { 'neovim/nvim-lspconfig' },
+		dependencies = { 'WhoIsSethDaniel/mason-tool-installer.nvim', event = "VeryLazy" }, -- Install the linters
 		event = "VeryLazy"
 	},
 	-- Interactive eval
