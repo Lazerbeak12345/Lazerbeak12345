@@ -34,7 +34,6 @@ elseif vim.env.VIMRUNNING ~= "2" then
 end
 
 local function configure_nvim_cmp()
-	-- TODO nvim-lsp source is broken
 	local cmp = require'cmp'
 	--[[local function has_words_before()
 		local line, col = unpack(vim.api.nvim_win_get_cursor(0))
@@ -83,7 +82,7 @@ local function configure_nvim_cmp()
 			['<C-k>'] = cmp.mapping(cmp.mapping.select_prev_item(), { 'i', 'c' })
 		},
 		sources = cmp.config.sources({
-			{ name = 'nvim_lsp' },
+			{ name = 'nvim_lsp' }, -- TODO Broken?
 			{ name = 'luasnip' },
 			{ name = 'latex_symbols' },
 			{ name = 'emoji', insert = true },
@@ -217,7 +216,11 @@ local function configuire_lspconfig()
 	-- Must also include what it does.
 	-- https://github.com/nvimdev/guard.nvim -- Linter chains (for if efm doesn't work)
 	require'mason-tool-installer'.setup{
-		ensure_installed = { 'selene', 'rustfmt', 'shellharden', 'stylua', 'luacheck' },
+		ensure_installed = {
+			-- TODO some of these are installed with npm
+			'selene', 'rustfmt', 'shellharden', 'stylua', 'luacheck',
+			"stylelint", "prettier",
+		},
 	}
 	local function efm ()
 		local function efm_formatter(name)
@@ -226,23 +229,26 @@ local function configuire_lspconfig()
 		local function efm_linter(name)
 			return require("efmls-configs.linters." .. name)
 		end
-		local default_langs = require"efmls-configs.defaults".languages()
+		local prettier = efm_formatter"prettier"
+		local css = { efm_linter"stylelint", prettier }
+		local prettier_only = { prettier } -- eslint isn't needed - we have the lsp
 		require'lspconfig'.efm.setup{
 			on_attach = default_args.on_attach,
 			capabilities = capabilities,
 			settings = {
-				-- TODO can this be used elsewhere?
+				-- TODO can this be used elsewhere (like lua_ls)?
 				rootMarkers = {".git/"},
-				languages = vim.tbl_extend("force", default_langs, {
+				languages = {
+					css = css, less = css, scss = css, sass = css,
+					javascript = prettier_only, javascriptreact = prettier_only,
+					typescript = prettier_only, typescriptreact = prettier_only,
+					html = prettier_only,
+					lua = { efm_linter"luacheck", efm_formatter"stylua", efm_linter"selene" },
+					vim = { efm_linter"vint" },
 					rust = { efm_formatter"rustfmt" },
-					-- We want both luacheck and selene.
-					lua = vim.tbl_extend("keep", default_langs.lua, { efm_linter"selene" }),
 					sh = { efm_formatter"shellharden" },
 					fish = { efm_linter"fish", efm_formatter"fish_indent" }
-					-- TODO alex, editorconfig_checker
-					-- TODO automatic_installation?
-					-- TODO dotenv_linter, tsc, printenv
-				})
+				}
 			}
 		}
 	end
@@ -323,9 +329,10 @@ local function configure_lualine()
 				'filename',
 				'selectioncount',
 				function () return require'lsp-status'.status() end,
-				function ()
-					return vim.fn['nvim_treesitter#statusline']{indicator_size=20}
-				end
+				-- The below doesn't look good and provides nothing I need
+				--function ()
+				--	return vim.fn['nvim_treesitter#statusline']{indicator_size=20}
+				--end
 			},
 			lualine_y = { 'searchcount', 'progress' }
 		},
@@ -439,7 +446,7 @@ do -- Keymaps and the like
 	-- Enable folding
 	--vim.o.foldmethod = 'syntax'
 	----vim.o.foldmethod = 'indent'
-	----TODO set foldexpr to nvim_treesitter#foldexpr() https://www.reddit.com/r/neovim/comments/15jxqgn/i_dont_get_why_treesitter_is_a_big_deal_and_at/jv2u0eq/?utm_source=share&utm_medium=web3x&utm_name=web3xcss&utm_term=1&utm_content=share_button
+	--- TODO: what about for when treesitter _doesnt_ work?
 	vim.wo.foldmethod= 'expr'
 	vim.wo.foldexpr = 'v:lua.vim.treesitter.foldexpr()'
 	vim.wo.foldlevel=99
@@ -466,22 +473,22 @@ do -- Keymaps and the like
 	vim.api.nvim_create_autocmd({ "BufNewFile", "BufRead" }, {
 		pattern = "*.rkt",
 		callback = function()
-			vim.o.tabstop = 2
-			vim.o.softtabstop = 2
-			vim.o.shiftwidth = 2
-			vim.o.textwidth = 79
-			vim.o.expandtab = true
-			vim.o.autoindent = true
-			vim.o.fileformat = "unix"
-			vim.o.lisp = true
+			vim.bo.tabstop = 2
+			vim.bo.softtabstop = 2
+			vim.bo.shiftwidth = 2
+			vim.bo.textwidth = 79
+			vim.bo.expandtab = true
+			vim.bo.autoindent = true
+			vim.bo.fileformat = "unix"
+			vim.bo.lisp = true
 		end
 	})
 	-- Disable numbers on terminal only.
 	vim.api.nvim_create_autocmd({ "TermOpen" }, {
 		pattern = "*",
 		callback = function()
-			vim.o.number = false
-			vim.o.relativenumber = false
+			vim.bo.number = false
+			vim.bo.relativenumber = false
 		end
 	})
 	-- Popup windows tend to be unreadable with a pink background
@@ -773,6 +780,7 @@ local lazy_plugins = {
 	},
 	--  Start Screen
 	{
+		-- TODO stopped working recently
 		'goolord/alpha-nvim', dependencies = 'nvim-tree/nvim-web-devicons', lazy = false,
 		config = function () require'alpha'.setup(require'alpha.themes.startify'.config) end
 	},
@@ -798,6 +806,7 @@ local lazy_plugins = {
 	--  Eww's configuration language, yuck
 	{ 'elkowar/yuck.vim', event = "BufEnter" },
 	{
+		-- TODO is it possible to replace this with something that uses treesitter or LSP?
 		"folke/todo-comments.nvim",
 		dependencies = "nvim-lua/plenary.nvim",
 		opts = {
