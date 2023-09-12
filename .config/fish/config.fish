@@ -62,3 +62,8 @@ if type --query rustup
 end
 starship completions fish > ~/.config/fish/completions/starship.fish
 starship init fish | source
+
+# pnpm
+set -gx PNPM_HOME "$HOME/.local/share/pnpm"
+set -gx PATH "$PNPM_HOME" $PATH
+# pnpm end
