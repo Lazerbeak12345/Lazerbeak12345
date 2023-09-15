@@ -257,6 +257,7 @@ local function configuire_lspconfig()
 		-- TODO needs to know the root dir only fails to find it on it's own when the first buffer is a lua file.
 		--  Not related to rooter
 		-- can be short-term fixed by running :LspStart lua_ls when editing this file
+		-- This happens to efm as well. Might be happening to everything if that's the first file.
 		"lua_ls",
 		"ruff_lsp", -- Super fast python linting & etc.
 		"rust_analyzer",
@@ -709,51 +710,12 @@ local lazy_plugins = {
 	-- Even nicer file management
 	{
 		'nvim-neo-tree/neo-tree.nvim',
-		branch = "v2.x", -- TODO migrate to v3
+		branch = "v3.x", -- TODO migrate to v3
 		dependencies = { "nvim-lua/plenary.nvim", "nvim-tree/nvim-web-devicons", "MunifTanjim/nui.nvim" },
 		config = function ()
 			vim.g.neo_tree_remove_legacy_commands = 1
 			vim.g.loaded_netrwPlugin = 1 -- Don't load both this and the builtin tree
-			local completion_kinds = require'lspkind'.symbol_map -- Completion-kinds:Document-kinds not a 1:1 map
-			require'neo-tree'.setup{
-				-- These icons below only need to be specified in neo-tree v2
-				default_component_configs = {
-					diagnostics = {
-						symbols = {
-							-- Just these icons still need set even after that upgrade
-							error = " ",
-							warn = " ",
-							info =" ",
-							hint = "" -- TODO: This icon isn't displaying correctly.
-						}
-					},
-					icon = { folder_empty = "󰜌", folder_empty_open = "󰜌" },
-					git_status = { symbols = { renamed   = "󰁕", unstaged  = "󰄱" } }
-				},
-				document_symbols = { kinds = {
-					File = { icon = completion_kinds.File, hl = "Tag" },
-					Namespace = { icon = completion_kinds.Module, hl = "Include" },
-					Package = { icon = "󰏖", hl = "Label" },
-					Class = { icon = completion_kinds.Class, hl = "Include" },
-					Property = { icon = completion_kinds.Property, hl = "@property" },
-					Enum = { icon = completion_kinds.Enum, hl = "@number" },
-					Function = { icon = completion_kinds.Function, hl = "Function" },
-					String = { icon = completion_kinds.Text, hl = "String" },
-					Number = { icon = completion_kinds.Value, hl = "Number" },
-					Array = { icon = "󰅪", hl = "Type" },
-					Object = { icon = "󰅩", hl = "Type" },
-					Key = { icon = completion_kinds.Keyword, hl = "" },
-					Struct = { icon = completion_kinds.Struct, hl = "Type" },
-					Operator = { icon = completion_kinds.Operator, hl = "Operator" },
-					TypeParameter = { icon = completion_kinds.TypeParameter, hl = "Type" },
-					StaticMethod = { icon = completion_kinds.Method, hl = 'Function' }
-				} },
-				-- Add this section only if you've configured source selector. (I havent)
-				source_selector = { sources = {
-					{ source = "filesystem", display_name = " 󰉓 Files " },
-					{ source = "git_status", display_name = " 󰊢 Git " },
-				} },
-			}
+			require'neo-tree'.setup{ window = { position = "current" } }
 		end,
 		lazy = false
 	},
