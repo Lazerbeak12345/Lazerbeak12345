@@ -82,7 +82,7 @@ local function configure_nvim_cmp()
 			['<C-k>'] = cmp.mapping(cmp.mapping.select_prev_item(), { 'i', 'c' })
 		},
 		sources = cmp.config.sources({
-			{ name = 'nvim_lsp' }, -- TODO Broken?
+			{ name = 'nvim_lsp' },
 			{ name = 'luasnip' },
 			{ name = 'latex_symbols' },
 			{ name = 'emoji', insert = true },
@@ -232,24 +232,30 @@ local function configuire_lspconfig()
 		local prettier = efm_formatter"prettier"
 		local css = { efm_linter"stylelint", prettier }
 		local prettier_only = { prettier } -- eslint isn't needed - we have the lsp
+		local languages = {
+			css = css, less = css, scss = css, sass = css,
+			javascript = prettier_only, javascriptreact = prettier_only,
+			typescript = prettier_only, typescriptreact = prettier_only,
+			html = prettier_only,
+			lua = { efm_linter"luacheck", efm_formatter"stylua", efm_linter"selene" },
+			vim = { efm_linter"vint" },
+			rust = { efm_formatter"rustfmt" },
+			sh = { efm_formatter"shellharden" },
+			fish = { efm_linter"fish", efm_formatter"fish_indent" }
+		}
+		local filetypes = {}
+		for lang, _ in pairs(languages) do
+			filetypes[#filetypes+1] = lang
+		end
 		require'lspconfig'.efm.setup{
 			on_attach = default_args.on_attach,
 			capabilities = capabilities,
 			settings = {
 				-- TODO can this be used elsewhere (like lua_ls)?
 				rootMarkers = {".git/"},
-				languages = {
-					css = css, less = css, scss = css, sass = css,
-					javascript = prettier_only, javascriptreact = prettier_only,
-					typescript = prettier_only, typescriptreact = prettier_only,
-					html = prettier_only,
-					lua = { efm_linter"luacheck", efm_formatter"stylua", efm_linter"selene" },
-					vim = { efm_linter"vint" },
-					rust = { efm_formatter"rustfmt" },
-					sh = { efm_formatter"shellharden" },
-					fish = { efm_linter"fish", efm_formatter"fish_indent" }
-				}
-			}
+				languages = languages
+			},
+			filetypes = filetypes
 		}
 	end
 	local lsp_installed = {
