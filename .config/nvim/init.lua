@@ -217,8 +217,13 @@ local function configuire_lspconfig()
 	-- https://github.com/nvimdev/guard.nvim -- Linter chains (for if efm doesn't work)
 	require'mason-tool-installer'.setup{
 		ensure_installed = {
-			-- TODO some of these are installed with npm
-			'selene', 'rustfmt', 'shellharden', 'stylua', 'luacheck',
+			'rustfmt', -- WARNING reccomends rustup instead of whatever it's doing now (deprecation)
+			'luacheck',
+			-- TODO requires unzip
+			'selene', 'stylua',
+			-- TODO requires cargo
+			'shellharden',
+			-- TODO requires npm
 			"stylelint", "prettier",
 		},
 	}
