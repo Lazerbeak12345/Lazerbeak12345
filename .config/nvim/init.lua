@@ -159,6 +159,21 @@ local function configure_lsp_status()
 	lsp_status.register_progress()
 end
 
+local function has_npm()
+	local check_npm = io.popen"command -v npm"
+	if check_npm then
+		check_npm:read"*all"
+		local val = ({check_npm:close()})[3]
+		has_npm = function ()
+			return val
+		end
+	else
+		has_npm = function ()
+			return nil
+		end
+	end
+end
+
 local function configuire_lspconfig()
 	local function lsp_keybindings(_client, bufnr)
 		-- Reccomended keymaps from nvim-lspconfig
@@ -212,12 +227,6 @@ local function configuire_lspconfig()
 			}
 		}
 	}
-	local check_npm = io.popen"command -v npm"
-	local has_npm = nil
-	if check_npm then
-		check_npm:read"*all"
-		has_npm = ({check_npm:close()})[3]
-	end
 	-- Style rule: All sources _must_ link to the documentation for each source.
 	-- Must also include what it does.
 	-- https://github.com/nvimdev/guard.nvim -- Linter chains (for if efm doesn't work)
@@ -233,7 +242,7 @@ local function configuire_lspconfig()
 	local mason_tool_installed_npm = {
 		"stylelint", "prettier",
 	}
-	if has_npm then
+	if has_npm() then
 		for _, name in ipairs(mason_tool_installed_npm) do
 			mason_tool_installed[#mason_tool_installed+1] = name
 		end
@@ -297,7 +306,7 @@ local function configuire_lspconfig()
 		"svelte",
 		"vimls"
 	}
-	if has_npm then
+	if has_npm() then
 		for _, name in ipairs(lsp_installed_npm) do
 			lsp_installed[#lsp_installed+1] = name
 		end
@@ -960,10 +969,18 @@ local lazy_plugins = {
 			}
 		},
 		event = 'BufEnter',
-		opts = {
-			ensure_installed = { "js", "bash", "node2", "chrome", "cppdbg", "mock", "puppet", "python", "firefox", "codelldb" },
-			handlers = {}
-		}
+		config = function ()
+			local installed = {
+				"js", "bash", "node2", "chrome", "cppdbg", "mock", "puppet", "python", "codelldb",
+			}
+			if has_npm() then
+				installed[#installed+1] = "firefox"
+			end
+			return {
+				ensure_installed = installed,
+				handlers = {}
+			}
+		end
 	},
 }
 require("lazy").setup(lazy_plugins, lazy_config)
