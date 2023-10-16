@@ -212,21 +212,33 @@ local function configuire_lspconfig()
 			}
 		}
 	}
+	local check_npm = io.popen"command -v npm"
+	local has_npm = nil
+	if check_npm then
+		check_npm:read"*all"
+		has_npm = ({check_npm:close()})[3]
+	end
 	-- Style rule: All sources _must_ link to the documentation for each source.
 	-- Must also include what it does.
 	-- https://github.com/nvimdev/guard.nvim -- Linter chains (for if efm doesn't work)
-	require'mason-tool-installer'.setup{
-		ensure_installed = {
-			'rustfmt', -- WARNING reccomends rustup instead of whatever it's doing now (deprecation)
-			'luacheck',
-			-- TODO requires unzip
-			'selene', 'stylua',
-			-- TODO requires cargo
-			'shellharden',
-			-- TODO requires npm
-			"stylelint", "prettier",
-		},
+	local mason_tool_installed = {
+		'rustfmt', -- WARNING reccomends rustup instead of whatever it's doing now (deprecation)
+		'luacheck',
+		-- TODO requires unzip
+		--'selene',
+		'stylua',
+		-- TODO requires cargo
+		'shellharden',
 	}
+	local mason_tool_installed_npm = {
+		"stylelint", "prettier",
+	}
+	if has_npm then
+		for _, name in ipairs(mason_tool_installed_npm) do
+			mason_tool_installed[#mason_tool_installed+1] = name
+		end
+	end
+	require'mason-tool-installer'.setup{ ensure_installed = mason_tool_installed }
 	local function efm ()
 		local function efm_formatter(name)
 			return require("efmls-configs.formatters." .. name)
@@ -242,7 +254,7 @@ local function configuire_lspconfig()
 			javascript = prettier_only, javascriptreact = prettier_only,
 			typescript = prettier_only, typescriptreact = prettier_only,
 			html = prettier_only,
-			lua = { efm_linter"luacheck", efm_formatter"stylua", efm_linter"selene" },
+			lua = { efm_linter"luacheck", efm_formatter"stylua"--[[, efm_linter"selene"]] },
 			vim = { efm_linter"vint" },
 			rust = { efm_formatter"rustfmt" },
 			sh = { efm_formatter"shellharden" },
@@ -285,12 +297,6 @@ local function configuire_lspconfig()
 		"svelte",
 		"vimls"
 	}
-	local check_npm = io.popen"command -v npm"
-	local has_npm = nil
-	if check_npm then
-		check_npm:read"*all"
-		has_npm = ({check_npm:close()})[3]
-	end
 	if has_npm then
 		for _, name in ipairs(lsp_installed_npm) do
 			lsp_installed[#lsp_installed+1] = name
@@ -605,6 +611,7 @@ local lazy_plugins = {
 					"vim",
 					"vimdoc",
 					"vue",
+					"xml",
 					"yaml",
 					"yuck",
 				},
