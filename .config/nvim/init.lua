@@ -500,22 +500,23 @@ do -- Keymaps and the like
 	vim.api.nvim_create_autocmd({ "BufNewFile", "BufRead" }, {
 		pattern = "*.rkt",
 		callback = function()
-			vim.bo.tabstop = 2
-			vim.bo.softtabstop = 2
-			vim.bo.shiftwidth = 2
-			vim.bo.textwidth = 79
-			vim.bo.expandtab = true
-			vim.bo.autoindent = true
-			vim.bo.fileformat = "unix"
-			vim.bo.lisp = true
+			vim.o.tabstop = 2
+			vim.o.softtabstop = 2
+			vim.o.shiftwidth = 2
+			vim.o.textwidth = 79
+			vim.o.expandtab = true
+			vim.o.autoindent = true
+			vim.o.fileformat = "unix"
+			vim.o.lisp = true
 		end
 	})
 	-- Disable numbers on terminal only.
 	vim.api.nvim_create_autocmd({ "TermOpen" }, {
 		pattern = "*",
 		callback = function()
-			vim.bo.number = false
-			vim.bo.relativenumber = false
+			-- TODO should this be something else? It errors for bo
+			vim.o.number = false
+			vim.o.relativenumber = false
 		end
 	})
 	-- Popup windows tend to be unreadable with a pink background
@@ -529,9 +530,9 @@ do -- Keymaps and the like
 	--	callback = function ()
 	--		print"asdf"
 	--		for _, v in pairs(vim.g.indent_blankline_filetype_exclude) do
-	--			if v == vim.bo.filetype then
+	--			if v == vim.o.filetype then
 	--				--vim.opt.list = false
-	--				--vim.bo.list = false
+	--				--vim.o.list = false
 	--			end
 	--		end
 	--	end
