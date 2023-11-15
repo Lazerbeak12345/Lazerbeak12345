@@ -580,6 +580,12 @@ local lazy_plugins = {
 	{
 		'nvim-treesitter/nvim-treesitter',
 		--opts = ,
+		dependencies = {
+			-- A companion to windwp/nvim-autopairs that does xml
+			"windwp/nvim-ts-autotag",
+			event = "InsertEnter",
+			opts = { enabled = true }
+		},
 		config = function ()
 			require'nvim-treesitter.configs'.setup{
 				ensure_installed = {
@@ -982,6 +988,29 @@ local lazy_plugins = {
 				handlers = {}
 			}
 		end
+	},
+	--[[{
+		-- This plugin does work, however it is made for modifying pairs in pre-exsisting code. Very nice, but doesn't do cmp things.
+		-- windwp/nvim-autopairs might be what I actually want, though it uses a lot more config to make it work
+		-- - autopairs has a few more utilities for editing, making use of treesitter
+		-- - autopairs doesn't support html without another plugin
+		"kylechui/nvim-surround",
+		version = "*", -- Omit to use `main` branch for latest features.
+		event = "VeryLazy",
+		config = function ()
+			require"nvim-surround".setup{
+			}
+		end
+	},]]
+	{
+		-- Place pairs after typing, ex { causes } to appear.
+		"windwp/nvim-autopairs",
+		event = "InsertEnter",
+		opts = {
+			fast_wrap = {
+				map = '<M-r>' -- <M-e> is to open the default GUI explorer in my WM
+			}
+		}
 	},
 }
 require("lazy").setup(lazy_plugins, lazy_config)
