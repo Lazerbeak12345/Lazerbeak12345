@@ -521,22 +521,6 @@ do -- Keymaps and the like
 	})
 	-- Popup windows tend to be unreadable with a pink background
 	--vim.api.nvim_set_hl(0, "Pmenu", {})
-	vim.g.indent_blankline_filetype_exclude = { 'alpha', 'lspinfo', 'checkhealth', 'help', 'man', '' }
-	-- TODO this doesn't work. (And I have no idea why. I'll just live with it for now. The above is only defined in this
-	-- ugly way to facilitate this.
-	--vim.api.nvim_create_autocmd({ "BufNewFile", "BufRead" }, {
-	--	--pattern = exclude,
-	--	pattern = "*",
-	--	callback = function ()
-	--		print"asdf"
-	--		for _, v in pairs(vim.g.indent_blankline_filetype_exclude) do
-	--			if v == vim.o.filetype then
-	--				--vim.opt.list = false
-	--				--vim.o.list = false
-	--			end
-	--		end
-	--	end
-	--})
 end
 
 local lazy_config = { defaults = { lazy = true }, checker = { enabled = true, notify = false } }
@@ -563,17 +547,28 @@ local lazy_plugins = {
 	{
 		'lukas-reineke/indent-blankline.nvim',
 		event = "VeryLazy",
+		main = "ibl",
+		version = "^3.3",
 		config = function ()
-			vim.opt.list = true
-			vim.opt.listchars:append"lead:⋅"
-			vim.opt.listchars:append"tab:  "
-			require'indent_blankline'.setup {
-				show_first_indent_level = false,
-				use_treesitter = true,
-				show_current_context = true,
-				context_highlight_list = {'Label'}
+			require"ibl".setup{
+				indent = { char = '│', tab_char = '│' },
+				scope = { show_start = false, show_end = false }
 			}
-			vim.cmd.IndentBlanklineRefresh()
+			local hooks = require"ibl.hooks"
+			hooks.register(
+				hooks.type.ACTIVE,
+				function ()
+					-- Because we only set when ibl activiates, it doesn't run for buffers we don't edit.
+					-- This also ensures that list is set _after_ ibl makes rendering changes. This prevents clashes.
+					vim.opt.list = true
+					return true
+				end
+			)
+			-- Line indent markers
+			vim.opt.listchars:append"lead:⋅"
+			vim.opt.listchars:append"nbsp:⚬"
+			vim.opt.listchars:append"tab:  " -- No > chars when ibl is slow
+			vim.opt.listchars:append"trail:─"
 		end
 	},
 	-- Super fancy coloring
@@ -904,7 +899,7 @@ local lazy_plugins = {
 		}
 	},
 	-- crates.io completion source
-	{ 'saecki/crates.nvim', opts = {}, event = "BufRead Cargo.toml" },
+	{ 'saecki/crates.nvim', opts = { src = { cmp = { enabled = true } } }, event = "BufRead Cargo.toml" },
 	-- package.json completion source
 	{ 'David-Kunz/cmp-npm', opts = {}, dependencies = 'plenary.nvim', event = "BufRead package.json" },
 	-- Fish completion
