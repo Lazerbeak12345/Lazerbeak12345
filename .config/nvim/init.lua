@@ -397,12 +397,39 @@ do -- Keymaps and the like
 	vim.g.vimsyn_embed = 'l'
 
 	-- Inline diagnostic alerts
-	vim.diagnostic.config{ severity_sort = true, virtual_text = { prefix = '🛈 ' } }
+	vim.diagnostic.config{ severity_sort = true, virtual_text = { prefix = function(diagnostic, _, _)
+		local severity = diagnostic.severity
+		if type(severity) == "table" then
+			severity = severity.min or severity[1]
+		end
+
+		local ERROR = vim.diagnostic.severity.ERROR
+		local WARN = vim.diagnostic.severity.WARN
+		local INFO = vim.diagnostic.severity.INFO
+		local HINT = vim.diagnostic.severity.HINT
+
+		-- Here we are getting the icons from the lualine default settings. If you change lualine's config, these icons will not change with it.
+		-- TODO deal with possible API changes?
+		local icons = require"lualine.components.diagnostics.config".symbols.icons
+
+		if severity == ERROR then
+			return icons.error
+		elseif severity == WARN then
+			return icons.warn
+		elseif severity == INFO then
+			return icons.info
+		elseif severity == HINT then
+			return icons.hint
+		end
+	end } }
 
 	-- see the docstrings for folded code
+	-- TODO this looks typo-ed and is likely broken
 	vim.g.SimpylFold_docstring_preview = 1
 
 	--vim.keymap.set('n', '<Leader>d', vim.diagnostic.goto_next)
+
+	-- TODO: unless there's a conflict, learn the _actual_ shortcuts (and remove these)
 
 	-- Enable folding with the spacebar (twice now, to allow lspconfig things)
 	vim.keymap.set('n', '<space><space>', 'za')
