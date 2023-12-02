@@ -511,6 +511,7 @@ do -- Keymaps and the like
 		end
 	})
 	-- Disable numbers on terminal only.
+	--[[ TODO: This will need an autocommand for every buffer, since the setting is inherited when split
 	vim.api.nvim_create_autocmd({ "TermOpen" }, {
 		pattern = "*",
 		callback = function()
@@ -518,7 +519,7 @@ do -- Keymaps and the like
 			vim.o.number = false
 			vim.o.relativenumber = false
 		end
-	})
+	})]]
 	-- Popup windows tend to be unreadable with a pink background
 	--vim.api.nvim_set_hl(0, "Pmenu", {})
 end
