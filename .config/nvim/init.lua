@@ -576,7 +576,7 @@ local lazy_plugins = {
 		'lukas-reineke/indent-blankline.nvim',
 		event = "VeryLazy",
 		main = "ibl",
-		version = "^3.3",
+		--version = "^3.3",
 		config = function ()
 			require"ibl".setup{
 				indent = { char = '│', tab_char = '│' },
@@ -652,7 +652,7 @@ local lazy_plugins = {
 					"vue",
 					"xml",
 					"yaml",
-					"yuck",
+					"yuck"
 				},
 				--ensure_installed = "all", -- Very slow to install everything
 				sync_install = true,
@@ -767,7 +767,8 @@ local lazy_plugins = {
 	-- Even nicer file management
 	{
 		'nvim-neo-tree/neo-tree.nvim',
-		branch = "v3.x", -- TODO migrate to v3
+		--branch = "v3.x",
+		branch = "main",
 		dependencies = { "nvim-lua/plenary.nvim", "nvim-tree/nvim-web-devicons", "MunifTanjim/nui.nvim" },
 		config = function ()
 			vim.g.neo_tree_remove_legacy_commands = 1
@@ -799,7 +800,6 @@ local lazy_plugins = {
 	},
 	--  Start Screen
 	{
-		-- TODO stopped working recently
 		'goolord/alpha-nvim', dependencies = 'nvim-tree/nvim-web-devicons', lazy = false,
 		config = function () require'alpha'.setup(require'alpha.themes.startify'.config) end
 	},
