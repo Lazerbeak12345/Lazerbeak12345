@@ -88,7 +88,7 @@ local function configure_nvim_cmp()
 			{ name = 'emoji', insert = true },
 		--}, {
 			{ name = "git" },
-			{ name = "crates" },
+			--{ name = "crates" }, Now loaded lazily TODO do this for _every_ cmp plugin
 			{ name = 'npm', keyword_length = 4 },
 			{ name = 'pandoc_references' },
 			{ name = 'nvim_lsp_document_symbol' },
@@ -927,7 +927,20 @@ local lazy_plugins = {
 		}
 	},
 	-- crates.io completion source
-	{ 'saecki/crates.nvim', opts = { src = { cmp = { enabled = true } } }, event = "BufRead Cargo.toml" },
+	{
+		'saecki/crates.nvim',
+		event = "BufRead Cargo.toml",
+		config = function()
+			require'crates'.setup{ src = { cmp = { enabled = true } } }
+			vim.api.nvim_create_autocmd("BufRead", {
+				group = vim.api.nvim_create_augroup("CmpSourceCargo", { clear = true }),
+				pattern = "Cargo.toml",
+				callback = function()
+					require'cmp'.setup.buffer{ sources = { { name = "crates" } } }
+				end
+			})
+		end
+	},
 	-- package.json completion source
 	{ 'David-Kunz/cmp-npm', opts = {}, dependencies = 'plenary.nvim', event = "BufRead package.json" },
 	-- Fish completion
