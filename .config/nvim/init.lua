@@ -431,9 +431,6 @@ do -- Keymaps and the like
 
 	-- TODO: unless there's a conflict, learn the _actual_ shortcuts (and remove these)
 
-	-- Enable folding with the spacebar (twice now, to allow lspconfig things)
-	vim.keymap.set('n', '<space><space>', 'za')
-
 	-- Go back one file in current buffer
 	vim.keymap.set('n', '<Leader><Leader>', '<c-^>')
 
