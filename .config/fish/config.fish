@@ -46,7 +46,7 @@ if status is-interactive
 end
 function fish_greeting
 	echo TODO:
-	cat ~/.todo
+	head ~/.todo
 	echo -e \n$fish_greeting
 end
 

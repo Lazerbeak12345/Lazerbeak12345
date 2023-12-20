@@ -1,5 +1,6 @@
 # The starship configuration file.
 # A cross-platform, cross shell, shell prompt, written in rust.
+"$schema" = 'https://starship.rs/config-schema.json'
 [directory]
 format = "in [$path]($style)[$read_only]($read_only_style) "
 truncation_symbol = "…/"
