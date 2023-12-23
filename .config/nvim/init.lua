@@ -89,7 +89,7 @@ local function configure_nvim_cmp()
 		--}, {
 			{ name = "git" },
 			--{ name = "crates" }, Now loaded lazily TODO do this for _every_ cmp plugin
-			{ name = 'npm', keyword_length = 4 },
+			{ name = 'npm', keyword_length = 4 }, -- TODO: only load if npm, pnpm or yarn is present
 			{ name = 'pandoc_references' },
 			{ name = 'nvim_lsp_document_symbol' },
 			{ name = "fish" },
@@ -232,10 +232,10 @@ local function configuire_lspconfig()
 	-- https://github.com/nvimdev/guard.nvim -- Linter chains (for if efm doesn't work)
 	local mason_tool_installed = {
 		'rustfmt', -- WARNING reccomends rustup instead of whatever it's doing now (deprecation)
-		'luacheck',
+		'luacheck', -- TODO: what does this require
 		-- TODO requires unzip
 		--'selene',
-		'stylua',
+		'stylua', -- TODO: what does this require
 		-- TODO requires cargo
 		'shellharden',
 	}
@@ -264,7 +264,7 @@ local function configuire_lspconfig()
 			typescript = prettier_only, typescriptreact = prettier_only,
 			html = prettier_only,
 			lua = { efm_linter"luacheck", efm_formatter"stylua"--[[, efm_linter"selene"]] },
-			vim = { efm_linter"vint" },
+			vim = { efm_linter"vint" }, -- TODO: what does this require
 			rust = { efm_formatter"rustfmt" },
 			sh = { efm_formatter"shellharden" },
 			fish = { efm_linter"fish", efm_formatter"fish_indent" }
@@ -357,7 +357,7 @@ local function configure_lualine()
 				'selectioncount',
 				function () return require'lsp-status'.status() end,
 				-- The below doesn't look good and provides nothing I need
-				--function ()
+				--function () -- NOTE: this would also need to only load if treesitter is installed (in the system)
 				--	return vim.fn['nvim_treesitter#statusline']{indicator_size=20}
 				--end
 			},
@@ -497,7 +497,7 @@ do -- Keymaps and the like
 	-- Enable folding
 	--vim.o.foldmethod = 'syntax'
 	----vim.o.foldmethod = 'indent'
-	--- TODO: what about for when treesitter _doesnt_ work?
+	--- TODO: what about for when treesitter _doesnt_ work? (this should also only load if treesitter is installed as a system)
 	vim.wo.foldmethod= 'expr'
 	vim.wo.foldexpr = 'v:lua.vim.treesitter.foldexpr()'
 	vim.wo.foldlevel=99
@@ -598,6 +598,7 @@ local lazy_plugins = {
 	},
 	-- Super fancy coloring
 	{
+		-- TODO: only load this if tree-sitter is installed
 		'nvim-treesitter/nvim-treesitter',
 		--opts = ,
 		dependencies = {
@@ -939,6 +940,7 @@ local lazy_plugins = {
 		end
 	},
 	-- package.json completion source
+	-- TODO: only load if npm, pnpm or yarn is present
 	{ 'David-Kunz/cmp-npm', opts = {}, dependencies = 'plenary.nvim', event = "BufRead package.json" },
 	-- Fish completion
 	{
