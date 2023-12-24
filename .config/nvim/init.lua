@@ -1034,7 +1034,7 @@ local lazy_plugins = {
 			if has_npm() then
 				installed[#installed+1] = "firefox"
 			end
-			return {
+			require'mason-nvim-dap'.setup{
 				ensure_installed = installed,
 				automatic_installation = true,
 				handlers = {}
