@@ -1,6 +1,13 @@
 local vim = vim -- Hacky workaround for sumneko_lua being sorta dumb right now. I can fix it better later.
 -- copied from https://github.com/folke/lazy.nvim#-installation
 local lazypath = vim.fn.stdpath'data' .. "/lazy/lazy.nvim"
+-- TODO mark PHP and composer as not needed?
+-- TODO: mark perl as not needed?
+-- TODO: these need to be marked as auto-install
+-- - prettier
+-- - stylelint
+-- - vint
+-- After that, tell efmls to not ask for them, if they can't be installed.
 if not vim.loop.fs_stat(lazypath) then
 	vim.fn.system{
 		"git",
@@ -238,6 +245,9 @@ local function configuire_lspconfig()
 		'stylua', -- TODO: what does this require
 		-- TODO requires cargo
 		'shellharden',
+		-- For Java
+		--'vscode-java-decompiler', -- TODO: This should be done from the DAP side of things, if possible
+		"checkstyle"
 	}
 	local mason_tool_installed_npm = {
 		"stylelint", "prettier",
@@ -295,7 +305,9 @@ local function configuire_lspconfig()
 		"rust_analyzer",
 		"taplo", -- For TOML
 		"marksman", -- For markdown
-		"efm"
+		"efm",
+		-- For Java
+		"jdtls"
 	}
 	local lsp_installed_npm = { -- TODO: make this automatic
 		"eslint",
@@ -510,6 +522,7 @@ do -- Keymaps and the like
 	--vim.o.background='dark'
 
 	-- I needed a ruby nvim plugin awhile back. This fixes it.
+	-- TODO: instad, mark as not needed?
 	vim.g.ruby_host_prog = '~/.bin/neovim-ruby-host'
 
 	vim.api.nvim_create_autocmd("TextYankPost", {
@@ -628,6 +641,7 @@ local lazy_plugins = {
 					"gitignore",
 					"godot_resource",
 					"html",
+					"java",
 					"javascript",
 					"json",
 					"json5",
@@ -1014,12 +1028,15 @@ local lazy_plugins = {
 		config = function ()
 			local installed = {
 				"js", "bash", "node2", "chrome", "cppdbg", "mock", "puppet", "python", "codelldb",
+				-- For Java
+				"javadbg", "javatest"
 			}
 			if has_npm() then
 				installed[#installed+1] = "firefox"
 			end
 			return {
 				ensure_installed = installed,
+				automatic_installation = true,
 				handlers = {}
 			}
 		end
