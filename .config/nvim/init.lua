@@ -226,6 +226,7 @@ local function configuire_lspconfig()
 	})
 	-- Installed through mason
 	require'mason'.setup{
+		max_concurrent_installers = require'luv'.available_parallelism(),
 		ui = {
 			icons = {
 				package_installed = "✓",
