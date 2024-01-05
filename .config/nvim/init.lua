@@ -1,7 +1,7 @@
 local vim = vim -- Hacky workaround for sumneko_lua being sorta dumb right now. I can fix it better later.
 -- copied from https://github.com/folke/lazy.nvim#-installation
 local lazypath = vim.fn.stdpath'data' .. "/lazy/lazy.nvim"
--- TODO mark PHP and composer as not needed?
+-- TODO: mark PHP and composer as not needed?
 -- TODO: mark perl as not needed?
 -- TODO: these need to be marked as auto-install
 -- - prettier
@@ -67,7 +67,7 @@ local function configure_nvim_cmp()
 					cmp.confirm{ select = true }
 				elseif require'luasnip'.expand_or_jumpable() then
 					require'luasnip'.expand_or_jump()
-				-- TODO there's currently no way to tell if there's even a possible completion here. If there is, we should use
+				-- TODO: there's currently no way to tell if there's even a possible completion here. If there is, we should use
 				--  that, and use the fallback otherwise. See https://github.com/hrsh7th/nvim-cmp/issues/602
 				--elseif has_words_before() then
 				--	print"tabbed! has words before"
@@ -95,7 +95,7 @@ local function configure_nvim_cmp()
 			{ name = 'emoji', insert = true },
 		--}, {
 			{ name = "git" },
-			--{ name = "crates" }, Now loaded lazily TODO do this for _every_ cmp plugin
+			--{ name = "crates" }, Now loaded lazily TODO: do this for _every_ cmp plugin
 			{ name = 'npm', keyword_length = 4 }, -- TODO: only load if npm, pnpm or yarn is present
 			{ name = 'pandoc_references' },
 			{ name = 'nvim_lsp_document_symbol' },
@@ -197,7 +197,7 @@ local function configuire_lspconfig()
 			print(vim.inspect(vim.lsp.buf.list_workspace_folders()))
 		end, bufopts)
 		vim.keymap.set('n', '<space>D', vim.lsp.buf.type_definition, bufopts)
-		vim.keymap.set('n', '<space>rn', vim.lsp.buf.rename, bufopts)
+		vim.keymap.set('n', '<space>rn', vim.lsp.buf.rename, bufopts) -- TODO: broken???
 		vim.keymap.set('n', '<space>ca', vim.lsp.buf.code_action, bufopts)
 		vim.keymap.set('n', 'gr', vim.lsp.buf.references, bufopts)
 		vim.keymap.set('n', '<space>f', function()
@@ -235,16 +235,17 @@ local function configuire_lspconfig()
 			}
 		}
 	}
+	-- TODO: assert that all requirements in `:h mason-requirements` are met
 	-- Style rule: All sources _must_ link to the documentation for each source.
 	-- Must also include what it does.
 	-- https://github.com/nvimdev/guard.nvim -- Linter chains (for if efm doesn't work)
 	local mason_tool_installed = {
-		'rustfmt', -- WARNING reccomends rustup instead of whatever it's doing now (deprecation)
+		'rustfmt', -- WARNING: reccomends rustup instead of whatever it's doing now (deprecation)
 		'luacheck', -- TODO: what does this require
-		-- TODO requires unzip
+		-- TODO: requires unzip
 		--'selene',
 		'stylua', -- TODO: what does this require
-		-- TODO requires cargo
+		-- TODO: requires cargo
 		'shellharden',
 		-- For Java
 		--'vscode-java-decompiler', -- TODO: This should be done from the DAP side of things, if possible
@@ -288,7 +289,7 @@ local function configuire_lspconfig()
 			on_attach = default_args.on_attach,
 			capabilities = capabilities,
 			settings = {
-				-- TODO can this be used elsewhere (like lua_ls)?
+				-- TODO: can this be used elsewhere (like lua_ls)?
 				rootMarkers = {".git/"},
 				languages = languages
 			},
@@ -297,7 +298,7 @@ local function configuire_lspconfig()
 	end
 	local lsp_installed = {
 		-- This is sumneko_lua. Not my favorite.
-		-- TODO needs to know the root dir only fails to find it on it's own when the first buffer is a lua file.
+		-- TODO: needs to know the root dir only fails to find it on it's own when the first buffer is a lua file.
 		--  Not related to rooter
 		-- can be short-term fixed by running :LspStart lua_ls when editing this file
 		-- This happens to efm as well. Might be happening to everything if that's the first file.
@@ -422,7 +423,7 @@ do -- Keymaps and the like
 		local HINT = vim.diagnostic.severity.HINT
 
 		-- Here we are getting the icons from the lualine default settings. If you change lualine's config, these icons will not change with it.
-		-- TODO deal with possible API changes?
+		-- TODO: deal with possible API changes?
 		local icons = require"lualine.components.diagnostics.config".symbols.icons
 
 		if severity == ERROR then
@@ -437,7 +438,7 @@ do -- Keymaps and the like
 	end } }
 
 	-- see the docstrings for folded code
-	-- TODO this looks typo-ed and is likely broken
+	-- TODO: this looks typo-ed and is likely broken
 	vim.g.SimpylFold_docstring_preview = 1
 
 	--vim.keymap.set('n', '<Leader>d', vim.diagnostic.goto_next)
@@ -553,7 +554,7 @@ do -- Keymaps and the like
 	vim.api.nvim_create_autocmd({ "TermOpen" }, {
 		pattern = "*",
 		callback = function()
-			-- TODO should this be something else? It errors for bo
+			-- TODO: should this be something else? It errors for bo
 			vim.o.number = false
 			vim.o.relativenumber = false
 		end
@@ -676,7 +677,7 @@ local lazy_plugins = {
 		event = 'VeryLazy'
 	},
 	{
-		-- TODO (low prio) match this and the cmd theme
+		-- TODO: (low prio) match this and the cmd theme
 		'rebelot/kanagawa.nvim',
 		lazy = false,
 		priority = 1000,
@@ -702,7 +703,7 @@ local lazy_plugins = {
 			--	end
 			--end
 			--vim.api.nvim_create_autocmd('TextYankPost', {callback = copy})
-			-- Use this plugin as a clipboard provider TODO doesn't seem to work
+			-- Use this plugin as a clipboard provider TODO: doesn't seem to work
 			--local function copy(lines, _)
 			--	require'osc52'.copy(table.concat(lines, '\n'))
 			--end
@@ -828,7 +829,7 @@ local lazy_plugins = {
 	},
 	-- Interactive eval
 	-- use 'Olical/conjure'
-	--  TODO configure this
+	--  TODO: configure this
 	--  this might be a problem 987632498629765296987492
 	--  This should be added after DAP (due to feature overlap and complexity)
 
@@ -838,24 +839,25 @@ local lazy_plugins = {
 	--  Eww's configuration language, yuck
 	{ 'elkowar/yuck.vim', event = "BufEnter" },
 	{
-		-- TODO is it possible to replace this with something that uses treesitter or LSP?
+		-- TODO: is it possible to replace this with something that uses treesitter or LSP?
 		"folke/todo-comments.nvim",
 		dependencies = "nvim-lua/plenary.nvim",
 		opts = {
 			keywords = {
 				-- matches the word, so break it on purpose
-				['F'..'IX'] = { icon = "" },
-				['T'..'ODO'] = { icon = "" },
-				['H'..'ACK'] = { icon = "" },
-				['W'..'ARN'] = { icon = "" },
-				['T'..'EST'] = { icon = "" },
-				['P'..'ERF'] = { icon = "󰓅" },
-				['N'..'OTE'] = { icon = "󱇗" }
+				FIX = { icon = "" },
+				TODO = { icon = "" },
+				HACK = { icon = "" },
+				WARN = { icon = "" },
+				TEST = { icon = "" },
+				PERF = { icon = "󰓅" },
+				NOTE = { icon = "󱇗" }
 			},
-			-- vim regex
-			highlight = { after = "", pattern = [[.*<(KEYWORDS)\s*:?]] },
-			-- ripgrep regex
-			search = { pattern = [[\b(KEYWORDS):?]] }, -- TODO false positives. it it big enough of a problem? Fixable?
+			-- Allow omitting the semicolon
+			---- vim regex
+			--highlight = { after = "", pattern = [[.*<(KEYWORDS)\s*:?]] },
+			---- ripgrep regex
+			--search = { pattern = [[\b(KEYWORDS):?]] }, -- TODO: false positives. it it big enough of a problem? Fixable?
 		},
 		event = "VeryLazy"
 	},
@@ -973,7 +975,7 @@ local lazy_plugins = {
 		end
 	},
 	-- conjure intractive eval completion
-	--use 'PaterJason/cmp-conjure' -- TODO add this to cmp -- this might be a problem 987632498629765296987492
+	--use 'PaterJason/cmp-conjure' -- TODO: add this to cmp -- this might be a problem 987632498629765296987492
 	{
 		"jay-babu/mason-nvim-dap.nvim",
 		dependencies = {
