@@ -29,16 +29,16 @@ if not vim.loop.fs_stat(lazypath) then
 end
 vim.opt.rtp:prepend(lazypath)
 
-if vim.env.VIMRUNNING == "1" then
-	print("dummy! read before running (override by setting $VIMRUNNING to \"2\")")
-	-- Lua never sleeps
-	vim.cmd.sleep()
-	-- and isn't a quitter
-	vim.cmd.qall{ bang = true }
-	-- So vim has to take care of it.
-elseif vim.env.VIMRUNNING ~= "2" then
-	vim.env.VIMRUNNING = 1
-end
+-- if vim.env.VIMRUNNING == "1" then
+-- 	print("dummy! read before running (override by setting $VIMRUNNING to \"2\")")
+-- 	-- Lua never sleeps
+-- 	vim.cmd.sleep()
+-- 	-- and isn't a quitter
+-- 	vim.cmd.qall{ bang = true }
+-- 	-- So vim has to take care of it.
+-- elseif vim.env.VIMRUNNING ~= "2" then
+-- 	vim.env.VIMRUNNING = 1
+-- end
 
 local function configure_nvim_cmp()
 	local cmp = require'cmp'
@@ -804,6 +804,15 @@ local lazy_plugins = {
 	--    fork of above)
 	-- Ease of use
 	{ 'vimlab/split-term.vim', cmd = { "Term", "VTerm", "TTerm" } },
+	{
+		"samjwill/nvim-unception",
+		init = function()
+			-- Optional settings go here!
+			-- e.g.) vim.g.unception_open_buffer_in_new_tab = true
+		end,
+		--event = 'TermOpen'
+		lazy = false
+	},
 	{
 		'airblade/vim-rooter',
 		config = function ()
