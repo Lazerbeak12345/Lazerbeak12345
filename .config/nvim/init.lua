@@ -422,7 +422,8 @@ do -- Keymaps and the like
 		local INFO = vim.diagnostic.severity.INFO
 		local HINT = vim.diagnostic.severity.HINT
 
-		-- Here we are getting the icons from the lualine default settings. If you change lualine's config, these icons will not change with it.
+		-- Here we are getting the icons from the lualine default settings. If you change lualine's config, these icons will
+		-- not change with it.
 		-- TODO: deal with possible API changes?
 		local icons = require"lualine.components.diagnostics.config".symbols.icons
 
@@ -511,7 +512,8 @@ do -- Keymaps and the like
 	-- Enable folding
 	--vim.o.foldmethod = 'syntax'
 	----vim.o.foldmethod = 'indent'
-	--- TODO: what about for when treesitter _doesnt_ work? (this should also only load if treesitter is installed as a system)
+	--- TODO: what about for when treesitter _doesnt_ work? (this should also only load if treesitter is installed as a
+	--  system)
 	vim.wo.foldmethod= 'expr'
 	vim.wo.foldexpr = 'v:lua.vim.treesitter.foldexpr()'
 	vim.wo.foldlevel=99
@@ -1054,10 +1056,8 @@ local lazy_plugins = {
 		end
 	},
 	--[[{
-		-- This plugin does work, however it is made for modifying pairs in pre-exsisting code. Very nice, but doesn't do cmp things.
-		-- windwp/nvim-autopairs might be what I actually want, though it uses a lot more config to make it work
-		-- - autopairs has a few more utilities for editing, making use of treesitter
-		-- - autopairs doesn't support html without another plugin
+		-- This plugin does work, however it is made for modifying pairs in pre-exsisting code. Very nice, but doesn't do cmp
+		-- things.
 		"kylechui/nvim-surround",
 		version = "*", -- Omit to use `main` branch for latest features.
 		event = "VeryLazy",
