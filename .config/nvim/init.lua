@@ -181,8 +181,36 @@ local function has_npm()
 	end
 end
 
-local function configuire_lspconfig()
-	local function lsp_keybindings(_client, bufnr)
+-- TODO: Ignore duplicate keys for this table (only)
+--
+-- Hooks for everything around the lspconfig function
+--     Heh. Remember back when I thought it was only going to do lspconfig? Yeah, me neither.
+local setup_configure_lspconfig = {
+	lsp_on_attach = function () end,
+	make_capabilities = function ()
+		return vim.lsp.protocol.make_client_capabilities()
+	end,
+	manual_lspconfigs = function () end
+}
+
+do
+	local lsp_on_attach = setup_configure_lspconfig.lsp_on_attach
+	setup_configure_lspconfig.lsp_on_attach = function (...)
+		lsp_on_attach(...)
+		require'lsp-status'.on_attach(...)
+	end
+end
+do
+	local lsp_on_attach = setup_configure_lspconfig.lsp_on_attach
+	setup_configure_lspconfig.lsp_on_attach = function (...)
+		lsp_on_attach(...)
+		require'folding'.on_attach(...)
+	end
+end
+do
+	local lsp_on_attach = setup_configure_lspconfig.lsp_on_attach
+	setup_configure_lspconfig.lsp_on_attach = function (client, bufnr, ...)
+		lsp_on_attach(client, bufnr, ...)
 		-- Reccomended keymaps from nvim-lspconfig
 		-- https://github.com/neovim/nvim-lspconfig#suggested-configuration
 		local bufopts = { noremap=true, silent=true, buffer=bufnr }
@@ -204,26 +232,62 @@ local function configuire_lspconfig()
 			vim.lsp.buf.format { async = true }
 		end, bufopts)
 	end
+end
+
+do
+	local make_capabilities = setup_configure_lspconfig.make_capabilities
+	setup_configure_lspconfig.make_capabilities = function ()
+		local capabilities = make_capabilities()
+		capabilities = vim.tbl_extend('keep', capabilities, require'lsp-status'.capabilities)
+		return capabilities
+	end
+end
+do
+	local make_capabilities = setup_configure_lspconfig.make_capabilities
+	setup_configure_lspconfig.make_capabilities = function ()
+		local capabilities = make_capabilities()
+		capabilities = vim.tbl_extend('keep', capabilities, require'cmp_nvim_lsp'.default_capabilities())
+		return capabilities
+	end
+end
+
+do
+	local manual_lspconfigs = setup_configure_lspconfig.manual_lspconfigs
+	setup_configure_lspconfig.manual_lspconfigs = function (lspconfig, default_args)
+		manual_lspconfigs(lspconfig, default_args)
+		lspconfig.racket_langserver.setup(default_args)
+	end
+end
+do
+	local manual_lspconfigs = setup_configure_lspconfig.manual_lspconfigs
+	setup_configure_lspconfig.manual_lspconfigs = function (lspconfig, default_args)
+		manual_lspconfigs(lspconfig, default_args)
+		lspconfig.clangd.setup{
+			on_attach = default_args.on_attach,
+			capabilities = vim.tbl_extend('keep', default_args.capabilities, {
+				handlers = require'lsp-status'.extensions.clangd.setup(),
+				init_options = { clangdFileStatus = true }
+			})
+		}
+	end
+end
+
+local get_lsp_default_args
+
+local function configuire_lspconfig()
 	local default_args={
-		on_attach = function(...)
-			require'lsp-status'.on_attach(...)
-			require'folding'.on_attach(...)
-			lsp_keybindings(...)
-		end,
+		on_attach = setup_configure_lspconfig.lsp_on_attach,
+		capabilities = setup_configure_lspconfig.make_capabilities()
 	}
-	local capabilities = vim.lsp.protocol.make_client_capabilities()
-	capabilities = vim.tbl_extend('keep', capabilities, require'lsp-status'.capabilities)
-	capabilities = vim.tbl_extend('keep', capabilities, require'cmp_nvim_lsp'.default_capabilities())
-	default_args.capabilities = capabilities
+	setup_configure_lspconfig.lsp_on_attach = nil
+	setup_configure_lspconfig.make_capabilities = nil
+	get_lsp_default_args = function ()
+		return default_args
+	end
+	local capabilities = default_args.capabilities
 	-- Installed manually in system.
-	require'lspconfig'.racket_langserver.setup(default_args)
-	require'lspconfig'.clangd.setup({
-		on_attach = default_args.on_attach,
-		capabilities = vim.tbl_extend('keep', capabilities, {
-			handlers = require'lsp-status'.extensions.clangd.setup(),
-			init_options = { clangdFileStatus = true }
-		})
-	})
+	setup_configure_lspconfig.manual_lspconfigs(require'lspconfig', default_args)
+	setup_configure_lspconfig.manual_lspconfigs = nil
 	-- Installed through mason
 	require'mason'.setup{
 		max_concurrent_installers = require'luv'.available_parallelism(),
