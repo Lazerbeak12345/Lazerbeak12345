@@ -169,15 +169,18 @@ end
 local function has_npm()
 	local check_npm = io.popen"command -v npm"
 	if check_npm then
-		check_npm:read"*all"
+		local read_res = check_npm:read"*all"
 		local val = ({check_npm:close()})[3]
+		local it_has_it = #read_res > 0
 		has_npm = function ()
-			return val
+			return it_has_it
 		end
+		return it_has_it
 	else
 		has_npm = function ()
 			return nil
 		end
+		return nil
 	end
 end
 
