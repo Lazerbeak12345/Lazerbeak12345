@@ -155,17 +155,6 @@ local function configure_nvim_cmp()
 	})
 end
 
-local function configure_lsp_status()
-	local lsp_status = require'lsp-status'
-	lsp_status.config{
-		status_symbol = '', -- The default V breaks some layout stuff.  was the next I used, but it's not needed
-		show_filename = false, -- Takes up too much space, redundant
-		diagnostics = false, -- lualine actually already displays this information
-		kind_labels = require'lspkind'.symbol_map,
-	}
-	lsp_status.register_progress()
-end
-
 local function has_npm()
 	local check_npm = io.popen"command -v npm"
 	if check_npm then
@@ -957,7 +946,16 @@ local lazy_plugins = {
 	},
 	{
 		'nvim-lua/lsp-status.nvim',
-		config = configure_lsp_status,
+		config = function()
+			local lsp_status = require'lsp-status'
+			lsp_status.config{
+				status_symbol = '', -- The default V breaks some layout stuff.  was the next I used, but it's not needed
+				show_filename = false, -- Takes up too much space, redundant
+				diagnostics = false, -- lualine actually already displays this information
+				kind_labels = require'lspkind'.symbol_map,
+			}
+			lsp_status.register_progress()
+		end,
 		module = 'lsp-status',
 		dependencies = "lualine.nvim"
 	},
@@ -1008,14 +1006,15 @@ local lazy_plugins = {
 				-- Completion on the vim.lsp apis
 				'hrsh7th/cmp-nvim-lua',
 				-- Use /usr/share/dict/words for completion
-				--[[{
+				{
 					'uga-rosa/cmp-dictionary',
+					enabled = false,
 					config = function ()
 						local dict = require"cmp_dictionary"
 						dict.setup{ debug = true }
 						dict.switcher{ spelling = { en = "/usr/share/dict/words" } }
 					end
-				}]]
+				}
 			}
 		}
 	},
