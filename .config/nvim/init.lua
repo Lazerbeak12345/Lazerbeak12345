@@ -189,13 +189,6 @@ do
 	local lsp_on_attach = setup_configure_lspconfig.lsp_on_attach
 	setup_configure_lspconfig.lsp_on_attach = function (...)
 		lsp_on_attach(...)
-		require'lsp-status'.on_attach(...)
-	end
-end
-do
-	local lsp_on_attach = setup_configure_lspconfig.lsp_on_attach
-	setup_configure_lspconfig.lsp_on_attach = function (...)
-		lsp_on_attach(...)
 		require'folding'.on_attach(...)
 	end
 end
@@ -226,14 +219,6 @@ do
 	end
 end
 
-do
-	local make_capabilities = setup_configure_lspconfig.make_capabilities
-	setup_configure_lspconfig.make_capabilities = function ()
-		local capabilities = make_capabilities()
-		capabilities = vim.tbl_extend('keep', capabilities, require'lsp-status'.capabilities)
-		return capabilities
-	end
-end
 do
 	local make_capabilities = setup_configure_lspconfig.make_capabilities
 	setup_configure_lspconfig.make_capabilities = function ()
@@ -630,7 +615,12 @@ local lazy_plugins = {
 	-- - Powerline
 	-- - Airline
 	-- - And the well-known, formerly first-place Lightline
-	{ 'nvim-lualine/lualine.nvim', config = configure_lualine, event = "BufEnter" },
+	{
+		'nvim-lualine/lualine.nvim',
+		config = configure_lualine,
+		event = "BufEnter",
+		dependencies = 'nvim-lua/lsp-status.nvim'
+	},
 	-- The looks of Powerline, but faster
 	-- use{
 	-- 	'itchyny/lightline.vim',
@@ -936,7 +926,6 @@ local lazy_plugins = {
 		config = configuire_lspconfig,
 		module = {
 			'lspconfig',
-			--'lsp-status',
 			'cmp_nvim_lsp',
 			"mason.nvim",
 			'mason-lspconfig.nvim',
@@ -955,9 +944,19 @@ local lazy_plugins = {
 				kind_labels = require'lspkind'.symbol_map,
 			}
 			lsp_status.register_progress()
+			local lsp_on_attach = setup_configure_lspconfig.lsp_on_attach
+			setup_configure_lspconfig.lsp_on_attach = function (...)
+				lsp_on_attach(...)
+				lsp_status.on_attach(...)
+			end
+			local make_capabilities = setup_configure_lspconfig.make_capabilities
+			setup_configure_lspconfig.make_capabilities = function ()
+				local capabilities = make_capabilities()
+				capabilities = vim.tbl_extend('keep', capabilities, require'lsp-status'.capabilities)
+				return capabilities
+			end
 		end,
-		module = 'lsp-status',
-		dependencies = "lualine.nvim"
+		module = 'lsp-status'
 	},
 	-- Automate installing some language-servers
 	{ 'williamboman/mason.nvim', event = "VeryLazy" },
