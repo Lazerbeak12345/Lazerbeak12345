@@ -96,7 +96,7 @@ local function configure_nvim_cmp()
 		--}, {
 			{ name = "git" },
 			--{ name = "crates" }, Now loaded lazily TODO: do this for _every_ cmp plugin
-			{ name = 'npm', keyword_length = 4 }, -- TODO: only load if npm, pnpm or yarn is present
+			--{ name = 'npm', keyword_length = 4 }, -- lazy loaded
 			{ name = 'pandoc_references' },
 			{ name = 'nvim_lsp_document_symbol' },
 			{ name = "fish" },
@@ -155,6 +155,9 @@ local function configure_nvim_cmp()
 	})
 end
 
+-- only load things if npm, pnpm or yarn is present
+-- TODO: consider checking for npm, pnpm and  yarn.
+-- TODO: consider just checking for node
 local function has_npm()
 	local check_npm = io.popen"command -v npm"
 	if check_npm then
@@ -1033,13 +1036,24 @@ local lazy_plugins = {
 		end
 	},
 	-- package.json completion source
-	-- TODO: only load if npm, pnpm or yarn is present
-	{ 'David-Kunz/cmp-npm', opts = {}, dependencies = 'plenary.nvim', event = "BufRead package.json" },
+	{
+		'David-Kunz/cmp-npm',
+		dependencies = { 'plenary.nvim', 'nvim-cmp' },
+		event = "BufRead package.json",
+		cond = function  ()
+			return has_npm()
+		end,
+		config = function ()
+			require'cmp-npm'.setup{}
+			require'cmp'.setup.buffer{ name = 'npm', keyword_length = 4 }
+		end
+	},
 	-- Fish completion
 	{
 		'mtoohey31/cmp-fish',
 		ft = "fish", -- Only load on fish filetype
 		cond = function ()
+			-- TODO: break this out into it's own function
 			-- Only load if fish is present
 			local check_fish = io.popen"command -v fish"
 			local has_fish = nil
