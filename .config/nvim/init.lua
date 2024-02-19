@@ -94,7 +94,7 @@ local function configure_nvim_cmp()
 			{ name = 'latex_symbols' },
 			{ name = 'emoji', insert = true },
 		--}, {
-			{ name = "git" },
+			--{ name = "git" }, -- lazy loaded
 			--{ name = "crates" }, Now loaded lazily TODO: do this for _every_ cmp plugin
 			--{ name = 'npm', keyword_length = 4 }, -- lazy loaded
 			{ name = 'pandoc_references' },
@@ -637,7 +637,7 @@ local lazy_plugins = {
 	-- Indent lines
 	{
 		'lukas-reineke/indent-blankline.nvim',
-		event = "VeryLazy",
+		event = "VeryLazy", -- TODO: better lazyness?
 		main = "ibl",
 		--version = "^3.3",
 		config = function ()
@@ -725,7 +725,7 @@ local lazy_plugins = {
 			}
 		end,
 		build = ':TSUpdateSync',
-		event = 'VeryLazy'
+		event = 'VeryLazy' -- TODO: better lazyness?
 	},
 	{
 		-- TODO: (low prio) match this and the cmd theme
@@ -774,7 +774,7 @@ local lazy_plugins = {
 
 	-- Git integration
 	--  Genral use
-	{ 'tpope/vim-fugitive', event = "VeryLazy" },
+	{ 'tpope/vim-fugitive', event = "VeryLazy" }, -- TODO: better lazyness?
 	--  Line-per-line indicators and chunk selection
 	{
 		'lewis6991/gitsigns.nvim',
@@ -884,8 +884,8 @@ local lazy_plugins = {
 	{
 		'creativenull/efmls-configs-nvim',
 		--version = 'v1.1.1',
-		dependencies = { 'WhoIsSethDaniel/mason-tool-installer.nvim', event = "VeryLazy" }, -- Install the linters
-		event = "VeryLazy"
+		dependencies = { 'WhoIsSethDaniel/mason-tool-installer.nvim', event = "VeryLazy" }, -- Install the linters -- TODO: better lazyness?
+		event = "VeryLazy" -- TODO: better lazyness?
 	},
 	-- Interactive eval
 	-- use 'Olical/conjure'
@@ -919,7 +919,7 @@ local lazy_plugins = {
 			---- ripgrep regex
 			--search = { pattern = [[\b(KEYWORDS):?]] }, -- TODO: false positives. it it big enough of a problem? Fixable?
 		},
-		event = "VeryLazy"
+		event = "VeryLazy" -- TODO: better lazyness?
 	},
 
 	-- Language-server protocol
@@ -934,7 +934,7 @@ local lazy_plugins = {
 			'mason-lspconfig.nvim',
 		},
 		dependencies = 'creativenull/efmls-configs-nvim',
-		event = "VeryLazy"
+		event = "VeryLazy" -- TODO: better lazyness?
 	},
 	{
 		'nvim-lua/lsp-status.nvim',
@@ -962,8 +962,8 @@ local lazy_plugins = {
 		module = 'lsp-status'
 	},
 	-- Automate installing some language-servers
-	{ 'williamboman/mason.nvim', event = "VeryLazy" },
-	{ 'williamboman/mason-lspconfig.nvim', event = "VeryLazy" },
+	{ 'williamboman/mason.nvim', event = "VeryLazy" }, -- TODO: better lazyness?
+	{ 'williamboman/mason-lspconfig.nvim', event = "VeryLazy" }, -- TODO: better lazyness?
 	-- Update command for mason
 	--  https://github.com/RubixDev/mason-update-all#updating-from-cli
 	{ 'RubixDev/mason-update-all', opts = {}, event = "BufEnter" },
@@ -993,8 +993,6 @@ local lazy_plugins = {
 				'hrsh7th/cmp-buffer',
 				-- Lower the text sorting of completions starting with _
 				'lukas-reineke/cmp-under-comparator',
-				-- Git completion source
-				{ 'petertriho/cmp-git', opts = {} },
 				-- latex symbol completion support (allows for inserting unicode)
 				'kdheepak/cmp-latex-symbols',
 				-- Emoji completion support
@@ -1020,9 +1018,20 @@ local lazy_plugins = {
 			}
 		}
 	},
+	-- Git completion source
+	{
+		'petertriho/cmp-git',
+		event = "VeryLazy", -- TODO: better lazyness?
+		dependencies = 'nvim-cmp',
+		config = function ()
+			require'cmp-git'.setup{}
+			require'cmp'.setup.buffer{ sources = { { name = "git" } } }
+		end
+	},
 	-- crates.io completion source
 	{
 		'saecki/crates.nvim',
+		dependencies = 'nvim-cmp',
 		event = "BufRead Cargo.toml",
 		config = function()
 			require'crates'.setup{ src = { cmp = { enabled = true } } }
@@ -1045,7 +1054,7 @@ local lazy_plugins = {
 		end,
 		config = function ()
 			require'cmp-npm'.setup{}
-			require'cmp'.setup.buffer{ name = 'npm', keyword_length = 4 }
+			require'cmp'.setup.buffer{ sources = { { name = 'npm', keyword_length = 4 } } }
 		end
 	},
 	-- Fish completion
@@ -1139,7 +1148,7 @@ local lazy_plugins = {
 		-- things.
 		"kylechui/nvim-surround",
 		version = "*", -- Omit to use `main` branch for latest features.
-		event = "VeryLazy",
+		event = "VeryLazy", -- TODO: better lazyness?
 		config = function ()
 			require"nvim-surround".setup{
 			}
