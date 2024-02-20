@@ -1024,7 +1024,7 @@ local lazy_plugins = {
 		event = "VeryLazy", -- TODO: better lazyness?
 		dependencies = 'nvim-cmp',
 		config = function ()
-			require'cmp-git'.setup{}
+			require'cmp_git'.setup{}
 			require'cmp'.setup.buffer{ sources = { { name = "git" } } }
 		end
 	},
