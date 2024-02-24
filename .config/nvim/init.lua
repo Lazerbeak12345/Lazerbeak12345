@@ -88,15 +88,16 @@ local function configure_nvim_cmp()
 			['<C-j>'] = cmp.mapping(cmp.mapping.select_next_item(), { 'i', 'c' }),
 			['<C-k>'] = cmp.mapping(cmp.mapping.select_prev_item(), { 'i', 'c' })
 		},
+		-- TODO: my method of lazy loading doesn't seem to work. It replaces all sources.
 		sources = cmp.config.sources({
-			{ name = 'nvim_lsp' },
+			{ name = 'nvim_lsp' }, -- can be lazy
 			{ name = 'luasnip' },
 			{ name = 'latex_symbols' },
 			{ name = 'emoji', insert = true },
 		--}, {
-			--{ name = "git" }, -- lazy loaded
-			--{ name = "crates" }, Now loaded lazily TODO: do this for _every_ cmp plugin
-			--{ name = 'npm', keyword_length = 4 }, -- lazy loaded
+			{ name = "git" }, -- can be lazy loaded
+			{ name = "crates" }, -- can be lazy
+			{ name = 'npm', keyword_length = 4 }, -- can be lazy
 			{ name = 'nvim_lsp_document_symbol' },
 			{ name = "fish" },
 			{ name = "path" },
@@ -218,15 +219,6 @@ do
 		vim.keymap.set('n', '<space>f', function()
 			vim.lsp.buf.format { async = true }
 		end, bufopts)
-	end
-end
-
-do
-	local make_capabilities = setup_configure_lspconfig.make_capabilities
-	setup_configure_lspconfig.make_capabilities = function ()
-		local capabilities = make_capabilities()
-		capabilities = vim.tbl_extend('keep', capabilities, require'cmp_nvim_lsp'.default_capabilities())
-		return capabilities
 	end
 end
 
@@ -928,11 +920,13 @@ local lazy_plugins = {
 		config = configuire_lspconfig,
 		module = {
 			'lspconfig',
-			'cmp_nvim_lsp',
 			"mason.nvim",
 			'mason-lspconfig.nvim',
 		},
-		dependencies = 'creativenull/efmls-configs-nvim',
+		dependencies = {
+			'creativenull/efmls-configs-nvim',
+			'cmp-nvim-lsp'
+		},
 		event = "VeryLazy" -- TODO: better lazyness?
 	},
 	{
@@ -1013,7 +1007,23 @@ local lazy_plugins = {
 					end
 				}
 			}
-		}
+		},
+		config = function ()
+			local cmp_nvim_lsp = require'cmp_nvim_lsp'
+			local lsp_on_attach = setup_configure_lspconfig.lsp_on_attach
+			setup_configure_lspconfig.lsp_on_attach = function (...)
+				lsp_on_attach(...)
+				--require'cmp'.setup.buffer{sources={ { name = 'nvim_lsp' } }}
+				-- BUG: doesn't seem to trigger on its own. I have to do this for now.
+				cmp_nvim_lsp._on_insert_enter()
+			end
+			local make_capabilities = setup_configure_lspconfig.make_capabilities
+			setup_configure_lspconfig.make_capabilities = function ()
+				local capabilities = make_capabilities()
+				capabilities = vim.tbl_extend('force', capabilities, cmp_nvim_lsp.default_capabilities())
+				return capabilities
+			end
+		end
 	},
 	-- Git completion source
 	{
@@ -1022,7 +1032,8 @@ local lazy_plugins = {
 		dependencies = 'nvim-cmp',
 		config = function ()
 			require'cmp_git'.setup{}
-			require'cmp'.setup.buffer{ sources = { { name = "git" } } }
+			-- TODO: this is per-buffer
+			--require'cmp'.setup.buffer{ sources = { { name = "git" } } }
 		end
 	},
 	-- crates.io completion source
@@ -1036,7 +1047,7 @@ local lazy_plugins = {
 				group = vim.api.nvim_create_augroup("CmpSourceCargo", { clear = true }),
 				pattern = "Cargo.toml",
 				callback = function()
-					require'cmp'.setup.buffer{ sources = { { name = "crates" } } }
+					--require'cmp'.setup.buffer{ sources = { { name = "crates" } } }
 				end
 			})
 		end
@@ -1051,7 +1062,8 @@ local lazy_plugins = {
 		end,
 		config = function ()
 			require'cmp-npm'.setup{}
-			require'cmp'.setup.buffer{ sources = { { name = 'npm', keyword_length = 4 } } }
+			-- TODO: this is per-buffer
+			--require'cmp'.setup.buffer{ sources = { { name = 'npm', keyword_length = 4 } } }
 		end
 	},
 	-- Fish completion
@@ -1131,7 +1143,8 @@ local lazy_plugins = {
 				end
 			}
 		},
-		event = 'BufEnter',
+		--event = 'BufEnter',
+		event = "VeryLazy", -- TODO: better lazyness?
 		config = function ()
 			local installed = {
 				"js", "bash", "node2", "chrome", "cppdbg", "mock", "puppet", "python", "codelldb",
