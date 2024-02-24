@@ -97,7 +97,6 @@ local function configure_nvim_cmp()
 			--{ name = "git" }, -- lazy loaded
 			--{ name = "crates" }, Now loaded lazily TODO: do this for _every_ cmp plugin
 			--{ name = 'npm', keyword_length = 4 }, -- lazy loaded
-			{ name = 'pandoc_references' },
 			{ name = 'nvim_lsp_document_symbol' },
 			{ name = "fish" },
 			{ name = "path" },
@@ -997,8 +996,6 @@ local lazy_plugins = {
 				'kdheepak/cmp-latex-symbols',
 				-- Emoji completion support
 				'hrsh7th/cmp-emoji',
-				-- Pandoc completion
-				'jc-doyle/cmp-pandoc-references',
 				-- cmdline history completion
 				--Plug 'dmitmel/cmp-cmdline-history'
 				-- Use LSP symbols for buffer-style search
@@ -1073,6 +1070,14 @@ local lazy_plugins = {
 			return has_fish and true or false -- Convert from truthy to bool
 		end
 	},
+	-- Pandoc completion
+	-- Dude. I literally don't think I've ever used this.
+	--[[{
+		'jc-doyle/cmp-pandoc-references',
+		config = function ()
+			require'cmp'.setup.buffer{ sources = { { name = 'pandoc_references' } } }
+		end
+	},]]
 	-- conjure intractive eval completion
 	--use 'PaterJason/cmp-conjure' -- TODO: add this to cmp -- this might be a problem 987632498629765296987492
 	{
