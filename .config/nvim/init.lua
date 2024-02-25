@@ -91,8 +91,8 @@ local function configure_nvim_cmp()
 		-- TODO: my method of lazy loading doesn't seem to work. It replaces all sources.
 		sources = cmp.config.sources({
 			{ name = 'nvim_lsp' }, -- can be lazy
-			{ name = 'luasnip' },
-			{ name = 'latex_symbols' },
+			{ name = 'luasnip' }, -- Cannot be lazy
+			{ name = 'latex_symbols' }, -- can be lazy
 			{ name = 'emoji', insert = true },
 		--}, {
 			{ name = "git" }, -- can be lazy loaded
@@ -666,7 +666,7 @@ local lazy_plugins = {
 		},
 		config = function ()
 			require'nvim-treesitter.configs'.setup{
-				ensure_installed = {
+				--[[ensure_installed = {
 					"bash",
 					"c",
 					"cmake",
@@ -709,7 +709,7 @@ local lazy_plugins = {
 					"xml",
 					"yaml",
 					"yuck"
-				},
+				},]]
 				--ensure_installed = "all", -- Very slow to install everything
 				sync_install = true,
 				auto_install = true
@@ -986,8 +986,6 @@ local lazy_plugins = {
 				'hrsh7th/cmp-buffer',
 				-- Lower the text sorting of completions starting with _
 				'lukas-reineke/cmp-under-comparator',
-				-- latex symbol completion support (allows for inserting unicode)
-				'kdheepak/cmp-latex-symbols',
 				-- Emoji completion support
 				'hrsh7th/cmp-emoji',
 				-- cmdline history completion
@@ -1090,6 +1088,11 @@ local lazy_plugins = {
 			require'cmp'.setup.buffer{ sources = { { name = 'pandoc_references' } } }
 		end
 	},]]
+	-- latex symbol completion support (allows for inserting unicode)
+	{
+		'kdheepak/cmp-latex-symbols',
+		event = "VeryLazy", -- TODO: better lazyness?
+	},
 	-- conjure intractive eval completion
 	--use 'PaterJason/cmp-conjure' -- TODO: add this to cmp -- this might be a problem 987632498629765296987492
 	{
