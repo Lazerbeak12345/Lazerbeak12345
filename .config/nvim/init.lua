@@ -89,16 +89,17 @@ local function configure_nvim_cmp()
 			['<C-k>'] = cmp.mapping(cmp.mapping.select_prev_item(), { 'i', 'c' })
 		},
 		-- TODO: my method of lazy loading doesn't seem to work. It replaces all sources.
+		-- TODO: make all lazily loaded cmp plugins depend on cmp?
 		sources = cmp.config.sources({
 			{ name = 'nvim_lsp' }, -- can be lazy
 			{ name = 'luasnip' }, -- Cannot be lazy
 			{ name = 'latex_symbols' }, -- can be lazy
-			{ name = 'emoji', insert = true },
+			{ name = 'emoji', insert = true }, -- can be lazy
 		--}, {
 			{ name = "git" }, -- can be lazy loaded
 			{ name = "crates" }, -- can be lazy
 			{ name = 'npm', keyword_length = 4 }, -- can be lazy
-			{ name = 'nvim_lsp_document_symbol' },
+			{ name = 'nvim_lsp_document_symbol' }, -- can be lazy
 			{ name = "fish" },
 			{ name = "path" },
 			--{ name = "dictionary", keyword_length = 2 }, -- TODO: seems broken (switcher is deprecated)
@@ -986,12 +987,8 @@ local lazy_plugins = {
 				'hrsh7th/cmp-buffer',
 				-- Lower the text sorting of completions starting with _
 				'lukas-reineke/cmp-under-comparator',
-				-- Emoji completion support
-				'hrsh7th/cmp-emoji',
 				-- cmdline history completion
 				--Plug 'dmitmel/cmp-cmdline-history'
-				-- Use LSP symbols for buffer-style search
-				'hrsh7th/cmp-nvim-lsp-document-symbol',
 				-- Completion on the vim.lsp apis
 				'hrsh7th/cmp-nvim-lua',
 				-- Use /usr/share/dict/words for completion
@@ -1022,6 +1019,12 @@ local lazy_plugins = {
 				return capabilities
 			end
 		end
+	},
+	-- Use LSP symbols for buffer-style search
+	{
+		'hrsh7th/cmp-nvim-lsp-document-symbol',
+		event = "VeryLazy", -- TODO: better lazyness?
+		dependencies = 'nvim-cmp'
 	},
 	-- Git completion source
 	{
@@ -1091,6 +1094,11 @@ local lazy_plugins = {
 	-- latex symbol completion support (allows for inserting unicode)
 	{
 		'kdheepak/cmp-latex-symbols',
+		event = "VeryLazy", -- TODO: better lazyness?
+	},
+	-- Emoji completion support
+	{
+		'hrsh7th/cmp-emoji',
 		event = "VeryLazy", -- TODO: better lazyness?
 	},
 	-- conjure intractive eval completion
