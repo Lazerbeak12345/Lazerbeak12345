@@ -106,7 +106,7 @@ local function configure_nvim_cmp()
 			{ name = 'nvim_lua' },
 		}, {
 			{ name = 'buffer' },
-			{ name = 'cmdline', keyword_length = 2 },
+			{ name = 'cmdline', keyword_length = 2 }, -- Can be lazy
 		}--[[, {
 			{ name = 'cmdline_history', options = { history_type = ':' } },
 		}]]),
@@ -146,7 +146,7 @@ local function configure_nvim_cmp()
 		sources = cmp.config.sources(
 			{ { name = 'path' } },
 			{
-				{ name = 'cmdline' },
+				{ name = 'cmdline' }, -- Can be lazy
 				{ name = 'cmdline_history' }
 			}
 		)
@@ -978,24 +978,28 @@ local lazy_plugins = {
 			'hrsh7th/nvim-cmp',
 			config = configure_nvim_cmp,
 			dependencies  = {
-				'saadparwaiz1/cmp_luasnip',
-				-- Snippet source. (There's others out there too)
 				{
-					'L3MON4D3/LuaSnip',
-					config = function ()
-						-- Grab things from rafamadriz/friendly-snippets & etc.
-						require"luasnip.loaders.from_vscode".lazy_load()
-					end,
-					--  Pre-configured snippits
-					dependencies = 'rafamadriz/friendly-snippets'
+					'saadparwaiz1/cmp_luasnip',
+					-- Snippet source. (There's others out there too)
+					dependencies = {{
+						'L3MON4D3/LuaSnip',
+						config = function ()
+							-- Grab things from rafamadriz/friendly-snippets & etc.
+							require"luasnip.loaders.from_vscode".lazy_load()
+						end,
+						--  Pre-configured snippits
+						dependencies = 'rafamadriz/friendly-snippets'
+					}},
 				},
-				'hrsh7th/cmp-cmdline',
 				'hrsh7th/cmp-path',
 				'hrsh7th/cmp-buffer',
 				-- Lower the text sorting of completions starting with _
 				'lukas-reineke/cmp-under-comparator',
 				-- cmdline history completion
-				--Plug 'dmitmel/cmp-cmdline-history'
+				{
+					'dmitmel/cmp-cmdline-history',
+					enabled = false
+				},
 				-- Completion on the vim.lsp apis
 				'hrsh7th/cmp-nvim-lua',
 				-- Use /usr/share/dict/words for completion
@@ -1026,6 +1030,12 @@ local lazy_plugins = {
 				return capabilities
 			end
 		end
+	},
+	-- VI : command completion
+	{
+		'hrsh7th/cmp-cmdline',
+		event = "VeryLazy", -- TODO: better lazyness?
+		dependencies = 'nvim-cmp',
 	},
 	-- Use LSP symbols for buffer-style search
 	{
