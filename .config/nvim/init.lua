@@ -156,25 +156,32 @@ local function configure_nvim_cmp()
 	})
 end
 
+local has_the_command_that_some_call
+do
+	local theCommandsThatWeKnow = {}
+	function has_the_command_that_some_call(tim)
+		if theCommandsThatWeKnow[tim]~=nil then
+			return theCommandsThatWeKnow[tim]
+		end
+		local check_cmd = io.popen(string.format("command -v %s", tim))
+		if check_cmd then
+			local read_res = check_cmd:read"*all"
+			local val = ({check_cmd:close()})[3]
+			local it_has_it = #read_res > 0
+			theCommandsThatWeKnow[tim] = it_has_it
+			return it_has_it
+		else
+			theCommandsThatWeKnow[tim] = false
+			return false
+		end
+	end
+end
+
 -- only load things if npm, pnpm or yarn is present
 -- TODO: consider checking for npm, pnpm and  yarn.
 -- TODO: consider just checking for node
 local function has_npm()
-	local check_npm = io.popen"command -v npm"
-	if check_npm then
-		local read_res = check_npm:read"*all"
-		local val = ({check_npm:close()})[3]
-		local it_has_it = #read_res > 0
-		has_npm = function ()
-			return it_has_it
-		end
-		return it_has_it
-	else
-		has_npm = function ()
-			return nil
-		end
-		return nil
-	end
+	return has_the_command_that_some_call"npm"
 end
 
 -- TODO: Ignore duplicate keys for this table (only)
@@ -1024,7 +1031,7 @@ local lazy_plugins = {
 	{
 		'hrsh7th/cmp-nvim-lsp-document-symbol',
 		event = "VeryLazy", -- TODO: better lazyness?
-		dependencies = 'nvim-cmp'
+		dependencies = { 'hrsh7th/cmp-nvim-lsp', 'nvim-cmp' }
 	},
 	-- Git completion source
 	{
@@ -1072,15 +1079,8 @@ local lazy_plugins = {
 		'mtoohey31/cmp-fish',
 		ft = "fish", -- Only load on fish filetype
 		cond = function ()
-			-- TODO: break this out into it's own function
 			-- Only load if fish is present
-			local check_fish = io.popen"command -v fish"
-			local has_fish = nil
-			if check_fish then
-				check_fish:read"*all"
-				has_fish = ({check_fish:close()})[3]
-			end
-			return has_fish and true or false -- Convert from truthy to bool
+			return has_the_command_that_some_call"fish"
 		end
 	},
 	-- Pandoc completion
