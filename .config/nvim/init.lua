@@ -565,6 +565,10 @@ do -- Keymaps and the like
 	-- Load file automatically when changes happen
 	vim.o.autoread = true
 
+	-- Ensure that the cursor is this many chars at lowest from either end of each buffer
+	vim.o.scrolloff = 5
+	vim.o.sidescrolloff = 5
+
 	--enable syntax highlighting (optimised for dark backgrounds)
 	--vim.o.background='dark'
 
