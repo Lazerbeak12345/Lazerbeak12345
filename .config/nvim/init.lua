@@ -101,7 +101,7 @@ local function configure_nvim_cmp()
 			{ name = 'npm', keyword_length = 4 }, -- can be lazy
 			{ name = 'nvim_lsp_document_symbol' }, -- can be lazy
 			{ name = "fish" }, -- can be lazy
-			{ name = "path" },
+			{ name = "path" }, -- can be lazy
 			--{ name = "dictionary", keyword_length = 2 }, -- TODO: seems broken (switcher is deprecated)
 			{ name = 'nvim_lua' },
 		}, {
@@ -144,7 +144,7 @@ local function configure_nvim_cmp()
 	-- Use cmdline & path source for ':' (if you enabled `native_menu`, this won't work anymore).
 	cmp.setup.cmdline(':', {
 		sources = cmp.config.sources(
-			{ { name = 'path' } },
+			{ { name = 'path' } }, -- can be lazy
 			{
 				{ name = 'cmdline' }, -- Can be lazy
 				{ name = 'cmdline_history' }
@@ -950,7 +950,6 @@ local lazy_plugins = {
 						dependencies = 'rafamadriz/friendly-snippets'
 					}},
 				},
-				'hrsh7th/cmp-path',
 				'hrsh7th/cmp-buffer',
 				-- Lower the text sorting of completions starting with _
 				'lukas-reineke/cmp-under-comparator',
@@ -989,6 +988,12 @@ local lazy_plugins = {
 				return capabilities
 			end
 		end
+	},
+	-- Path completion
+	{
+		'hrsh7th/cmp-path',
+		event = "VeryLazy", -- TODO: better lazyness?
+		dependencies = 'nvim-cmp'
 	},
 	-- VI : command completion
 	{
