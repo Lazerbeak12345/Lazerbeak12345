@@ -100,7 +100,7 @@ local function configure_nvim_cmp()
 			{ name = "crates" }, -- can be lazy
 			{ name = 'npm', keyword_length = 4 }, -- can be lazy
 			{ name = 'nvim_lsp_document_symbol' }, -- can be lazy
-			{ name = "fish" },
+			{ name = "fish" }, -- can be lazy
 			{ name = "path" },
 			--{ name = "dictionary", keyword_length = 2 }, -- TODO: seems broken (switcher is deprecated)
 			{ name = 'nvim_lua' },
@@ -678,53 +678,8 @@ local lazy_plugins = {
 		},
 		config = function ()
 			require'nvim-treesitter.configs'.setup{
-				--[[ensure_installed = {
-					"bash",
-					"c",
-					"cmake",
-					"commonlisp",
-					"cpp",
-					"css",
-					"diff",
-					"dot",
-					"fennel",
-					"fish",
-					"gdscript",
-					"git_config",
-					"git_rebase",
-					"gitattributes",
-					"gitcommit",
-					"gitignore",
-					"godot_resource",
-					"html",
-					"java",
-					"javascript",
-					"json",
-					"json5",
-					"jsonc",
-					"lua",
-					"make",
-					"markdown",
-					"markdown_inline",
-					"python",
-					"racket",
-					"rust",
-					"scheme",
-					"scss",
-					"svelte",
-					"toml",
-					"tsx",
-					"typescript",
-					"vim",
-					"vimdoc",
-					"vue",
-					"xml",
-					"yaml",
-					"yuck"
-				},]]
-				--ensure_installed = "all", -- Very slow to install everything
 				sync_install = true,
-				auto_install = true
+				auto_install = true -- With this, I don't actually need any list. It lazy-installs this way.
 			}
 		end,
 		build = ':TSUpdateSync',
