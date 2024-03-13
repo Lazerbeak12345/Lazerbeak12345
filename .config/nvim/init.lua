@@ -89,7 +89,6 @@ local function configure_nvim_cmp()
 			['<C-k>'] = cmp.mapping(cmp.mapping.select_prev_item(), { 'i', 'c' })
 		},
 		-- TODO: my method of lazy loading doesn't seem to work. It replaces all sources.
-		-- TODO: make all lazily loaded cmp plugins depend on cmp?
 		sources = cmp.config.sources({
 			{ name = 'nvim_lsp' }, -- can be lazy
 			{ name = 'luasnip' }, -- Cannot be lazy
