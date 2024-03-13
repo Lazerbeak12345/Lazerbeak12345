@@ -103,7 +103,7 @@ local function configure_nvim_cmp()
 			{ name = "fish" }, -- can be lazy
 			{ name = "path" }, -- can be lazy
 			--{ name = "dictionary", keyword_length = 2 }, -- TODO: seems broken (switcher is deprecated)
-			{ name = 'nvim_lua' },
+			{ name = 'nvim_lua' }, -- can be lazy
 		}, {
 			{ name = 'buffer' },
 			{ name = 'cmdline', keyword_length = 2 }, -- Can be lazy
@@ -958,8 +958,6 @@ local lazy_plugins = {
 					'dmitmel/cmp-cmdline-history',
 					enabled = false
 				},
-				-- Completion on the vim.lsp apis
-				'hrsh7th/cmp-nvim-lua',
 				-- Use /usr/share/dict/words for completion
 				{
 					'uga-rosa/cmp-dictionary',
@@ -988,6 +986,12 @@ local lazy_plugins = {
 				return capabilities
 			end
 		end
+	},
+	-- Completion on the vim.lsp apis
+	{
+		'hrsh7th/cmp-nvim-lua',
+		event = "VeryLazy", -- TODO: better lazyness?
+		dependencies = 'nvim-cmp'
 	},
 	-- Path completion
 	{
