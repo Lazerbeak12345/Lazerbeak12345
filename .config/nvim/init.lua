@@ -43,7 +43,7 @@ vim.opt.rtp:prepend(lazypath)
 local function configure_nvim_cmp()
 	local cmp = require'cmp'
 	--[[local function has_words_before()
-		local line, col = unpack(vim.api.nvim_win_get_cursor(0))
+
 		return col ~= 0 and vim.api.nvim_buf_get_lines(0, line - 1, line, true)[1]:sub(col, col):match("%s") == nil
 	end]]
 	cmp.setup{
@@ -108,7 +108,7 @@ local function configure_nvim_cmp()
 			{ name = 'buffer' }, -- can be lazy
 			{ name = 'cmdline', keyword_length = 2 }, -- Can be lazy
 		}--[[, {
-			{ name = 'cmdline_history', options = { history_type = ':' } },
+			{ name = 'cmdline_history', options = { history_type = ':' } }, -- can be lazy
 		}]]),
 		sorting = {
 			comparators = {
@@ -138,7 +138,7 @@ local function configure_nvim_cmp()
 	cmp.setup.cmdline({'/', '?'}, {
 		sources = cmp.config.sources(
 			{ { name = 'buffer' } }, -- can be lazy
-			{ { name = 'cmdline_history' } }
+			{ { name = 'cmdline_history' } } -- can be lazy
 		)
 	})
 	-- Use cmdline & path source for ':' (if you enabled `native_menu`, this won't work anymore).
@@ -147,12 +147,12 @@ local function configure_nvim_cmp()
 			{ { name = 'path' } }, -- can be lazy
 			{
 				{ name = 'cmdline' }, -- Can be lazy
-				{ name = 'cmdline_history' }
+				{ name = 'cmdline_history' } -- can be lazy
 			}
 		)
 	})
 	cmp.setup.cmdline({'@', '='}, {
-		sources = { { name = 'cmdline_history' } }
+		sources = { { name = 'cmdline_history' } } -- can be lazy
 	})
 end
 
