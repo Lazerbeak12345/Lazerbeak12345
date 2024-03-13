@@ -952,11 +952,6 @@ local lazy_plugins = {
 				},
 				-- Lower the text sorting of completions starting with _
 				'lukas-reineke/cmp-under-comparator',
-				-- cmdline history completion
-				{
-					'dmitmel/cmp-cmdline-history',
-					enabled = false
-				},
 				-- Use /usr/share/dict/words for completion
 				{
 					'uga-rosa/cmp-dictionary',
@@ -985,6 +980,13 @@ local lazy_plugins = {
 				return capabilities
 			end
 		end
+	},
+	-- cmdline history completion
+	{
+		'dmitmel/cmp-cmdline-history',
+		event = "VeryLazy", -- TODO: better lazyness?
+		dependencies = 'nvim-cmp',
+		enabled = false
 	},
 	-- Completion within this buffer
 	{
