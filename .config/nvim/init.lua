@@ -105,7 +105,7 @@ local function configure_nvim_cmp()
 			--{ name = "dictionary", keyword_length = 2 }, -- TODO: seems broken (switcher is deprecated)
 			{ name = 'nvim_lua' }, -- can be lazy
 		}, {
-			{ name = 'buffer' },
+			{ name = 'buffer' }, -- can be lazy
 			{ name = 'cmdline', keyword_length = 2 }, -- Can be lazy
 		}--[[, {
 			{ name = 'cmdline_history', options = { history_type = ':' } },
@@ -137,7 +137,7 @@ local function configure_nvim_cmp()
 	-- Use buffer source (then history) for `/` and `?` (if you enabled `native_menu`, this won't work anymore).
 	cmp.setup.cmdline({'/', '?'}, {
 		sources = cmp.config.sources(
-			{ { name = 'buffer' } },
+			{ { name = 'buffer' } }, -- can be lazy
 			{ { name = 'cmdline_history' } }
 		)
 	})
@@ -950,7 +950,6 @@ local lazy_plugins = {
 						dependencies = 'rafamadriz/friendly-snippets'
 					}},
 				},
-				'hrsh7th/cmp-buffer',
 				-- Lower the text sorting of completions starting with _
 				'lukas-reineke/cmp-under-comparator',
 				-- cmdline history completion
@@ -986,6 +985,12 @@ local lazy_plugins = {
 				return capabilities
 			end
 		end
+	},
+	-- Completion within this buffer
+	{
+		'hrsh7th/cmp-buffer',
+		event = "VeryLazy", -- TODO: better lazyness?
+		dependencies = 'nvim-cmp'
 	},
 	-- Completion on the vim.lsp apis
 	{
