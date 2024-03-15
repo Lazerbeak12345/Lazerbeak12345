@@ -812,13 +812,12 @@ local lazy_plugins = {
 	--    fork of above)
 	-- Ease of use
 	{ 'vimlab/split-term.vim', cmd = { "Term", "VTerm", "TTerm" } },
+	-- un-recursor
 	{
 		"samjwill/nvim-unception",
 		init = function()
-			-- Optional settings go here!
-			-- e.g.) vim.g.unception_open_buffer_in_new_tab = true
+			vim.g.unception_block_while_host_edits = 1
 		end,
-		--event = 'TermOpen'
 		lazy = false
 	},
 	{
