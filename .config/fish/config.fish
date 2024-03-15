@@ -1,3 +1,10 @@
+if status is-login
+	if test -n $bass
+		bass source /etc/profile
+	else
+		echo "Bass isn't installed - you might have a hard time with the /etc/profile"
+	end
+end
 if test -z $NATE_PATH_MODDED
 	set -xp PATH $HOME/.cargo/bin
 	set -xa PATH $HOME/.radicle/bin
@@ -34,8 +41,9 @@ alias dotfiles "/usr/bin/git --git-dir=$HOME/.dotfiles --work-tree=$HOME"
 if status is-interactive
 	alias more less
 	alias vim nvim
-	alias ls exa
-	alias tree 'exa -T'
+	alias pnpx 'pnpm dlx'
+	alias ls lsd
+	alias tree 'lsd --tree'
 	alias cls clear
 	abbr --add nivm nvim
 	abbr --add vnim nvim
