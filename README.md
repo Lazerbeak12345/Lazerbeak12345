@@ -25,6 +25,13 @@ I'm making use of an approach introduced to me by [kalkayan and their dotfiles](
 
 ```bash
 git clone --bare https://github.com/Lazerbeak12345/Lazerbeak12345 $HOME/.dotfiles
+
+# then put this in your .bashrc
+
+alias dotfiles="/usr/bin/git --git-dir=$HOME/.dotfiles --work-tree=$HOME"
+
+# refresh your bash instance, then use the dotfiles command to restore the .gitignore and any other files you'd like to try out.
+# be sure to make backups!
 ```
 
 There's a lot of reasons why this approach is awesome, and perhaps the biggest one is its simplicity.
