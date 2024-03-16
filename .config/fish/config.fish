@@ -39,7 +39,9 @@ function workonc -d "Open up an editor on the given configuration dir"
 end
 alias dotfiles "/usr/bin/git --git-dir=$HOME/.dotfiles --work-tree=$HOME"
 if status is-interactive
+	alias less nvimpager
 	alias more less
+	set -x PAGER nvimpager
 	alias vim nvim
 	alias pnpx 'pnpm dlx'
 	alias ls lsd

@@ -183,6 +183,16 @@ local function has_npm()
 	return has_the_command_that_some_call"npm"
 end
 
+local function inside_neovimpager()
+	local result = pcall(function()
+		require'nvimpager'
+	end)
+	inside_neovimpager = function()
+		return result
+	end
+	return result
+end
+
 -- TODO: Ignore duplicate keys for this table (only)
 --
 -- Hooks for everything around the lspconfig function
@@ -826,7 +836,11 @@ local lazy_plugins = {
 			vim.g.rooter_change_directory_for_non_project_files = 'current'
 			-- vim.g.rooter_patterns = ['.git', 'mod.conf', 'modpack.conf','game.conf','texture_pack.conf']
 		end,
-		lazy = false
+		lazy = false,
+		cond = function ()
+			-- dont load if we are in neovimpager
+			return not inside_neovimpager()
+		end
 	},
 	--  Start Screen
 	{
