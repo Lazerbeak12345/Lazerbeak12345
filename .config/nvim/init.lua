@@ -207,13 +207,6 @@ local setup_configure_lspconfig = {
 
 do
 	local lsp_on_attach = setup_configure_lspconfig.lsp_on_attach
-	setup_configure_lspconfig.lsp_on_attach = function (...)
-		lsp_on_attach(...)
-		require'folding'.on_attach(...)
-	end
-end
-do
-	local lsp_on_attach = setup_configure_lspconfig.lsp_on_attach
 	setup_configure_lspconfig.lsp_on_attach = function (client, bufnr, ...)
 		lsp_on_attach(client, bufnr, ...)
 		-- Reccomended keymaps from nvim-lspconfig
@@ -940,7 +933,16 @@ local lazy_plugins = {
 	--  https://github.com/RubixDev/mason-update-all#updating-from-cli
 	{ 'RubixDev/mason-update-all', opts = {}, event = "BufEnter" },
 	-- Better folding
-	'pierreglaser/folding-nvim',
+	{
+		'pierreglaser/folding-nvim',
+		config = function()
+			local lsp_on_attach = setup_configure_lspconfig.lsp_on_attach
+			setup_configure_lspconfig.lsp_on_attach = function (...)
+				lsp_on_attach(...)
+				require'folding'.on_attach(...)
+			end
+		end
+	},
 
 	-- Completion details (uses LSP)
 	{
