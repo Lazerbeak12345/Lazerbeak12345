@@ -264,8 +264,6 @@ do
 	end
 end
 
-local get_lsp_default_args
-
 local function configuire_lspconfig()
 	local default_args={
 		on_attach = setup_configure_lspconfig.lsp_on_attach,
@@ -273,9 +271,6 @@ local function configuire_lspconfig()
 	}
 	setup_configure_lspconfig.lsp_on_attach = nil
 	setup_configure_lspconfig.make_capabilities = nil
-	get_lsp_default_args = function ()
-		return default_args
-	end
 	local capabilities = default_args.capabilities
 	-- Installed manually in system.
 	setup_configure_lspconfig.manual_lspconfigs(require'lspconfig', default_args)
