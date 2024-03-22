@@ -5,11 +5,13 @@ if status is-login
 		echo "Bass isn't installed - you might have a hard time with the /etc/profile"
 	end
 end
+set -x GOPATH $HOME/.config/go
 if test -z $NATE_PATH_MODDED
 	set -xp PATH $HOME/.cargo/bin
 	set -xa PATH $HOME/.radicle/bin
 	set -xa PATH $HOME/.luarocks/bin
 	set -xa PATH $HOME/.bin
+	set -xa PATH $GOPATH/bin
 	set -x NATE_PATH_MODDED
 end
 function update_nvim -d "Update all nvim packages"
