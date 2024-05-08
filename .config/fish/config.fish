@@ -57,7 +57,7 @@ if status is-interactive
 	abbr --add dof dotfiles
 end
 function fish_greeting
-	echo TODO:
+	echo TODO: \((cat ~/.todo | wc -l) lines\)
 	head ~/.todo
 	echo -e \n$fish_greeting
 end
