@@ -42,6 +42,9 @@ vim.opt.rtp:prepend(lazypath)
 
 local function configure_nvim_cmp()
 	local cmp = require'cmp'
+	local luasnip = require'luasnip'
+	local cmp_under_comparator = require'cmp-under-comparator'
+	local lspkind = require'lspkind'
 	--[[local function has_words_before()
 
 		return col ~= 0 and vim.api.nvim_buf_get_lines(0, line - 1, line, true)[1]:sub(col, col):match("%s") == nil
@@ -50,7 +53,7 @@ local function configure_nvim_cmp()
 		--Defaults:https://github.com/hrsh7th/nvim-cmp/blob/main/lua/cmp/config/default.lua
 		snippet = {
 			expand = function(args)
-				require'luasnip'.lsp_expand(args.body)
+				luasnip.lsp_expand(args.body)
 			end,
 		},
 		mapping = {
@@ -65,8 +68,8 @@ local function configure_nvim_cmp()
 			['<Tab>'] = cmp.mapping(function (fallback)
 				if cmp.visible() then
 					cmp.confirm{ select = true }
-				elseif require'luasnip'.expand_or_jumpable() then
-					require'luasnip'.expand_or_jump()
+				elseif luasnip.expand_or_jumpable() then
+					luasnip.expand_or_jump()
 				-- TODO: there's currently no way to tell if there's even a possible completion here. If there is, we should use
 				--  that, and use the fallback otherwise. See https://github.com/hrsh7th/nvim-cmp/issues/602
 				--elseif has_words_before() then
@@ -79,8 +82,8 @@ local function configure_nvim_cmp()
 			['<S-Tab>'] = cmp.mapping(function (fallback)
 				if cmp.visible() then
 					cmp.mapping.select_prev_item()
-				elseif require'luasnip'.jumpable(-1) then
-					require'luasnip'.jump(-1)
+				elseif luasnip.jumpable(-1) then
+					luasnip.jump(-1)
 				else
 					fallback()
 				end
@@ -115,7 +118,7 @@ local function configure_nvim_cmp()
 				cmp.config.compare.exact,
 				cmp.config.compare.score,
 				cmp.config.compare.recently_used,
-				require'cmp-under-comparator'.under,
+				cmp_under_comparator.under,
 				cmp.config.compare.kind,
 				cmp.config.compare.sort_text,
 				cmp.config.compare.length,
@@ -123,7 +126,7 @@ local function configure_nvim_cmp()
 			},
 		},
 		formatting = {
-			format = require'lspkind'.cmp_format{
+			format = lspkind.cmp_format{
 				mode = 'symbol_text',
 				before = function (entry, vim_item)
 					-- Not as pretty as before but much more reliable
