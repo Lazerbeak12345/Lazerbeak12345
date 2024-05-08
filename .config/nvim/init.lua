@@ -40,11 +40,21 @@ vim.opt.rtp:prepend(lazypath)
 -- 	vim.env.VIMRUNNING = 1
 -- end
 
+-- This code seperates out the luasnip args. The API is placeholder-ish, so I
+-- might be able to swap it out easily.
+local luasnip_cmp_features = {
+	snippet_expand = function () end,
+	expand_or_jumpable = function () end,
+	expand_or_jump = function () end,
+	jumpable = function () end,
+	jump = function () end,
+}
+
 local function configure_nvim_cmp()
 	local cmp = require'cmp'
-	local luasnip = require'luasnip'
 	local cmp_under_comparator = require'cmp-under-comparator'
 	local lspkind = require'lspkind'
+
 	--[[local function has_words_before()
 
 		return col ~= 0 and vim.api.nvim_buf_get_lines(0, line - 1, line, true)[1]:sub(col, col):match("%s") == nil
@@ -52,9 +62,7 @@ local function configure_nvim_cmp()
 	cmp.setup{
 		--Defaults:https://github.com/hrsh7th/nvim-cmp/blob/main/lua/cmp/config/default.lua
 		snippet = {
-			expand = function(args)
-				luasnip.lsp_expand(args.body)
-			end,
+			expand = luasnip_cmp_features.snippet_expand,
 		},
 		mapping = {
 			['<C-d>'] = cmp.mapping(cmp.mapping.scroll_docs(-4), { 'i', 'c' }),
@@ -68,8 +76,8 @@ local function configure_nvim_cmp()
 			['<Tab>'] = cmp.mapping(function (fallback)
 				if cmp.visible() then
 					cmp.confirm{ select = true }
-				elseif luasnip.expand_or_jumpable() then
-					luasnip.expand_or_jump()
+				elseif luasnip_cmp_features.expand_or_jumpable() then
+					luasnip_cmp_features.expand_or_jump()
 				-- TODO: there's currently no way to tell if there's even a possible completion here. If there is, we should use
 				--  that, and use the fallback otherwise. See https://github.com/hrsh7th/nvim-cmp/issues/602
 				--elseif has_words_before() then
@@ -82,8 +90,8 @@ local function configure_nvim_cmp()
 			['<S-Tab>'] = cmp.mapping(function (fallback)
 				if cmp.visible() then
 					cmp.mapping.select_prev_item()
-				elseif luasnip.jumpable(-1) then
-					luasnip.jump(-1)
+				elseif luasnip_cmp_features.jumpable(-1) then
+					luasnip_cmp_features.jump(-1)
 				else
 					fallback()
 				end
@@ -962,6 +970,14 @@ local lazy_plugins = {
 						config = function ()
 							-- Grab things from rafamadriz/friendly-snippets & etc.
 							require"luasnip.loaders.from_vscode".lazy_load()
+							local luasnip = require'luasnip'
+							function luasnip_cmp_features.snippet_expand (args)
+								luasnip.lsp_expand(args.body)
+							end
+							luasnip_cmp_features.expand_or_jumpable = luasnip.expand_or_jumpable
+							luasnip_cmp_features.expand_or_jump = luasnip.expand_or_jump
+							luasnip_cmp_features.jumpable = luasnip.jumpable
+							luasnip_cmp_features.jump = luasnip.jump
 						end,
 						--  Pre-configured snippits
 						dependencies = 'rafamadriz/friendly-snippets'
