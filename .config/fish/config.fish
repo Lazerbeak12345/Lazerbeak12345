@@ -1,14 +1,14 @@
 if status is-login
-	if test -n $bass
+	if functions -q bass
 		bass source /etc/profile
 	else
 		echo "Bass isn't installed - you might have a hard time with the /etc/profile"
 	end
 end
 set -x GOPATH $HOME/.config/go
-fish_add_path -p $HOME/.cargo/bin
+fish_add_path -a $HOME/.cargo/bin
 fish_add_path -a $HOME/.radicle/bin
-fish_add_path -p $HOME/.luarocks/bin
+fish_add_path -a $HOME/.luarocks/bin
 fish_add_path -a $HOME/.bin
 fish_add_path -a $GOPATH/bin
 function update_nvim -d "Update all nvim packages"
