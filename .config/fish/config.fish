@@ -6,14 +6,11 @@ if status is-login
 	end
 end
 set -x GOPATH $HOME/.config/go
-if test -z $NATE_PATH_MODDED
-	set -xp PATH $HOME/.cargo/bin
-	set -xa PATH $HOME/.radicle/bin
-	set -xa PATH $HOME/.luarocks/bin
-	set -xa PATH $HOME/.bin
-	set -xa PATH $GOPATH/bin
-	set -x NATE_PATH_MODDED
-end
+fish_add_path -p $HOME/.cargo/bin
+fish_add_path -a $HOME/.radicle/bin
+fish_add_path -p $HOME/.luarocks/bin
+fish_add_path -a $HOME/.bin
+fish_add_path -a $GOPATH/bin
 function update_nvim -d "Update all nvim packages"
 	# https://github.com/RubixDev/mason-update-all#updating-from-cli
 	echo Update lazy.nvim plugins
