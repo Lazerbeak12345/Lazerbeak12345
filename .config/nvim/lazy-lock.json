@@ -9,7 +9,7 @@
   "cmp-latex-symbols": { "branch": "main", "commit": "165fb66afdbd016eaa1570e41672c4c557b57124" },
   "cmp-npm": { "branch": "main", "commit": "2337f109f51a09297596dd6b538b70ccba92b4e4" },
   "cmp-nvim-lsp": { "branch": "main", "commit": "5af77f54de1b16c34b23cba810150689a3a90312" },
-  "cmp-nvim-lsp-document-symbol": { "branch": "main", "commit": "f0f53f704c08ea501f9d222b23491b0d354644b0" },
+  "cmp-nvim-lsp-document-symbol": { "branch": "main", "commit": "f94f7ba948e32cd302caba1c2ca3f7c697fb4fcf" },
   "cmp-nvim-lua": { "branch": "main", "commit": "f12408bdb54c39c23e67cab726264c10db33ada8" },
   "cmp-path": { "branch": "main", "commit": "91ff86cd9c29299a64f968ebb45846c485725f23" },
   "cmp-under-comparator": { "branch": "master", "commit": "6857f10272c3cfe930cece2afa2406e1385bfef8" },
