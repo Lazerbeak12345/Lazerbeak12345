@@ -423,7 +423,6 @@ local lazy_plugins = {
 	{ 'lukas-reineke/indent-blankline.nvim',
 		event = "VeryLazy", -- TODO: better lazyness?
 		main = "ibl",
-		--version = "^3.3",
 		config = function ()
 			require"ibl".setup{
 				indent = { char = '│', tab_char = '│' },
@@ -454,7 +453,7 @@ local lazy_plugins = {
 			-- A companion to windwp/nvim-autopairs that does xml
 			"windwp/nvim-ts-autotag",
 			event = "InsertEnter",
-			opts = { enabled = true }
+			opts = {}
 		},
 		opts = {
 			sync_install = true,
@@ -568,7 +567,7 @@ local lazy_plugins = {
 		branch = "main",
 		dependencies = { "nvim-lua/plenary.nvim", "nvim-tree/nvim-web-devicons", "MunifTanjim/nui.nvim" },
 		init = function ()
-vim.g.neo_tree_remove_legacy_commands = 1
+			vim.g.neo_tree_remove_legacy_commands = 1
 			vim.g.loaded_netrwPlugin = 1 -- Don't load both this and the builtin tree
 		end,
 		opts = { window = { position = "current" } },
