@@ -448,16 +448,17 @@ local lazy_plugins = {
 	-- Super fancy coloring
 	{ 'nvim-treesitter/nvim-treesitter',
 		-- TODO: only load this if tree-sitter is installed
-		--opts = ,
 		dependencies = {
 			-- A companion to windwp/nvim-autopairs that does xml
 			"windwp/nvim-ts-autotag",
 			event = "InsertEnter",
 			opts = {}
 		},
+		main = 'nvim-treesitter.configs',
 		opts = {
 			sync_install = true,
 			auto_install = true -- With this, I don't actually need any list. It lazy-installs this way.
+			-- TODO: require `tree-sitter` cli program
 		},
 		build = ':TSUpdateSync',
 		event = 'VeryLazy' -- TODO: better lazyness?
