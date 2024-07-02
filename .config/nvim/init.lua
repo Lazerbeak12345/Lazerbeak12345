@@ -40,29 +40,33 @@ vim.opt.rtp:prepend(lazypath)
 -- 	vim.env.VIMRUNNING = 1
 -- end
 
--- This code seperates out the luasnip args. The API is placeholder-ish, so I
--- might be able to swap it out easily.
-local luasnip_cmp_features = {
-	snippet_expand = function () end,
-	expand_or_jumpable = function () end,
-	expand_or_jump = function () end,
-	jumpable = function () end,
-	jump = function () end,
-}
-
 local function configure_nvim_cmp()
 	local cmp = require'cmp'
-	local cmp_under_comparator = require'cmp-under-comparator'
+	local lsp_zero = require'lsp-zero'
+	local cmp_action = lsp_zero.cmp_action()
+	local cmp_format = lsp_zero.cmp_format{details = true}
 	local lspkind = require'lspkind'
-
+	lsp_zero.extend_cmp()
 	--[[local function has_words_before()
 
 		return col ~= 0 and vim.api.nvim_buf_get_lines(0, line - 1, line, true)[1]:sub(col, col):match("%s") == nil
 	end]]
+	local formatting = lsp_zero.cmp_format{}
+	do -- We still like lspkind in this house. format with zero, then lspkind. Best of both, hardly any manual config
+		local zero_format_fn = formatting.format
+		formatting.format = lspkind.cmp_format{
+			mode = 'symbol_text',
+			before = function (entry, vim_item)
+				return zero_format_fn(entry, vim_item)
+			end
+		}
+	end
 	cmp.setup{
 		--Defaults:https://github.com/hrsh7th/nvim-cmp/blob/main/lua/cmp/config/default.lua
 		snippet = {
-			expand = luasnip_cmp_features.snippet_expand,
+			expand = function(args)
+				require'luasnip'.lsp_expand(args.body)
+			end,
 		},
 		mapping = {
 			['<C-d>'] = cmp.mapping(cmp.mapping.scroll_docs(-4), { 'i', 'c' }),
@@ -76,8 +80,8 @@ local function configure_nvim_cmp()
 			['<Tab>'] = cmp.mapping(function (fallback)
 				if cmp.visible() then
 					cmp.confirm{ select = true }
-				elseif luasnip_cmp_features.expand_or_jumpable() then
-					luasnip_cmp_features.expand_or_jump()
+				elseif require'luasnip'.expand_or_jumpable() then
+					require'luasnip'.expand_or_jump()
 				-- TODO: there's currently no way to tell if there's even a possible completion here. If there is, we should use
 				--  that, and use the fallback otherwise. See https://github.com/hrsh7th/nvim-cmp/issues/602
 				--elseif has_words_before() then
@@ -90,8 +94,8 @@ local function configure_nvim_cmp()
 			['<S-Tab>'] = cmp.mapping(function (fallback)
 				if cmp.visible() then
 					cmp.mapping.select_prev_item()
-				elseif luasnip_cmp_features.jumpable(-1) then
-					luasnip_cmp_features.jump(-1)
+				elseif require'luasnip'.jumpable(-1) then
+					require'luasnip'.jump(-1)
 				else
 					fallback()
 				end
@@ -126,23 +130,14 @@ local function configure_nvim_cmp()
 				cmp.config.compare.exact,
 				cmp.config.compare.score,
 				cmp.config.compare.recently_used,
-				cmp_under_comparator.under,
+				require'cmp-under-comparator'.under,
 				cmp.config.compare.kind,
 				cmp.config.compare.sort_text,
 				cmp.config.compare.length,
 				cmp.config.compare.order,
 			},
 		},
-		formatting = {
-			format = lspkind.cmp_format{
-				mode = 'symbol_text',
-				before = function (entry, vim_item)
-					-- Not as pretty as before but much more reliable
-					vim_item.menu = "[" .. entry.source.name .. "]"
-					return vim_item
-				end
-			},
-		},
+		formatting = formatting
 	}
 	-- Use buffer source (then history) for `/` and `?` (if you enabled `native_menu`, this won't work anymore).
 	cmp.setup.cmdline({'/', '?'}, {
@@ -211,191 +206,9 @@ end
 local setup_configure_lspconfig = {
 	lsp_on_attach = function () end,
 	make_capabilities = function ()
-		return vim.lsp.protocol.make_client_capabilities()
-	end,
-	manual_lspconfigs = function () end
+		return require'lsp-zero'.get_capabilities()
+	end
 }
-
-do
-	local lsp_on_attach = setup_configure_lspconfig.lsp_on_attach
-	setup_configure_lspconfig.lsp_on_attach = function (client, bufnr, ...)
-		lsp_on_attach(client, bufnr, ...)
-		-- Reccomended keymaps from nvim-lspconfig
-		-- https://github.com/neovim/nvim-lspconfig#suggested-configuration
-		local bufopts = { noremap=true, silent=true, buffer=bufnr }
-		vim.keymap.set('n', 'gD', vim.lsp.buf.declaration, bufopts)
-		vim.keymap.set('n', 'gd', vim.lsp.buf.definition, bufopts)
-		vim.keymap.set('n', 'K', vim.lsp.buf.hover, bufopts)
-		vim.keymap.set('n', 'gi', vim.lsp.buf.implementation, bufopts)
-		vim.keymap.set('n', '<C-k>', vim.lsp.buf.signature_help, bufopts)
-		vim.keymap.set('n', '<space>wa', vim.lsp.buf.add_workspace_folder, bufopts)
-		vim.keymap.set('n', '<space>wr', vim.lsp.buf.remove_workspace_folder, bufopts)
-		vim.keymap.set('n', '<space>wl', function()
-			print(vim.inspect(vim.lsp.buf.list_workspace_folders()))
-		end, bufopts)
-		vim.keymap.set('n', '<space>D', vim.lsp.buf.type_definition, bufopts)
-		vim.keymap.set('n', '<space>rn', vim.lsp.buf.rename, bufopts) -- TODO: broken???
-		vim.keymap.set('n', '<space>ca', vim.lsp.buf.code_action, bufopts)
-		vim.keymap.set('n', 'gr', vim.lsp.buf.references, bufopts)
-		vim.keymap.set('n', '<space>f', function()
-			vim.lsp.buf.format { async = true }
-		end, bufopts)
-	end
-end
-
-do
-	local manual_lspconfigs = setup_configure_lspconfig.manual_lspconfigs
-	setup_configure_lspconfig.manual_lspconfigs = function (lspconfig, default_args)
-		manual_lspconfigs(lspconfig, default_args)
-		lspconfig.racket_langserver.setup(default_args)
-	end
-end
-do
-	local manual_lspconfigs = setup_configure_lspconfig.manual_lspconfigs
-	setup_configure_lspconfig.manual_lspconfigs = function (lspconfig, default_args)
-		manual_lspconfigs(lspconfig, default_args)
-		lspconfig.clangd.setup{
-			on_attach = default_args.on_attach,
-			capabilities = vim.tbl_extend('keep', default_args.capabilities, {
-				handlers = require'lsp-status'.extensions.clangd.setup(),
-				init_options = { clangdFileStatus = true }
-			})
-		}
-	end
-end
-
-local function configuire_lspconfig()
-	local default_args={
-		on_attach = setup_configure_lspconfig.lsp_on_attach,
-		capabilities = setup_configure_lspconfig.make_capabilities()
-	}
-	setup_configure_lspconfig.lsp_on_attach = nil
-	setup_configure_lspconfig.make_capabilities = nil
-	local capabilities = default_args.capabilities
-	-- Installed manually in system.
-	setup_configure_lspconfig.manual_lspconfigs(require'lspconfig', default_args)
-	setup_configure_lspconfig.manual_lspconfigs = nil
-	-- Installed through mason
-	require'mason'.setup{
-		max_concurrent_installers = require'luv'.available_parallelism(),
-		ui = {
-			icons = {
-				package_installed = "✓",
-				package_pending = "➜",
-				package_uninstalled = "✗"
-			}
-		}
-	}
-	-- TODO: assert that all requirements in `:h mason-requirements` are met
-	-- Style rule: All sources _must_ link to the documentation for each source.
-	-- Must also include what it does.
-	-- https://github.com/nvimdev/guard.nvim -- Linter chains (for if efm doesn't work)
-	local mason_tool_installed = {
-		'rustfmt', -- WARNING: reccomends rustup instead of whatever it's doing now (deprecation)
-		'luacheck', -- TODO: what does this require
-		-- TODO: requires unzip
-		--'selene',
-		'stylua', -- TODO: what does this require
-		-- TODO: requires cargo
-		'shellharden',
-		-- For Java
-		--'vscode-java-decompiler', -- TODO: This should be done from the DAP side of things, if possible
-		"checkstyle"
-	}
-	local mason_tool_installed_npm = {
-		"stylelint", "prettier",
-	}
-	if has_npm() then
-		for _, name in ipairs(mason_tool_installed_npm) do
-			mason_tool_installed[#mason_tool_installed+1] = name
-		end
-	end
-	require'mason-tool-installer'.setup{ ensure_installed = mason_tool_installed }
-	local function efm ()
-		local function efm_formatter(name)
-			return require("efmls-configs.formatters." .. name)
-		end
-		local function efm_linter(name)
-			return require("efmls-configs.linters." .. name)
-		end
-		local prettier = efm_formatter"prettier"
-		local css = { efm_linter"stylelint", prettier }
-		local prettier_only = { prettier } -- eslint isn't needed - we have the lsp
-		local languages = {
-			css = css, less = css, scss = css, sass = css,
-			javascript = prettier_only, javascriptreact = prettier_only,
-			typescript = prettier_only, typescriptreact = prettier_only,
-			html = prettier_only,
-			lua = { efm_linter"luacheck", efm_formatter"stylua"--[[, efm_linter"selene"]] },
-			vim = { efm_linter"vint" }, -- TODO: what does this require
-			rust = { efm_formatter"rustfmt" },
-			sh = { efm_formatter"shellharden" },
-			fish = { efm_linter"fish", efm_formatter"fish_indent" }
-		}
-		local filetypes = {}
-		for lang, _ in pairs(languages) do
-			filetypes[#filetypes+1] = lang
-		end
-		require'lspconfig'.efm.setup{
-			on_attach = default_args.on_attach,
-			capabilities = capabilities,
-			settings = {
-				-- TODO: can this be used elsewhere (like lua_ls)?
-				rootMarkers = {".git/"},
-				languages = languages
-			},
-			filetypes = filetypes
-		}
-	end
-	local lsp_installed = {
-		-- This is sumneko_lua. Not my favorite.
-		-- TODO: needs to know the root dir only fails to find it on it's own when the first buffer is a lua file.
-		--  Not related to rooter
-		-- can be short-term fixed by running :LspStart lua_ls when editing this file
-		-- This happens to efm as well. Might be happening to everything if that's the first file.
-		"lua_ls",
-		"ruff_lsp", -- Super fast python linting & etc.
-		"rust_analyzer",
-		"taplo", -- For TOML
-		"marksman", -- For markdown
-		"efm",
-		-- For Java
-		"jdtls"
-	}
-	local lsp_installed_npm = { -- TODO: make this automatic
-		"eslint",
-		"html",
-		"jsonls",
-		"tsserver",
-		"pyright", -- Everything else python LSP
-		"svelte",
-		"vimls"
-	}
-	if has_npm() then
-		for _, name in ipairs(lsp_installed_npm) do
-			lsp_installed[#lsp_installed+1] = name
-		end
-	end
-	require'mason-lspconfig'.setup{
-		automatic_installation = true,
-		ensure_installed = lsp_installed,
-		handlers = {
-			function (server_name) -- default handler (optional)
-				require'lspconfig'[server_name].setup(default_args)
-			end,
-			ruff_lsp = function ()
-				require'lspconfig'.ruff_lsp.setup {
-					on_attach = default_args.on_attach,
-					capabilities = vim.tbl_extend('keep', capabilities, {
-						-- Pyright does it better
-						hoverProvider = false
-					})
-				}
-			end,
-			efm = efm
-		}
-	}
-end
 
 local function configure_lualine()
 	--                                        █ 🙽 🙼 🙿   🙾
@@ -461,34 +274,6 @@ do -- Keymaps and the like
 	-- Which syntaxes would you like to enable highlighting for in vim files?
 	vim.g.vimsyn_embed = 'l'
 
-	-- Inline diagnostic alerts
-	vim.diagnostic.config{ severity_sort = true, virtual_text = { prefix = function(diagnostic, _, _)
-		local severity = diagnostic.severity
-		if type(severity) == "table" then
-			severity = severity.min or severity[1]
-		end
-
-		local ERROR = vim.diagnostic.severity.ERROR
-		local WARN = vim.diagnostic.severity.WARN
-		local INFO = vim.diagnostic.severity.INFO
-		local HINT = vim.diagnostic.severity.HINT
-
-		-- Here we are getting the icons from the lualine default settings. If you change lualine's config, these icons will
-		-- not change with it.
-		-- TODO: deal with possible API changes?
-		local icons = require"lualine.components.diagnostics.config".symbols.icons
-
-		if severity == ERROR then
-			return icons.error
-		elseif severity == WARN then
-			return icons.warn
-		elseif severity == INFO then
-			return icons.info
-		elseif severity == HINT then
-			return icons.hint
-		end
-	end } }
-
 	-- see the docstrings for folded code
 	-- TODO: this looks typo-ed and is likely broken
 	vim.g.SimpylFold_docstring_preview = 1
@@ -497,36 +282,26 @@ do -- Keymaps and the like
 
 	-- TODO: unless there's a conflict, learn the _actual_ shortcuts (and remove these)
 
-	-- Go back one file in current buffer
-	vim.keymap.set('n', '<Leader><Leader>', '<c-^>')
+	vim.keymap.set('n', '<Leader><Leader>', '<c-^>', {desc="Go back one file in current buffer"})
 
 	-- Map <Esc> to exit terminal-mode (stolen from nvim's :help terminal-input then modified for lua)
-	vim.keymap.set('t', '<Esc>', '<C-\\><C-n>')
+	vim.keymap.set('t', '<Esc>', '<C-\\><C-n>', {desc='exit terminal mode and convert it back into a buffer'})
 	-- Make it a tad easier to change the terminal back to a buffer
-	vim.keymap.set('', '<Leader>]', '<C-\\><C-n>')
+	vim.keymap.set('', '<Leader>]', '<C-\\><C-n>', {desc='exit terminal mode and convert it back into a buffer'})
 
 	-- Keyboard shortcut to open nerd tree via currently disabled mod
 	--vim.keymap.set('', '<Leader>n', '<Plug>NERDTreeTabsToggle<CR>')
 
 	-- Reccomended keymaps from nvim-lspconfig
 	-- https://github.com/neovim/nvim-lspconfig#suggested-configuration
-	do
-		local opts = { noremap=true, silent=true }
-		vim.keymap.set('n', '<space>e', vim.diagnostic.open_float, opts)
-		vim.keymap.set('n', '[d', vim.diagnostic.goto_prev, opts)
-		vim.keymap.set('n', ']d', vim.diagnostic.goto_next, opts)
-		vim.keymap.set('n', '<space>q', vim.diagnostic.setloclist, opts)
-	end
-
-	do -- https://github.com/folke/todo-comments.nvim#jumping
-		vim.keymap.set("n", "]t", function()
-			require'todo-comments'.jump_next()
-		end, { desc = "Next todo comment" })
-
-		vim.keymap.set("n", "[t", function()
-			require'todo-comments'.jump_prev()
-		end, { desc = "Previous todo comment" })
-	end
+	vim.keymap.set('n', '<space>e', vim.diagnostic.open_float, { noremap=true, silent=true, desc="diagnostic open float" })
+	vim.keymap.set('n', '[d', vim.diagnostic.goto_prev, { noremap=true, silent=true, desc="diagnostic goto prev" })
+	vim.keymap.set('n', ']d', vim.diagnostic.goto_next, { noremap=true, silent=true, desc="diagnostic goto next" })
+	vim.keymap.set('n', '<space>q', vim.diagnostic.setloclist, {
+		noremap=true,
+		silent=true,
+		desc="diagnostic add to locaction list"
+	})
 
 	-- Reccomended settings for nvim-cmp
 	vim.o.completeopt = 'menu,menuone,noselect'
@@ -629,8 +404,7 @@ local lazy_plugins = {
 	-- - Powerline
 	-- - Airline
 	-- - And the well-known, formerly first-place Lightline
-	{
-		'nvim-lualine/lualine.nvim',
+	{ 'nvim-lualine/lualine.nvim',
 		config = configure_lualine,
 		event = "BufEnter",
 		dependencies = 'nvim-lua/lsp-status.nvim'
@@ -646,11 +420,9 @@ local lazy_plugins = {
 	-- 	}
 	-- }
 	-- Indent lines
-	{
-		'lukas-reineke/indent-blankline.nvim',
+	{ 'lukas-reineke/indent-blankline.nvim',
 		event = "VeryLazy", -- TODO: better lazyness?
 		main = "ibl",
-		--version = "^3.3",
 		config = function ()
 			require"ibl".setup{
 				indent = { char = '│', tab_char = '│' },
@@ -674,45 +446,41 @@ local lazy_plugins = {
 		end
 	},
 	-- Super fancy coloring
-	{
+	{ 'nvim-treesitter/nvim-treesitter',
 		-- TODO: only load this if tree-sitter is installed
-		'nvim-treesitter/nvim-treesitter',
-		--opts = ,
 		dependencies = {
 			-- A companion to windwp/nvim-autopairs that does xml
 			"windwp/nvim-ts-autotag",
 			event = "InsertEnter",
-			opts = { enabled = true }
+			opts = {}
 		},
-		config = function ()
-			require'nvim-treesitter.configs'.setup{
-				sync_install = true,
-				auto_install = true -- With this, I don't actually need any list. It lazy-installs this way.
-			}
-		end,
+		main = 'nvim-treesitter.configs',
+		opts = {
+			sync_install = true,
+			auto_install = true -- With this, I don't actually need any list. It lazy-installs this way.
+			-- TODO: require `tree-sitter` cli program
+		},
 		build = ':TSUpdateSync',
 		event = 'VeryLazy' -- TODO: better lazyness?
 	},
-	{
+	{ 'rebelot/kanagawa.nvim',
 		-- TODO: (low prio) match this and the cmd theme
-		'rebelot/kanagawa.nvim',
 		lazy = false,
 		priority = 1000,
 		config = function ()
 			vim.cmd.colorscheme'kanagawa'
 		end
 	},
-	{
+	{ 'ojroques/nvim-osc52',
 		-- Copy clipboard even if over ssh
-		'ojroques/nvim-osc52',
 		config = function ()
 			require'osc52'.setup{}
 			-- Setup a few keymaps so I can copy even if the rest of this plugin is broken
-			vim.keymap.set('n', '<leader>c', require'osc52'.copy_operator, {expr = true})
-			vim.keymap.set('n', '<leader>cc', '<leader>c_', {remap = true})
-			vim.keymap.set('n', '<leader>C', '<leader>c', {remap = true})
-			vim.keymap.set('v', '<leader>c', require'osc52'.copy_visual)
-			vim.keymap.set('v', '<leader>C', '<leader>c', {remap = true})
+			vim.keymap.set('n', '<leader>c', require'osc52'.copy_operator, {expr = true, desc="osc52 copy operator"})
+			vim.keymap.set('n', '<leader>cc', '<leader>c_', {remap = true, desc="osc52 copy _"})
+			vim.keymap.set('n', '<leader>C', '<leader>c', {remap = true, desc="osc52 copy operator alt"})
+			vim.keymap.set('v', '<leader>c', require'osc52'.copy_visual, {desc="osc52 copy visual mode operator"})
+			vim.keymap.set('v', '<leader>C', '<leader>c', {remap = true, desc="osc52 copy visual mode operator alt"})
 			-- Copy text yanked into + (this does work, but hard to use)
 			--local function copy()
 			--	if vim.v.event.operator == 'y' and vim.v.event.regname == '+' then
@@ -742,11 +510,10 @@ local lazy_plugins = {
 	--  Genral use
 	{ 'tpope/vim-fugitive', event = "VeryLazy" }, -- TODO: better lazyness?
 	--  Line-per-line indicators and chunk selection
-	{
-		'lewis6991/gitsigns.nvim',
+	{ 'lewis6991/gitsigns.nvim',
 		opts = {
 			on_attach = function(bufnr)
-				local gs = package.loaded.gitsigns
+				local gs = require'gitsigns'
 				local function map(mode, l, r, opts)
 					opts = opts or {}
 					opts.buffer = bufnr
@@ -759,53 +526,52 @@ local lazy_plugins = {
 						gs.next_hunk()
 					end)
 					return '<Ignore>'
-				end, {expr=true})
+				end, {expr=true, desc="Git next hunk"})
 				map('n', '[c', function()
 					if vim.wo.diff then return '[c' end
 					vim.schedule(function()
 						gs.prev_hunk()
 					end)
 					return '<Ignore>'
-				end, {expr=true})
+				end, {expr=true, desc="Git prev hunk"})
 				-- Actions
-				map('n', '<leader>hs', gs.stage_hunk)
-				map('n', '<leader>hr', gs.reset_hunk)
+				map('n', '<leader>hs', gs.stage_hunk, {desc="Git stage hunk"})
+				map('n', '<leader>hr', gs.reset_hunk, {desc="Git reset hunk"})
 				map('v', '<leader>hs', function()
 					gs.stage_hunk {vim.fn.line("."), vim.fn.line("v")}
-				end)
+				end, {desc="Git stage hunk visual"})
 				map('v', '<leader>hr', function()
 					gs.reset_hunk {vim.fn.line("."), vim.fn.line("v")}
-				end)
-				map('n', '<leader>hS', gs.stage_buffer)
-				map('n', '<leader>hu', gs.undo_stage_hunk)
-				map('n', '<leader>hR', gs.reset_buffer)
-				map('n', '<leader>hp', gs.preview_hunk)
+				end, {desc="Git reset hunk visual"})
+				map('n', '<leader>hS', gs.stage_buffer, {desc="Git stage buffer"})
+				map('n', '<leader>hu', gs.undo_stage_hunk, {desc="Git undo stage hunk"})
+				map('n', '<leader>hR', gs.reset_buffer, {desc="Git reset buffer"})
+				map('n', '<leader>hp', gs.preview_hunk, {desc="Git preview hunk"})
 				map('n', '<leader>hb', function()
 					gs.blame_line{full=true}
-				end)
-				map('n', '<leader>tb', gs.toggle_current_line_blame)
-				map('n', '<leader>hd', gs.diffthis)
+				end, {desc="Git blame line"})
+				map('n', '<leader>tb', gs.toggle_current_line_blame, {desc="Git toggle current line blame"})
+				map('n', '<leader>hd', gs.diffthis, {desc="Git diff this"})
 				map('n', '<leader>hD', function()
 					gs.diffthis('~')
-				end)
-				map('n', '<leader>td', gs.toggle_deleted)
+				end, {desc="Git diff this ~"})
+				map('n', '<leader>td', gs.toggle_deleted, {desc="Git toggle deleted"})
 				-- Text object
-				map({'o', 'x'}, 'ih', ':<C-U>Gitsigns select_hunk<CR>')
+				map({'o', 'x'}, 'ih', ':<C-U>Gitsigns select_hunk<CR>', {desc="Git select hunk"})
 			end
 		},
 		event = "BufEnter"
 	},
 	-- Even nicer file management
-	{
-		'nvim-neo-tree/neo-tree.nvim',
+	{ 'nvim-neo-tree/neo-tree.nvim',
 		--branch = "v3.x",
 		branch = "main",
 		dependencies = { "nvim-lua/plenary.nvim", "nvim-tree/nvim-web-devicons", "MunifTanjim/nui.nvim" },
-		config = function ()
+		init = function ()
 			vim.g.neo_tree_remove_legacy_commands = 1
 			vim.g.loaded_netrwPlugin = 1 -- Don't load both this and the builtin tree
-			require'neo-tree'.setup{ window = { position = "current" } }
 		end,
+		opts = { window = { position = "current" } },
 		lazy = false
 	},
 
@@ -822,16 +588,14 @@ local lazy_plugins = {
 	-- Ease of use
 	{ 'vimlab/split-term.vim', cmd = { "Term", "VTerm", "TTerm" } },
 	-- un-recursor
-	{
-		"samjwill/nvim-unception",
+	{ "samjwill/nvim-unception",
 		init = function()
 			vim.g.unception_block_while_host_edits = 1
 		end,
 		lazy = false
 	},
-	{
-		'airblade/vim-rooter',
-		config = function ()
+	{ 'airblade/vim-rooter',
+		init = function ()
 			vim.g.rooter_change_directory_for_non_project_files = 'current'
 			-- vim.g.rooter_patterns = ['.git', 'mod.conf', 'modpack.conf','game.conf','texture_pack.conf']
 		end,
@@ -842,20 +606,18 @@ local lazy_plugins = {
 		end
 	},
 	--  Start Screen
-	{
-		'goolord/alpha-nvim', dependencies = 'nvim-tree/nvim-web-devicons', lazy = false,
-		config = function () require'alpha'.setup(require'alpha.themes.startify'.config) end
+	{ 'goolord/alpha-nvim',
+		dependencies = 'nvim-tree/nvim-web-devicons',
+		lazy = false,
+		config = function ()
+			require'alpha'.setup(require'alpha.themes.startify'.config)
+		end
 	},
 
 
 	-- common dependencie of many nvim plugins
 	'nvim-lua/plenary.nvim',
-	{
-		'creativenull/efmls-configs-nvim',
-		--version = 'v1.1.1',
-		dependencies = { 'WhoIsSethDaniel/mason-tool-installer.nvim', event = "VeryLazy" }, -- Install the linters -- TODO: better lazyness?
-		event = "VeryLazy" -- TODO: better lazyness?
-	},
+	'creativenull/efmls-configs-nvim', --version = 'v1.1.1', },
 	-- Interactive eval
 	-- use 'Olical/conjure'
 	--  TODO: configure this
@@ -867,48 +629,226 @@ local lazy_plugins = {
 	{ 'sheerun/vim-polyglot', event = "BufEnter" },
 	--  Eww's configuration language, yuck
 	{ 'elkowar/yuck.vim', event = "BufEnter" },
-	{
+	{ "folke/todo-comments.nvim",
 		-- TODO: is it possible to replace this with something that uses treesitter or LSP?
-		"folke/todo-comments.nvim",
 		dependencies = "nvim-lua/plenary.nvim",
-		opts = {
-			keywords = {
-				-- matches the word, so break it on purpose
-				FIX = { icon = "" },
-				TODO = { icon = "" },
-				HACK = { icon = "" },
-				WARN = { icon = "" },
-				TEST = { icon = "" },
-				PERF = { icon = "󰓅" },
-				NOTE = { icon = "󱇗" }
-			},
-			-- Allow omitting the semicolon
-			---- vim regex
-			--highlight = { after = "", pattern = [[.*<(KEYWORDS)\s*:?]] },
-			---- ripgrep regex
-			--search = { pattern = [[\b(KEYWORDS):?]] }, -- TODO: false positives. it it big enough of a problem? Fixable?
-		},
-		event = "VeryLazy" -- TODO: better lazyness?
+		event = "VeryLazy", -- TODO: better lazyness?
+		config = function ()
+			local tc = require'todo-comments'
+			tc.setup{
+				keywords = {
+					-- matches the word, so break it on purpose
+					FIX = { icon = " " },
+					TODO = { icon = "" },
+					HACK = { icon = "" },
+					WARN = { icon = " " },
+					TEST = { icon = " " },
+					PERF = { icon = "󰓅 " },
+					NOTE = { icon = "󱇗" }
+				},
+				-- Allow omitting the semicolon
+				---- vim regex
+				--highlight = { after = "", pattern = [[.*<(KEYWORDS)\s*:?]] },
+				---- ripgrep regex
+				--search = { pattern = [[\b(KEYWORDS):?]] }, -- TODO: false positives. it it big enough of a problem? Fixable?
+			}
+			-- https://github.com/folke/todo-comments.nvim#jumping
+			vim.keymap.set("n", "]t", function()
+				tc.jump_next()
+			end, { desc = "Next todo comment" })
+
+			vim.keymap.set("n", "[t", function()
+				tc.jump_prev()
+			end, { desc = "Previous todo comment" })
+		end
 	},
 
 	-- Language-server protocol
 	-- Must be after language specific things
-	{
-		'neovim/nvim-lspconfig',
-		config = configuire_lspconfig,
-		module = {
-			'lspconfig',
-			"mason.nvim",
-			'mason-lspconfig.nvim',
-		},
-		dependencies = {
-			'creativenull/efmls-configs-nvim',
-			'cmp-nvim-lsp'
-		},
-		event = "VeryLazy" -- TODO: better lazyness?
+	{'VonHeikemen/lsp-zero.nvim',
+		branch = 'v3.x',
+		init = function ()
+			-- Disable automatic setup, we are doing it manually
+			vim.g.lsp_zero_extend_cmp = false
+			vim.g.lsp_zero_extend_lspconfig = false
+		end,
+		lazy = true,
+		config = false
 	},
-	{
-		'nvim-lua/lsp-status.nvim',
+	{ 'williamboman/mason.nvim',
+		lazy = false,
+		opts = {
+			max_concurrent_installers = require'luv'.available_parallelism(),
+			ui = {
+				icons = {
+					package_installed = "✓",
+					package_pending = "➜ ",
+					package_uninstalled = "✗"
+				}
+			}
+		}
+	},
+	{ 'neovim/nvim-lspconfig',
+		event = {"BufReadPre", "BufNewFile"},
+		cmd = {"LspInfo", "LspInstall", "LspStart"},
+		dependencies = {
+			'VonHeikemen/lsp-zero.nvim',
+			'hrsh7th/cmp-nvim-lsp',
+			'williamboman/mason.nvim',
+			'WhoIsSethDaniel/mason-tool-installer.nvim',
+			'williamboman/mason-lspconfig.nvim',
+			'creativenull/efmls-configs-nvim',
+			-- TODO: make these into soft dependencies
+			'nvim-lua/lsp-status.nvim',
+			'nvim-lualine/lualine.nvim',
+			'airblade/vim-rooter',
+			'pierreglaser/folding-nvim',
+		},
+		config = function()
+			local lsp_zero = require'lsp-zero'
+			local mason_tool_installer = require'mason-tool-installer'
+			local mason_lspconfig = require'mason-lspconfig'
+			lsp_zero.extend_lspconfig() -- Ensures that the below settings are applied to lspconfig generally
+
+			do
+				local lsp_on_attach = setup_configure_lspconfig.lsp_on_attach
+				setup_configure_lspconfig.lsp_on_attach = nil
+				lsp_zero.on_attach(function (client, bufnr)
+					-- lsp-zero's keymaps are close enough to what I like
+					-- Not a surpise. Mine are from a template.
+					lsp_zero.default_keymaps{buffer = bufnr}
+					lsp_on_attach(client, bufnr)
+					-- TODO: https://lsp-zero.netlify.app/v3.x/language-server-configuration.html#format-using-a-keybinding
+				end)
+			end
+
+			lsp_zero.set_server_config{
+				capabilities = setup_configure_lspconfig.make_capabilities()
+			}
+			setup_configure_lspconfig.make_capabilities = nil
+			-- Here we are getting the icons from the lualine default settings. If you change lualine's config, these icons will
+			-- not change with it.
+			-- This is horrible. Despicible. Don't do it. It WILL break.
+			lsp_zero.set_sign_icons(require"lualine.components.diagnostics.config".symbols.icons)
+			-- Installed manually in system.
+			lsp_zero.use'racket_langserver'
+			lsp_zero.use('clangd', {
+				capabilities = {
+					handlers = require'lsp-status'.extensions.clangd.setup(),
+					init_options = { clangdFileStatus = true }
+				}
+			})
+
+			-- Installed through mason
+			-- TODO: assert that all requirements in `:h mason-requirements` are met
+			-- Style rule: All sources _must_ link to the documentation for each source.
+			-- Must also include what it does.
+			-- https://github.com/nvimdev/guard.nvim -- Linter chains (for if efm doesn't work)
+			local mason_tool_installed = {
+				'rustfmt', -- WARNING: reccomends rustup instead of whatever it's doing now (deprecation)
+				'luacheck', -- TODO: what does this require
+				-- TODO: requires unzip
+				--'selene',
+				'stylua', -- TODO: what does this require
+				-- TODO: requires cargo
+				'shellharden',
+				-- For Java
+				--'vscode-java-decompiler', -- TODO: This should be done from the DAP side of things, if possible
+				"checkstyle"
+			}
+			local mason_tool_installed_npm = {
+				"stylelint", "prettier",
+			}
+			if has_npm() then
+				for _, name in ipairs(mason_tool_installed_npm) do
+					mason_tool_installed[#mason_tool_installed+1] = name
+				end
+			end
+			mason_tool_installer.setup{ ensure_installed = mason_tool_installed }
+			local lsp_installed = {
+				-- This is sumneko_lua. Not my favorite.
+				-- TODO: needs to know the root dir only fails to find it on it's own when the first buffer is a lua file.
+				--  Not related to rooter
+				-- can be short-term fixed by running :LspStart lua_ls when editing this file
+				-- This happens to efm as well. Might be happening to everything if that's the first file.
+				"lua_ls",
+				"ruff_lsp", -- Super fast python linting & etc.
+				"rust_analyzer",
+				"taplo", -- For TOML
+				"marksman", -- For markdown
+				"efm",
+				-- For Java
+				"jdtls"
+			}
+			local lsp_installed_npm = { -- TODO: make this automatic
+				"eslint",
+				"html",
+				"jsonls",
+				"tsserver",
+				"pyright", -- Everything else python LSP
+				"svelte",
+				"vimls"
+			}
+			if has_npm() then
+				for _, name in ipairs(lsp_installed_npm) do
+					lsp_installed[#lsp_installed+1] = name
+				end
+			end
+			mason_lspconfig.setup{
+				automatic_installation = true,
+				ensure_installed = lsp_installed,
+				handlers = {
+					lsp_zero.default_setup,
+					ruff_lsp = function ()
+						lsp_zero.use('ruff_lsp', {
+							capabilities = {
+								hoverProvider = false
+							}
+						})
+					end,
+					efm = function()
+						local function efm_formatter(name)
+							return require("efmls-configs.formatters." .. name)
+						end
+						local function efm_linter(name)
+							return require("efmls-configs.linters." .. name)
+						end
+						local prettier = efm_formatter"prettier"
+						local css = { efm_linter"stylelint", prettier }
+						local prettier_only = { prettier } -- eslint isn't needed - we have the lsp
+						local languages = {
+							css = css, less = css, scss = css, sass = css,
+							javascript = prettier_only, javascriptreact = prettier_only,
+							typescript = prettier_only, typescriptreact = prettier_only,
+							html = prettier_only,
+							lua = { efm_linter"luacheck", efm_formatter"stylua"--[[, efm_linter"selene"]] },
+							vim = { efm_linter"vint" }, -- TODO: what does this require
+							rust = { efm_formatter"rustfmt" },
+							sh = { efm_formatter"shellharden" },
+							fish = { efm_linter"fish", efm_formatter"fish_indent" }
+						}
+						local filetypes = {}
+						for lang, _ in pairs(languages) do
+							filetypes[#filetypes+1] = lang
+						end
+						lsp_zero.use('efm', {
+							settings = {
+								-- This is, certianly, the way to go for other things, assuming this even works
+								rootMarkers = vim.g.rooter_patterns,
+								languages = languages
+							},
+							filetypes = filetypes
+						})
+					end,
+					lua_ls = function()
+						lsp_zero.use('lua_ls', lsp_zero.nvim_lua_ls())
+					end
+				}
+			}
+		end
+	},
+	{ 'nvim-lua/lsp-status.nvim',
+		dependencies = 'onsails/lspkind-nvim',
 		config = function()
 			local lsp_status = require'lsp-status'
 			lsp_status.config{
@@ -918,148 +858,119 @@ local lazy_plugins = {
 				kind_labels = require'lspkind'.symbol_map,
 			}
 			lsp_status.register_progress()
-			local lsp_on_attach = setup_configure_lspconfig.lsp_on_attach
+			local lsp_on_attach = assert(setup_configure_lspconfig.lsp_on_attach, "lsp-status is before lsp-zero")
 			setup_configure_lspconfig.lsp_on_attach = function (...)
 				lsp_on_attach(...)
 				lsp_status.on_attach(...)
 			end
-			local make_capabilities = setup_configure_lspconfig.make_capabilities
+			local make_capabilities = assert(setup_configure_lspconfig.make_capabilities, "lsp-status is before lspconfig")
 			setup_configure_lspconfig.make_capabilities = function ()
-				local capabilities = make_capabilities()
-				capabilities = vim.tbl_extend('keep', capabilities, require'lsp-status'.capabilities)
-				return capabilities
+				return vim.tbl_extend('keep', make_capabilities(), lsp_status.capabilities)
 			end
 		end,
 		module = 'lsp-status'
 	},
-	-- Automate installing some language-servers
-	{ 'williamboman/mason.nvim', event = "VeryLazy" }, -- TODO: better lazyness?
-	{ 'williamboman/mason-lspconfig.nvim', event = "VeryLazy" }, -- TODO: better lazyness?
 	-- Update command for mason
 	--  https://github.com/RubixDev/mason-update-all#updating-from-cli
-	{ 'RubixDev/mason-update-all', opts = {}, event = "BufEnter" },
+	{ 'RubixDev/mason-update-all',
+		opts = {},
+		cmd = "MasonUpdateAll",
+		dependencies = 'williamboman/mason.nvim'
+	},
 	-- Better folding
-	{
-		'pierreglaser/folding-nvim',
+	{ 'pierreglaser/folding-nvim',
+		-- TODO: this plugin makes use of deprecated functionality
 		config = function()
-			local lsp_on_attach = setup_configure_lspconfig.lsp_on_attach
-			setup_configure_lspconfig.lsp_on_attach = function (...)
-				lsp_on_attach(...)
-				require'folding'.on_attach(...)
+			local lsp_on_attach = assert(setup_configure_lspconfig.lsp_on_attach, "folding-nvim is before lsp-zero")
+			local folding = require'folding'
+			setup_configure_lspconfig.lsp_on_attach = function (client, bufnr)
+				lsp_on_attach(client, bufnr)
+				-- This is what it's doing internally. It's very dumb. it should be using capabilities
+				-- I have to do it this way otherwise it complains
+				if folding.servers_supporting_folding[client.name] then
+					folding.on_attach()
+				end
 			end
-		end
+		end,
+		event = "VeryLazy" -- TODO: better lazyness?
 	},
 
 	-- Completion details (uses LSP)
-	{
-		'hrsh7th/cmp-nvim-lsp',
-		dependencies = {
-			'hrsh7th/nvim-cmp',
-			config = configure_nvim_cmp,
-			dependencies  = {
-				{
-					'saadparwaiz1/cmp_luasnip',
-					-- Snippet source. (There's others out there too)
-					dependencies = {{
-						'L3MON4D3/LuaSnip',
-						config = function ()
-							-- Grab things from rafamadriz/friendly-snippets & etc.
-							require"luasnip.loaders.from_vscode".lazy_load()
-							local luasnip = require'luasnip'
-							function luasnip_cmp_features.snippet_expand (args)
-								luasnip.lsp_expand(args.body)
-							end
-							luasnip_cmp_features.expand_or_jumpable = luasnip.expand_or_jumpable
-							luasnip_cmp_features.expand_or_jump = luasnip.expand_or_jump
-							luasnip_cmp_features.jumpable = luasnip.jumpable
-							luasnip_cmp_features.jump = luasnip.jump
-						end,
-						--  Pre-configured snippits
-						dependencies = 'rafamadriz/friendly-snippets'
-					}},
-				},
-				-- Lower the text sorting of completions starting with _
-				'lukas-reineke/cmp-under-comparator',
-				-- Use /usr/share/dict/words for completion
-				{
-					'uga-rosa/cmp-dictionary',
-					enabled = false,
+	{ 'hrsh7th/nvim-cmp',
+		config = configure_nvim_cmp,
+		event = 'InsertEnter',
+		dependencies  = {
+			'onsails/lspkind-nvim',
+			'nvim-lspconfig',
+			"nvim-lua/plenary.nvim",
+			{ 'saadparwaiz1/cmp_luasnip',
+				-- Snippet source. (There's others out there too)
+				dependencies = { 'L3MON4D3/LuaSnip',
 					config = function ()
-						local dict = require"cmp_dictionary"
-						dict.setup{ debug = true }
-						dict.switcher{ spelling = { en = "/usr/share/dict/words" } }
-					end
-				}
+						-- Grab things from rafamadriz/friendly-snippets & etc.
+						require"luasnip.loaders.from_vscode".lazy_load()
+					end,
+					--  Pre-configured snippits
+					dependencies = 'rafamadriz/friendly-snippets'
+				},
+			},
+			-- Lower the text sorting of completions starting with _
+			'lukas-reineke/cmp-under-comparator',
+			-- Use /usr/share/dict/words for completion
+			{ 'uga-rosa/cmp-dictionary',
+				enabled = false,
+				config = function ()
+					local dict = require"cmp_dictionary"
+					dict.setup{ debug = true }
+					dict.switcher{ spelling = { en = "/usr/share/dict/words" } }
+				end
 			}
-		},
-		config = function ()
-			local cmp_nvim_lsp = require'cmp_nvim_lsp'
-			local lsp_on_attach = setup_configure_lspconfig.lsp_on_attach
-			setup_configure_lspconfig.lsp_on_attach = function (...)
-				lsp_on_attach(...)
-				--require'cmp'.setup.buffer{sources={ { name = 'nvim_lsp' } }}
-				-- BUG: doesn't seem to trigger on its own. I have to do this for now.
-				cmp_nvim_lsp._on_insert_enter()
-			end
-			local make_capabilities = setup_configure_lspconfig.make_capabilities
-			setup_configure_lspconfig.make_capabilities = function ()
-				local capabilities = make_capabilities()
-				capabilities = vim.tbl_extend('force', capabilities, cmp_nvim_lsp.default_capabilities())
-				return capabilities
-			end
-		end
+		}
 	},
 	-- cmdline history completion
-	{
-		'dmitmel/cmp-cmdline-history',
+	{ 'dmitmel/cmp-cmdline-history',
 		event = "VeryLazy", -- TODO: better lazyness?
 		dependencies = 'nvim-cmp',
 		enabled = false
 	},
 	-- Completion within this buffer
-	{
-		'hrsh7th/cmp-buffer',
+	{ 'hrsh7th/cmp-buffer',
 		event = "VeryLazy", -- TODO: better lazyness?
 		dependencies = 'nvim-cmp'
 	},
 	-- Completion on the vim.lsp apis
-	{
-		'hrsh7th/cmp-nvim-lua',
+	{ 'hrsh7th/cmp-nvim-lua',
 		event = "VeryLazy", -- TODO: better lazyness?
 		dependencies = 'nvim-cmp'
 	},
 	-- Path completion
-	{
-		'hrsh7th/cmp-path',
+	{ 'hrsh7th/cmp-path',
 		event = "VeryLazy", -- TODO: better lazyness?
 		dependencies = 'nvim-cmp'
 	},
 	-- VI : command completion
-	{
-		'hrsh7th/cmp-cmdline',
+	{ 'hrsh7th/cmp-cmdline',
 		event = "VeryLazy", -- TODO: better lazyness?
-		dependencies = 'nvim-cmp',
+		dependencies = 'nvim-cmp'
 	},
 	-- Use LSP symbols for buffer-style search
-	{
-		'hrsh7th/cmp-nvim-lsp-document-symbol',
+	{ 'hrsh7th/cmp-nvim-lsp-document-symbol',
 		event = "VeryLazy", -- TODO: better lazyness?
 		dependencies = { 'hrsh7th/cmp-nvim-lsp', 'nvim-cmp' }
 	},
 	-- Git completion source
-	{
-		'petertriho/cmp-git',
+	{ 'petertriho/cmp-git',
 		event = "VeryLazy", -- TODO: better lazyness?
 		dependencies = 'nvim-cmp',
-		config = function ()
+		opts = {}
+		--[[config = function ()
 			require'cmp_git'.setup{}
 			-- TODO: this is per-buffer
 			--require'cmp'.setup.buffer{ sources = { { name = "git" } } }
-		end
+		end]]
 	},
 	-- crates.io completion source
-	{
-		'saecki/crates.nvim',
+	{ 'saecki/crates.nvim',
 		dependencies = 'nvim-cmp',
 		event = "BufRead Cargo.toml",
 		config = function()
@@ -1074,22 +985,21 @@ local lazy_plugins = {
 		end
 	},
 	-- package.json completion source
-	{
-		'David-Kunz/cmp-npm',
+	{ 'David-Kunz/cmp-npm',
 		dependencies = { 'plenary.nvim', 'nvim-cmp' },
 		event = "BufRead package.json",
 		cond = function  ()
 			return has_npm()
 		end,
-		config = function ()
+		opts = {}
+		--[[config = function ()
 			require'cmp-npm'.setup{}
 			-- TODO: this is per-buffer
 			--require'cmp'.setup.buffer{ sources = { { name = 'npm', keyword_length = 4 } } }
-		end
+		end]]
 	},
 	-- Fish completion
-	{
-		'mtoohey31/cmp-fish',
+	{ 'mtoohey31/cmp-fish',
 		ft = "fish", -- Only load on fish filetype
 		cond = function ()
 			-- Only load if fish is present
@@ -1105,19 +1015,16 @@ local lazy_plugins = {
 		end
 	},]]
 	-- latex symbol completion support (allows for inserting unicode)
-	{
-		'kdheepak/cmp-latex-symbols',
-		event = "VeryLazy", -- TODO: better lazyness?
+	{ 'kdheepak/cmp-latex-symbols',
+		event = "VeryLazy" -- TODO: better lazyness?
 	},
 	-- Emoji completion support
-	{
-		'hrsh7th/cmp-emoji',
-		event = "VeryLazy", -- TODO: better lazyness?
+	{ 'hrsh7th/cmp-emoji',
+		event = "VeryLazy" -- TODO: better lazyness?
 	},
 	-- conjure intractive eval completion
 	--use 'PaterJason/cmp-conjure' -- TODO: add this to cmp -- this might be a problem 987632498629765296987492
-	{
-		"jay-babu/mason-nvim-dap.nvim",
+	{ "jay-babu/mason-nvim-dap.nvim",
 		dependencies = {
 			'neovim/nvim-lspconfig', -- Mason needs to be setup first
 			{
@@ -1125,45 +1032,45 @@ local lazy_plugins = {
 				config = function ()
 					vim.keymap.set('n', '<F5>', function()
 						require'dap'.continue()
-					end)
+					end, {desc="DAP continue"})
 					vim.keymap.set('n', '<F10>', function()
 						require'dap'.step_over()
-					end)
+					end, {desc="DAP step over"})
 					vim.keymap.set('n', '<F11>', function()
 						require'dap'.step_into()
-					end)
+					end, {desc="DAP step into"})
 					vim.keymap.set('n', '<F12>', function()
 						require'dap'.step_out()
-					end)
+					end, {desc="DAP step out"})
 					vim.keymap.set('n', '<Leader>b', function()
 						require'dap'.toggle_breakpoint()
-					end)
+					end, {desc="DAP toggle breakpoint"})
 					vim.keymap.set('n', '<Leader>B', function()
 						require'dap'.set_breakpoint()
-					end)
+					end, {desc="DAP set breakpoint"})
 					vim.keymap.set('n', '<Leader>lp', function()
 						require'dap'.set_breakpoint(nil, nil, vim.fn.input('Log point message: '))
-					end)
+					end, {desc="DAP set logging breakpoint"})
 					vim.keymap.set('n', '<Leader>dr', function()
 						require'dap'.repl.open()
-					end)
+					end, {desc="DAP open REPL"})
 					vim.keymap.set('n', '<Leader>dl', function()
 						require'dap'.run_last()
-					end)
+					end, {desc="DAP run last"})
 					vim.keymap.set({'n', 'v'}, '<Leader>dh', function()
 						require'dap.ui.widgets'.hover()
-					end)
+					end, {desc="DAP eval under the cursor into hover."})
 					vim.keymap.set({'n', 'v'}, '<Leader>dp', function()
 						require'dap.ui.widgets'.preview()
-					end)
+					end, {desc="DAP eval under the cursor into window."})
 					vim.keymap.set('n', '<Leader>df', function()
 						local widgets = require'dap.ui.widgets'
 						widgets.centered_float(widgets.frames)
-					end)
+					end, {desc='DAP view stack frames'})
 					vim.keymap.set('n', '<Leader>ds', function()
 						local widgets = require'dap.ui.widgets'
 						widgets.centered_float(widgets.scopes)
-					end)
+					end, {desc='DAP view current scope'})
 				end
 			}
 		},
@@ -1196,16 +1103,15 @@ local lazy_plugins = {
 			}
 		end
 	},]]
-	{
+	{ "windwp/nvim-autopairs",
 		-- Place pairs after typing, ex { causes } to appear.
-		"windwp/nvim-autopairs",
 		event = "InsertEnter",
 		opts = {
 			fast_wrap = {
 				map = '<M-r>' -- <M-e> is to open the default GUI explorer in my WM
 			}
 		}
-	},
+	}
 }
 require("lazy").setup(lazy_plugins, lazy_config)
 -- vim.o.ambiwidth="double" -- use this if the arrows are cut off
