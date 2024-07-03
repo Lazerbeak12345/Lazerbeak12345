@@ -566,7 +566,12 @@ local lazy_plugins = {
 	{ 'nvim-neo-tree/neo-tree.nvim',
 		--branch = "v3.x",
 		branch = "main",
-		dependencies = { "nvim-lua/plenary.nvim", "nvim-tree/nvim-web-devicons", "MunifTanjim/nui.nvim" },
+		dependencies = {
+			"nvim-lua/plenary.nvim",
+			"nvim-tree/nvim-web-devicons",
+			"MunifTanjim/nui.nvim",
+			'airblade/vim-rooter'
+		},
 		init = function ()
 			vim.g.neo_tree_remove_legacy_commands = 1
 			vim.g.loaded_netrwPlugin = 1 -- Don't load both this and the builtin tree
@@ -599,7 +604,6 @@ local lazy_plugins = {
 			vim.g.rooter_change_directory_for_non_project_files = 'current'
 			-- vim.g.rooter_patterns = ['.git', 'mod.conf', 'modpack.conf','game.conf','texture_pack.conf']
 		end,
-		lazy = false,
 		cond = function ()
 			-- dont load if we are in neovimpager
 			return not inside_neovimpager()
@@ -607,7 +611,10 @@ local lazy_plugins = {
 	},
 	--  Start Screen
 	{ 'goolord/alpha-nvim',
-		dependencies = 'nvim-tree/nvim-web-devicons',
+		dependencies = {
+			'nvim-tree/nvim-web-devicons',
+			'airblade/vim-rooter'
+		},
 		lazy = false,
 		config = function ()
 			require'alpha'.setup(require'alpha.themes.startify'.config)
@@ -767,10 +774,6 @@ local lazy_plugins = {
 			mason_tool_installer.setup{ ensure_installed = mason_tool_installed }
 			local lsp_installed = {
 				-- This is sumneko_lua. Not my favorite.
-				-- TODO: needs to know the root dir only fails to find it on it's own when the first buffer is a lua file.
-				--  Not related to rooter
-				-- can be short-term fixed by running :LspStart lua_ls when editing this file
-				-- This happens to efm as well. Might be happening to everything if that's the first file.
 				"lua_ls",
 				"ruff_lsp", -- Super fast python linting & etc.
 				"rust_analyzer",
