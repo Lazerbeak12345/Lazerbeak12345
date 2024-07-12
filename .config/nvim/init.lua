@@ -1081,10 +1081,19 @@ local lazy_plugins = {
 		event = "VeryLazy", -- TODO: better lazyness?
 		config = function ()
 			local installed = {
-				"js", "bash", "node2", "chrome", "cppdbg", "mock", "puppet", "python", "codelldb",
-				-- For Java
-				"javadbg", "javatest"
+				"js", "bash", "node2", "chrome", "mock", "python",
 			}
+			local installed_unzip = {
+				"codelldb", "puppet", "cppdbg",
+				-- For Java
+				"javatest", "javadbj" -- java-debug-adapter
+			}
+			-- TODO: this needs to be automatic
+			if has_the_command_that_some_call"unzip" then
+				for _, name in ipairs(installed_unzip) do
+					installed[#installed+1] = name
+				end
+			end
 			if has_npm() then
 				installed[#installed+1] = "firefox"
 			end
