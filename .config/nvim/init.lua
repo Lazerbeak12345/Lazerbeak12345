@@ -1068,14 +1068,19 @@ local lazy_plugins = {
 		config = function ()
 			require'mason-nvim-dap'.setup{
 				ensure_installed = {
-					"js", "bash", "node2", "chrome", "python",
+					"js", "python",
 					-- TODO: this needs to be automatic
 					table.unpack(has_the_command_that_some_call"unzip" and {
 						"codelldb", "puppet", "cppdbg",
+						"bash",
 						-- For Java
 						"javatest", "javadbj", -- java-debug-adapter
 					} or {}),
-					table.unpack(has_npm() and { "firefox", "mock" } or {})
+					table.unpack(has_npm() and {
+						"firefox", "chrome",
+						"node2",
+						"mock",
+					} or {})
 				},
 				automatic_installation = true,
 				handlers = {}
