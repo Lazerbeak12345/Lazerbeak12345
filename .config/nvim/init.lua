@@ -751,41 +751,40 @@ local lazy_plugins = {
 			-- https://github.com/nvimdev/guard.nvim -- Linter chains (for if efm doesn't work)
 			mason_tool_installer.setup{ ensure_installed = {
 				'rustfmt', -- WARNING: reccomends rustup instead of whatever it's doing now (deprecation)
-				'luacheck', -- TODO: what does this require
-				-- TODO: requires unzip
-				--'selene',
-				'stylua', -- TODO: what does this require
-				-- TODO: requires cargo
-				'shellharden',
 				-- For Java
 				--'vscode-java-decompiler', -- TODO: This should be done from the DAP side of things, if possible
 				"checkstyle",
+				-- This is sumneko_lua. Not my favorite.
+				"lua_ls",
+				"ruff_lsp", -- Super fast python linting & etc.
+				"rust_analyzer",
+				"taplo", -- For TOML
+				"marksman", -- For markdown
+				"efm",
+				-- For Java
+				"jdtls",
 				table.unpack(has_npm() and {
-					"stylelint", "prettier"
-				} or {})
+					"stylelint", "prettier",
+					"eslint",
+					"html",
+					"jsonls",
+					"tsserver",
+					"pyright", -- Everything else python LSP
+					"svelte",
+					"vimls"
+				} or {}),
+				table.unpack(has_the_command_that_some_call"unzip" and {
+					"stylua",
+					"selene"
+				} or {}),
+				table.unpack(has_the_command_that_some_call"cargo" and {
+					'shellharden'
+				} or {}),
+				table.unpack(has_the_command_that_some_call"luarocks" and {
+					'luacheck',
+				} or {}),
 			} }
 			mason_lspconfig.setup{
-				automatic_installation = true,
-				ensure_installed = {
-					-- This is sumneko_lua. Not my favorite.
-					"lua_ls",
-					"ruff_lsp", -- Super fast python linting & etc.
-					"rust_analyzer",
-					"taplo", -- For TOML
-					"marksman", -- For markdown
-					"efm",
-					-- For Java
-					"jdtls",
-					table.unpack(has_npm() and { -- TODO: make this automatic
-						"eslint",
-						"html",
-						"jsonls",
-						"tsserver",
-						"pyright", -- Everything else python LSP
-						"svelte",
-						"vimls"
-					} or {})
-				},
 				handlers = {
 					lsp_zero.default_setup,
 					ruff_lsp = function ()
