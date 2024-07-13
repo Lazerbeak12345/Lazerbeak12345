@@ -795,25 +795,25 @@ local lazy_plugins = {
 						})
 					end,
 					efm = function()
-						local function efm_formatter(name)
+						local function formater(name)
 							return require("efmls-configs.formatters." .. name)
 						end
-						local function efm_linter(name)
+						local function linter(name)
 							return require("efmls-configs.linters." .. name)
 						end
-						local prettier = efm_formatter"prettier"
-						local css = { efm_linter"stylelint", prettier }
+						local prettier = formater"prettier"
+						local css = { linter"stylelint", prettier }
 						local prettier_only = { prettier } -- eslint isn't needed - we have the lsp
 						local languages = {
 							css = css, less = css, scss = css, sass = css,
 							javascript = prettier_only, javascriptreact = prettier_only,
 							typescript = prettier_only, typescriptreact = prettier_only,
 							html = prettier_only,
-							lua = { efm_linter"luacheck", efm_formatter"stylua"--[[, efm_linter"selene"]] },
-							vim = { efm_linter"vint" }, -- TODO: what does this require
-							rust = { efm_formatter"rustfmt" },
-							sh = { efm_formatter"shellharden" },
-							fish = { efm_linter"fish", efm_formatter"fish_indent" }
+							lua = { linter"luacheck", formater"stylua"--[[, efm_linter"selene"]] },
+							vim = { linter"vint" }, -- TODO: what does this require
+							rust = { formater"rustfmt" },
+							sh = { formater"shellharden" },
+							fish = { linter"fish", formater"fish_indent" }
 						}
 						local filetypes = {}
 						for lang, _ in pairs(languages) do
