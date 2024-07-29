@@ -68,17 +68,25 @@ end
 set -gx WASMTIME_HOME "$HOME/.wasmtime"
 
 string match -r ".wasmtime" "$PATH" > /dev/null; or set -gx PATH "$WASMTIME_HOME/bin" $PATH
-set -x VISUAL nvim # Full screen editor
-set -x EDITOR "nvim -e" # Non-visual editor
-set -x GIT_EDITOR $VISUAL # Git uses vim otherwise.
+if type -q nvim
+	set -x VISUAL nvim # Full screen editor
+	set -x EDITOR "nvim -e" # Non-visual editor
+	set -x GIT_EDITOR $VISUAL # Git uses vim otherwise.
+	if type -q git
+		git config --global merge.tool nvimdiff3
+		git config --global merge.conflictstyle diff3
+		git config --global mergetool.prompt false
+	end
+end
 # Rustup seems to keep dissapearing for months at a time....
-if type --query rustup
+if type -q rustup
 	rustup completions fish > ~/.config/fish/completions/rustup.fish
 end
-starship completions fish > ~/.config/fish/completions/starship.fish
-starship init fish | source
-
-# pnpm
-set -gx PNPM_HOME "$HOME/.local/share/pnpm"
-set -gx PATH "$PNPM_HOME" $PATH
-# pnpm end
+if type -q starship
+	starship completions fish > ~/.config/fish/completions/starship.fish
+	starship init fish | source
+end
+if type -q pnpm
+	set -gx PNPM_HOME "$HOME/.local/share/pnpm"
+	set -gx PATH "$PNPM_HOME" $PATH
+end
