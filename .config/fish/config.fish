@@ -40,7 +40,13 @@ alias dotfiles "/usr/bin/git --git-dir=$HOME/.dotfiles --work-tree=$HOME"
 if status is-interactive
 	alias less nvimpager
 	alias more less
-	set -x PAGER nvimpager
+	if set -q NVIM
+		# TODO: request a -R flag
+		set -x PAGER nvimpager -c
+		# set -x PAGER nvimpager -p -- -c '"syn off"'
+	else
+		set -x PAGER nvimpager
+	end
 	alias vim nvim
 	alias pnpx 'pnpm dlx'
 	alias ls lsd

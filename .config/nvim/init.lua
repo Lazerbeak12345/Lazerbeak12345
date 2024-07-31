@@ -596,8 +596,9 @@ local lazy_plugins = {
 	{ "samjwill/nvim-unception",
 		init = function()
 			vim.g.unception_block_while_host_edits = 1
+			vim.g.unception_enable_flavor_text = 1
 		end,
-		lazy = false
+		lazy = false,
 	},
 	{ 'airblade/vim-rooter',
 		init = function ()
@@ -1099,7 +1100,7 @@ local lazy_plugins = {
 	},]]
 	{ "windwp/nvim-autopairs",
 		-- Place pairs after typing, ex { causes } to appear.
-		event = "InsertEnter",
+		event = "VeryLazy",
 		opts = {
 			fast_wrap = {
 				map = '<M-r>' -- <M-e> is to open the default GUI explorer in my WM
