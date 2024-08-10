@@ -750,41 +750,44 @@ local lazy_plugins = {
 			-- Installed through mason
 			-- TODO: assert that all requirements in `:h mason-requirements` are met
 			-- https://github.com/nvimdev/guard.nvim -- Linter chains (for if efm doesn't work)
-			mason_tool_installer.setup{ ensure_installed = {
-				'rustfmt', -- WARNING: reccomends rustup instead of whatever it's doing now (deprecation)
-				-- For Java
-				--'vscode-java-decompiler', -- TODO: This should be done from the DAP side of things, if possible
-				"checkstyle",
-				-- This is sumneko_lua. Not my favorite.
-				"lua_ls",
-				"ruff_lsp", -- Super fast python linting & etc.
-				"rust_analyzer",
-				"taplo", -- For TOML
-				"marksman", -- For markdown
-				"efm",
-				-- For Java
-				"jdtls",
-				table.unpack(has_npm() and {
-					"stylelint", "prettier",
-					"eslint",
-					"html",
-					"jsonls",
-					"tsserver",
-					"pyright", -- Everything else python LSP
-					"svelte",
-					"vimls"
-				} or {}),
-				table.unpack(has_the_command_that_some_call"unzip" and {
-					"stylua",
-					"selene"
-				} or {}),
-				table.unpack(has_the_command_that_some_call"cargo" and {
-					'shellharden'
-				} or {}),
-				table.unpack(has_the_command_that_some_call"luarocks" and {
-					'luacheck',
-				} or {}),
-			} }
+			mason_tool_installer.setup{
+				ensure_installed = vim.iter{
+					'rustfmt', -- WARNING: reccomends rustup instead of whatever it's doing now (deprecation)
+					-- For Java
+					--'vscode-java-decompiler', -- TODO: This should be done from the DAP side of things, if possible
+					"checkstyle",
+					-- This is sumneko_lua. Not my favorite.
+					"lua_ls",
+					"ruff_lsp", -- Super fast python linting & etc.
+					"rust_analyzer",
+					"taplo", -- For TOML
+					"marksman", -- For markdown
+					"efm",
+					-- For Java
+					"jdtls",
+					has_npm() and {
+						"stylelint", "prettier",
+						"eslint",
+						"html",
+						"jsonls",
+						"tsserver",
+						"pyright", -- Everything else python LSP
+						"svelte",
+						"vimls"
+					} or {},
+					has_the_command_that_some_call"unzip" and {
+						"stylua",
+						"selene"
+					} or {},
+					has_the_command_that_some_call"cargo" and {
+						'shellharden'
+					} or {},
+					has_the_command_that_some_call"luarocks" and {
+						'luacheck',
+					} or {}
+				}:flatten():totable(),
+				auto_update = true,
+			}
 			mason_lspconfig.setup{
 				handlers = {
 					lsp_zero.default_setup,
@@ -1067,21 +1070,21 @@ local lazy_plugins = {
 		event = "VeryLazy", -- TODO: better lazyness?
 		config = function ()
 			require'mason-nvim-dap'.setup{
-				ensure_installed = {
+				ensure_installed = vim.iter{
 					"js", "python",
 					-- TODO: this needs to be automatic
-					table.unpack(has_the_command_that_some_call"unzip" and {
+					has_the_command_that_some_call"unzip" and {
 						"codelldb", "puppet", "cppdbg",
 						"bash",
 						-- For Java
 						"javatest", "javadbj", -- java-debug-adapter
-					} or {}),
-					table.unpack(has_npm() and {
+					} or {},
+					has_npm() and {
 						"firefox", "chrome",
 						"node2",
 						"mock",
-					} or {})
-				},
+					} or {}
+				}:flatten():totable(),
 				automatic_installation = true,
 				handlers = {}
 			}
