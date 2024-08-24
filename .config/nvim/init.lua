@@ -214,10 +214,26 @@ local function configure_lualine()
 	--                                        █ 🙽 🙼 🙿   🙾
 	-- https://github.com/ryanoasis/nerd-fonts/issues/1190
 	vim.opt.shortmess:append'S' -- Do not show search count message when searching e.g. '[1/5]'
+	local function filename_format(_--[[c]], filename, mod, filetype)
+		local icon, _--[[color]]= require'nvim-web-devicons'.get_icon_color(filetype)
+		-- icon = c:format_hl(color) .. icon .. c:get_default_hl() -- TODO: color lualine/components/filetype.lua
+		return (icon and  icon .. ' ' or '') .. filename .. (mod == 1 and ' ~' or '')
+	end
+	local custom_filename_component = {
+		'filename',
+		fmt = function (filename, c)
+			local mod = vim.bo.mod
+			local filetype = vim.bo.filetype
+			return filename_format(c, filename, mod, filetype)
+		end,
+	}
 	require'lualine'.setup{
 		options = {
 			component_separators = { left = '', right = ''},
 			section_separators = { left = ' ', right = ' '}
+		},
+		inactive_sections = {
+			lualine_c = { custom_filename_component }
 		},
 		sections = {
 			lualine_b = {
@@ -231,7 +247,7 @@ local function configure_lualine()
 				-- TODO: todo count https://github.com/folke/todo-comments.nvim/issues/197
 			},
 			lualine_c = {
-				'filename',
+				custom_filename_component,
 				'selectioncount',
 				function () return require'lsp-status'.status() end,
 				-- The below doesn't look good and provides nothing I need
@@ -239,21 +255,31 @@ local function configure_lualine()
 				--	return vim.fn['nvim_treesitter#statusline']{indicator_size=20}
 				--end
 			},
-			lualine_y = { 'searchcount', 'progress' }
+			lualine_y = {
+				{
+					function () return require'battery'.get_status_line() end,
+					cond = function ()
+						return vim.o.columns > 120
+					end
+				},
+				'searchcount',
+				'progress'
+			}
 		},
 		tabline = {
 			lualine_b = {{
 				'tabs',
 				mode = 1,
 				max_length = function () return vim.o.columns end,
-				fmt = function (name, context)
+				fmt = function (filename, context)
 					-- Show ~ if buffer is modified in tab
 					local buflist = vim.fn.tabpagebuflist(context.tabnr)
 					local winnr = vim.fn.tabpagewinnr(context.tabnr)
 					local bufnr = buflist[winnr]
 					local mod = vim.fn.getbufvar(bufnr, '&mod')
+					local filetype = vim.fn.getbufvar(bufnr, '&filetype')
 
-					return name .. (mod == 1 and ' ~' or '')
+					return filename_format(context, filename, mod, filetype)
 				end,
 				cond = function ()
 					return vim.fn.tabpagenr'$' > 1
@@ -578,6 +604,12 @@ local lazy_plugins = {
 		end,
 		opts = { window = { position = "current" } },
 		lazy = false
+	},
+	{
+		'justinhj/battery.nvim',
+		dependencies = {'nvim-tree/nvim-web-devicons', 'nvim-lua/plenary.nvim'},
+		opts = {},
+		event = "VeryLazy" -- TODO: better lazyness?
 	},
 
 	-- Icons
