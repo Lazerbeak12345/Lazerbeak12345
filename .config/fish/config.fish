@@ -90,3 +90,6 @@ if type -q pnpm
 	set -gx PNPM_HOME "$HOME/.local/share/pnpm"
 	set -gx PATH "$PNPM_HOME" $PATH
 end
+if type -q poetry
+	poetry completions fish > ~/.config/fish/completions/poetry.fish
+end
