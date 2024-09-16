@@ -802,7 +802,7 @@ local lazy_plugins = {
 						"eslint",
 						"html",
 						"jsonls",
-						"tsserver",
+						"ts_ls",
 						"pyright", -- Everything else python LSP
 						"svelte",
 						"vimls"
