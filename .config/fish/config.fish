@@ -73,7 +73,8 @@ set -gx WASMTIME_HOME "$HOME/.wasmtime"
 string match -r ".wasmtime" "$PATH" > /dev/null; or set -gx PATH "$WASMTIME_HOME/bin" $PATH
 if type -q nvim
 	set -x VISUAL nvim # Full screen editor
-	set -x EDITOR "nvim -e" # Non-visual editor
+	#set -x EDITOR "nvim -e" # Non-visual editor
+	set -x EDITOR $VISUAL # nvim will behave properly if it must be non-visual, afaik. lots of apps just use this variable to find the editor.
 	set -x GIT_EDITOR $VISUAL # Git uses vim otherwise.
 	if type -q git
 		git config --global merge.tool nvimdiff3
@@ -81,7 +82,7 @@ if type -q nvim
 		git config --global mergetool.prompt false
 	end
 end
-# Rustup seems to keep dissapearing for months at a time....
+# Rustup seems to keep disapearing for months at a time....
 if type -q rustup
 	rustup completions fish > ~/.config/fish/completions/rustup.fish
 end
