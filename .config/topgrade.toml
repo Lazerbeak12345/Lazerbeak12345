@@ -90,8 +90,8 @@
 # Commands to run after anything
 [post_commands]
 # "Emacs Snapshot" = "rm -rf ~/.emacs.d/elpa.bak && cp -rl ~/.emacs.d/elpa ~/.emacs.d/elpa.bak"
-"remove junk packages (fedora)" = "sudo dnf autoremove"
-"remove junk packages (arch)" = "yay -Rcns (yay -Qttdq)"
+"remove junk packages (fedora)" = "type -p dnf && sudo dnf autoremove"
+"remove junk packages (arch)" = "type -p yay && yay -Rcns $(yay -Qttdq)"
 
 
 # Custom commands
