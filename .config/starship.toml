@@ -55,7 +55,7 @@ format = "[$user]($style) "  # Don't say in. Let hostname do that
 [jobs]
 symbol = "✦ "  # I need a space here.
 [custom.vim]
-when = "[ -v $VIM ]"  # One such value is `/usr/share/nvim`
+when = "[ $VIM ]"  # One such value is `/usr/share/nvim`
 format = " "
 [custom.minetest_mod]
 files = ["mod.conf"]
