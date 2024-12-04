@@ -90,8 +90,9 @@
 # Commands to run after anything
 [post_commands]
 # "Emacs Snapshot" = "rm -rf ~/.emacs.d/elpa.bak && cp -rl ~/.emacs.d/elpa ~/.emacs.d/elpa.bak"
-"remove junk packages (fedora)" = "type -p dnf && sudo dnf autoremove"
-"remove junk packages (arch)" = "type -p yay && yay -Rcns $(yay -Qttdq)"
+"remove junk packages (fedora\tdnf)" = "type -p dnf && sudo dnf autoremove"
+"remove junk packages (arch\tyay)" = "type -p yay && yay -Rcns $(yay -Qttdq)"
+"remove junk packages (*\tflatpak)" = "type -p flatpak && sudo flatpak uninstall --unused"
 
 
 # Custom commands
