@@ -292,6 +292,10 @@ local function configure_lualine()
 	vim.opt.showtabline = 1 --(visible if more than 1 tab)
 end
 
+function tbflatten(tb)
+	return vim.iter(tb):flatten():totable()
+end
+
 do -- Keymaps and the like
 	-- refer to https://github.com/nanotee/nvim-lua-guide
 
@@ -783,7 +787,7 @@ local lazy_plugins = {
 			-- TODO: assert that all requirements in `:h mason-requirements` are met
 			-- https://github.com/nvimdev/guard.nvim -- Linter chains (for if efm doesn't work)
 			mason_tool_installer.setup{
-				ensure_installed = vim.iter{
+				ensure_installed = tbflatten{
 					'rustfmt', -- WARNING: reccomends rustup instead of whatever it's doing now (deprecation)
 					-- For Java
 					--'vscode-java-decompiler', -- TODO: This should be done from the DAP side of things, if possible
@@ -805,7 +809,11 @@ local lazy_plugins = {
 						"ts_ls",
 						"pyright", -- Everything else python LSP
 						"svelte",
-						"vimls"
+						"vimls",
+						"ast-grep", -- Rewriting for lots of stuff
+						"css-lsp",
+						"css-variables-language-server", -- Till css-lsp supports variables, this is needed
+						"cssmodules-language-server" -- For when we import css files in react, etc.
 					} or {},
 					has_the_command_that_some_call"unzip" and {
 						"stylua",
@@ -817,7 +825,7 @@ local lazy_plugins = {
 					has_the_command_that_some_call"luarocks" and {
 						'luacheck',
 					} or {}
-				}:flatten():totable(),
+				},
 				auto_update = true,
 			}
 			mason_lspconfig.setup{
@@ -1102,7 +1110,7 @@ local lazy_plugins = {
 		event = "VeryLazy", -- TODO: better lazyness?
 		config = function ()
 			require'mason-nvim-dap'.setup{
-				ensure_installed = vim.iter{
+				ensure_installed = tbflatten{
 					"js", "python",
 					-- TODO: this needs to be automatic
 					has_the_command_that_some_call"unzip" and {
@@ -1116,7 +1124,7 @@ local lazy_plugins = {
 						"node2",
 						"mock",
 					} or {}
-				}:flatten():totable(),
+				},
 				automatic_installation = true,
 				handlers = {}
 			}
