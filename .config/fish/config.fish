@@ -4,9 +4,6 @@ if status is-login
 	else
 		echo "Bass isn't installed - you might have a hard time with the /etc/profile"
 	end
-	if type -q fastfetch
-		fastfetch
-	end
 end
 set -x GOPATH $HOME/.config/go
 fish_add_path -a $HOME/.cargo/bin
@@ -65,6 +62,9 @@ if status is-interactive
 	abbr --add dof dotfiles
 end
 function fish_greeting
+	if type -q fastfetch
+		fastfetch
+	end
 	echo TODO: "($(wc -l < ~/.todo) lines)"
 	head ~/.todo
 	echo -e \n$fish_greeting
