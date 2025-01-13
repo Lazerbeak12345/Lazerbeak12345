@@ -794,7 +794,7 @@ local lazy_plugins = {
 					"checkstyle",
 					-- This is sumneko_lua. Not my favorite.
 					"lua_ls",
-					"ruff", -- Super fast python linting & etc.
+					"ruff-lsp", -- Super fast python linting & etc.
 					"rust_analyzer",
 					"taplo", -- For TOML
 					"marksman", -- For markdown
