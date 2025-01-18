@@ -169,16 +169,26 @@ do
 			return theCommandsThatWeKnow[tim]
 		end
 		local check_cmd = io.popen(string.format("command -v %s", tim))
+		local result = nil
 		if check_cmd then
 			local read_res = check_cmd:read"*all"
 			local val = ({check_cmd:close()})[3]
 			local it_has_it = #read_res > 0
 			theCommandsThatWeKnow[tim] = it_has_it
-			return it_has_it
+			result =  it_has_it
 		else
 			theCommandsThatWeKnow[tim] = false
-			return false
+			result =  false
 		end
+		if not result then
+			-- timmeh stuck in the well!
+			vim.notify(
+				string.format("the program '%s' is missing. Less functionality will be available.", tim),
+				--vim.log.levels.WARN
+				vim.log.levels.WARN
+			)
+		end
+		return result
 	end
 end
 
@@ -1149,7 +1159,40 @@ local lazy_plugins = {
 				map = '<M-r>' -- <M-e> is to open the default GUI explorer in my WM
 			}
 		}
-	}
+	},
+	(
+		-- TODO: merge these tables, reduce redundant code
+		-- TODO: unmaintained.
+		has_npm() and {
+			-- install with npm
+			"iamcco/markdown-preview.nvim",
+			cmd = { "MarkdownPreviewToggle", "MarkdownPreview", "MarkdownPreviewStop" },
+			build = "cd app && npm i && git restore .",
+			init = function()
+				vim.g.mkdp_filetypes = { "markdown" }
+			end,
+			ft = { "markdown" },
+		} or {
+			-- install without yarn or npm
+			"iamcco/markdown-preview.nvim",
+			cmd = { "MarkdownPreviewToggle", "MarkdownPreview", "MarkdownPreviewStop" },
+			ft = { "markdown" },
+			build = function() vim.fn["mkdp#util#install"]() end,
+		}
+	),
+	--[[
+	{
+		-- TODO: could support more filetypes
+		"toppair/peek.nvim",
+		event = { "VeryLazy" },
+		build = "deno task --quiet build:fast",
+		config = function()
+			require"peek".setup()
+			vim.api.nvim_create_user_command("PeekOpen", require"peek".open, {})
+			vim.api.nvim_create_user_command("PeekClose", require"peek".close, {})
+		end,
+		cond = function () return has_the_command_that_some_call"deno" end
+	},]]
 }
 require("lazy").setup(lazy_plugins, lazy_config)
 -- vim.o.ambiwidth="double" -- use this if the arrows are cut off
