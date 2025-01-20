@@ -584,7 +584,9 @@ local lazy_plugins = {
 					gs.reset_hunk {vim.fn.line("."), vim.fn.line("v")}
 				end, {desc="Git reset hunk visual"})
 				map('n', '<leader>hS', gs.stage_buffer, {desc="Git stage buffer"})
-				map('n', '<leader>hu', gs.undo_stage_hunk, {desc="Git undo stage hunk"})
+				-- DEPRECATED: use stage_hunk on these instead
+				-- TODO: use most recent keymap suggestion from readme
+				--map('n', '<leader>hu', gs.undo_stage_hunk, {desc="Git undo stage hunk"})
 				map('n', '<leader>hR', gs.reset_buffer, {desc="Git reset buffer"})
 				map('n', '<leader>hp', gs.preview_hunk, {desc="Git preview hunk"})
 				map('n', '<leader>hb', function()
