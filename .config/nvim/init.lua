@@ -561,43 +561,54 @@ local lazy_plugins = {
 				end
 				-- Navigation
 				map('n', ']c', function()
-					if vim.wo.diff then return ']c' end
-					vim.schedule(function()
-						gs.next_hunk()
-					end)
-					return '<Ignore>'
-				end, {expr=true, desc="Git next hunk"})
+					if vim.wo.diff then
+						vim.cmd.normal{']c', bang = true}
+					else
+						gs.nav_hunk'next'
+					end
+				end, {desc="Git next hunk"})
 				map('n', '[c', function()
-					if vim.wo.diff then return '[c' end
-					vim.schedule(function()
-						gs.prev_hunk()
-					end)
-					return '<Ignore>'
-				end, {expr=true, desc="Git prev hunk"})
+					if vim.wo.diff then
+						vim.cmd.normal{'[c', bang = true}
+					else
+						gs.nav_hunk'prev'
+					end
+				end, {desc="Git prev hunk"})
 				-- Actions
 				map('n', '<leader>hs', gs.stage_hunk, {desc="Git stage hunk"})
 				map('n', '<leader>hr', gs.reset_hunk, {desc="Git reset hunk"})
+
 				map('v', '<leader>hs', function()
 					gs.stage_hunk {vim.fn.line("."), vim.fn.line("v")}
 				end, {desc="Git stage hunk visual"})
+
 				map('v', '<leader>hr', function()
-					gs.reset_hunk {vim.fn.line("."), vim.fn.line("v")}
+				  gs.reset_hunk{ vim.fn.line'.', vim.fn.line'v' }
 				end, {desc="Git reset hunk visual"})
+
 				map('n', '<leader>hS', gs.stage_buffer, {desc="Git stage buffer"})
-				-- DEPRECATED: use stage_hunk on these instead
-				-- TODO: use most recent keymap suggestion from readme
-				--map('n', '<leader>hu', gs.undo_stage_hunk, {desc="Git undo stage hunk"})
 				map('n', '<leader>hR', gs.reset_buffer, {desc="Git reset buffer"})
 				map('n', '<leader>hp', gs.preview_hunk, {desc="Git preview hunk"})
+				map('n', '<leader>hi', gs.preview_hunk_inline, {desc="Git preview hunk inline"})
+
 				map('n', '<leader>hb', function()
 					gs.blame_line{full=true}
 				end, {desc="Git blame line"})
-				map('n', '<leader>tb', gs.toggle_current_line_blame, {desc="Git toggle current line blame"})
+
 				map('n', '<leader>hd', gs.diffthis, {desc="Git diff this"})
+
 				map('n', '<leader>hD', function()
-					gs.diffthis('~')
+					gs.diffthis'~'
 				end, {desc="Git diff this ~"})
+
+				map('n', '<leader>hQ', function() gs.setqflist'all' end, {desc="Git quickfix all"})
+				map('n', '<leader>hq', gs.setqflist, {desc="Git quickfix"})
+
+				-- Toggles
+				map('n', '<leader>tb', gs.toggle_current_line_blame, {desc="Git toggle current line blame"})
 				map('n', '<leader>td', gs.toggle_deleted, {desc="Git toggle deleted"})
+				map('n', '<leader>tw', gs.toggle_word_diff, {desc="Git toggle word diff"})
+
 				-- Text object
 				map({'o', 'x'}, 'ih', ':<C-U>Gitsigns select_hunk<CR>', {desc="Git select hunk"})
 			end
