@@ -29,6 +29,8 @@ if not vim.loop.fs_stat(lazypath) then
 end
 vim.opt.rtp:prepend(lazypath)
 
+-- TODO: proper git_dir stuff https://github.com/tpope/vim-fugitive/issues/2191
+
 -- if vim.env.VIMRUNNING == "1" then
 -- 	print("dummy! read before running (override by setting $VIMRUNNING to \"2\")")
 -- 	-- Lua never sleeps
@@ -302,7 +304,7 @@ local function configure_lualine()
 	vim.opt.showtabline = 1 --(visible if more than 1 tab)
 end
 
-function tbflatten(tb)
+local function tbflatten(tb)
 	return vim.iter(tb):flatten():totable()
 end
 
@@ -813,17 +815,22 @@ local lazy_plugins = {
 				ensure_installed = tbflatten{
 					'rustfmt', -- WARNING: reccomends rustup instead of whatever it's doing now (deprecation)
 					-- For Java
-					--'vscode-java-decompiler', -- TODO: This should be done from the DAP side of things, if possible
+					--'vscode-java-decompiler',
+					-- "google-java-format",
+					-- "java-debug-adapter"
+					--"java-language-server", -- developed by georgewfraser
+					--"jdtls", -- developed by eclipse
+					"gradle_ls",
+
 					"checkstyle",
 					-- This is sumneko_lua. Not my favorite.
 					"lua_ls",
+					-- TODO: broken
 					"ruff-lsp", -- Super fast python linting & etc.
 					"rust_analyzer",
 					"taplo", -- For TOML
 					"marksman", -- For markdown
 					"efm",
-					-- For Java
-					"jdtls",
 					has_npm() and {
 						"stylelint", "prettier",
 						"eslint",
@@ -854,6 +861,7 @@ local lazy_plugins = {
 			mason_lspconfig.setup{
 				handlers = {
 					lsp_zero.default_setup,
+					-- TODO: broken
 					ruff_lsp = function ()
 						lsp_zero.use('ruff_lsp', {
 							capabilities = {
@@ -1140,7 +1148,7 @@ local lazy_plugins = {
 						"codelldb", "puppet", "cppdbg",
 						"bash",
 						-- For Java
-						"javatest", "javadbj", -- java-debug-adapter
+						--"javatest", "javadbj", -- java-debug-adapter
 					} or {},
 					has_npm() and {
 						"firefox", "chrome",
