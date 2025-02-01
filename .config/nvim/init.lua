@@ -686,6 +686,8 @@ local lazy_plugins = {
 
 	-- common dependencie of many nvim plugins
 	'nvim-lua/plenary.nvim',
+
+	-- default settings for efmls
 	'creativenull/efmls-configs-nvim', --version = 'v1.1.1', },
 	-- Interactive eval
 	-- use 'Olical/conjure'
@@ -816,7 +818,7 @@ local lazy_plugins = {
 					'rustfmt', -- WARNING: reccomends rustup instead of whatever it's doing now (deprecation)
 					-- For Java
 					--'vscode-java-decompiler',
-					-- "google-java-format",
+					"google-java-format",
 					-- "java-debug-adapter"
 					--"java-language-server", -- developed by georgewfraser
 					--"jdtls", -- developed by eclipse
@@ -888,19 +890,18 @@ local lazy_plugins = {
 							vim = { linter"vint" }, -- TODO: what does this require
 							rust = { formater"rustfmt" },
 							sh = { formater"shellharden" },
-							fish = { linter"fish", formater"fish_indent" }
+							fish = { linter"fish", formater"fish_indent" },
+							-- BUG: doesn't work. I don't think efm works at all right now, actually
+							java = { formater"google_java_format" } -- For Java
 						}
-						local filetypes = {}
-						for lang, _ in pairs(languages) do
-							filetypes[#filetypes+1] = lang
-						end
 						lsp_zero.use('efm', {
 							settings = {
 								-- This is, certianly, the way to go for other things, assuming this even works
+								-- TODO: modify rooter_patterns to be the union of all of these language root patterns?
 								rootMarkers = vim.g.rooter_patterns,
 								languages = languages
 							},
-							filetypes = filetypes
+							filetypes = vim.tbl_keys(languages)
 						})
 					end,
 					lua_ls = function()
