@@ -435,6 +435,21 @@ do -- Keymaps and the like
 	})]]
 	-- Popup windows tend to be unreadable with a pink background
 	--vim.api.nvim_set_hl(0, "Pmenu", {})
+
+	--[[
+	-- TODO: if I uncomment this code, java code highlighting breaks
+	vim.api.nvim_create_autocmd({ "FileType" }, {
+		pattern = 'java',
+		callback = function()
+			assert(false)
+			require'jdtls'.start_or_attach(vim.tbl_extend(
+				'force',
+				require'lsp-zero.server'.default_config,
+				require'lspconfig'.jdtls.config_def.default_config
+			))
+		end
+	})
+	--]]
 end
 
 local lazy_config = { defaults = { lazy = true }, checker = { enabled = true, notify = false } }
@@ -736,7 +751,7 @@ local lazy_plugins = {
 
 	-- Language-server protocol
 	-- Must be after language specific things
-	{'VonHeikemen/lsp-zero.nvim',
+	{'VonHeikemen/lsp-zero.nvim', --- TODO: migrate to 4.x
 		branch = 'v3.x',
 		init = function ()
 			-- Disable automatic setup, we are doing it manually
@@ -820,8 +835,11 @@ local lazy_plugins = {
 					--'vscode-java-decompiler',
 					"google-java-format",
 					-- "java-debug-adapter"
-					--"java-language-server", -- developed by georgewfraser
-					--"jdtls", -- developed by eclipse
+					--has_the_command_that_some_call"mvn" and {
+					--	-- TODO: Blocked by https://github.com/georgewfraser/java-language-server/issues/283
+					--	--"java-language-server",
+					--},
+					"jdtls", -- developed by eclipse
 					"gradle_ls",
 
 					"checkstyle",
@@ -906,7 +924,8 @@ local lazy_plugins = {
 					end,
 					lua_ls = function()
 						lsp_zero.use('lua_ls', lsp_zero.nvim_lua_ls())
-					end
+					end,
+					jdtls = lsp_zero.noop
 				}
 			}
 		end
@@ -1161,6 +1180,10 @@ local lazy_plugins = {
 				handlers = {}
 			}
 		end
+	},
+	{'mfussenegger/nvim-jdtls',
+		ft = "java",
+		dependencies = 'hrsh7th/nvim-cmp',
 	},
 	--[[{
 		-- This plugin does work, however it is made for modifying pairs in pre-exsisting code. Very nice, but doesn't do cmp
