@@ -65,8 +65,11 @@ function fish_greeting
 	if type -q fastfetch
 		fastfetch
 	end
-	echo TODO: "($(wc -l < ~/.todo) lines)"
-	head ~/.todo
+	set --local todofile ~/.todo
+	set --local lines (wc -l < $todofile)
+	set --local items (grep "^[^[:blank:]]" -c $todofile)
+	echo TODO: "($lines lines, $items items)"
+	head $todofile
 	echo -e \n$fish_greeting
 end
 
