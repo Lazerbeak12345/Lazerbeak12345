@@ -1,3 +1,6 @@
+if [ $TERM = linux ] && type -q yaft
+	exec yaft
+end
 if status is-login
 	if functions -q bass
 		bass source /etc/profile
