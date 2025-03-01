@@ -423,6 +423,25 @@ do -- Keymaps and the like
 			vim.o.lisp = true
 		end
 	})
+
+
+	-- godot support
+	do -- TODO: learn how to use vim.filetype.add
+		-- HACK: doesn't work in nvim at all ootb, but vim.filetype.add doesn't work for this
+		vim.api.nvim_create_autocmd({"BufRead", "BufNewFile"}, {
+			pattern = "*.gd",
+			callback = function ()
+				vim.o.filetype = "gdscript"
+			end
+		})
+		-- HACK: gdresource is supported if opened from cli, this lets it work elsewhere. Same issue with vim.filetype.add.
+		vim.api.nvim_create_autocmd({"BufRead", "BufNewFile"}, {
+			pattern = "*.tscn",
+			callback = function ()
+				vim.o.filetype = "gdresource"
+			end
+		})
+	end
 	-- Disable numbers on terminal only.
 	--[[ TODO: This will need an autocommand for every buffer, since the setting is inherited when split
 	vim.api.nvim_create_autocmd({ "TermOpen" }, {
@@ -873,7 +892,10 @@ local lazy_plugins = {
 						'shellharden'
 					} or {},
 					has_the_command_that_some_call"luarocks" and {
-						'luacheck',
+						'luacheck'
+					} or {},
+					has_the_command_that_some_call"godot" and {
+						"gdtoolkit" -- TODO: configure this
 					} or {}
 				},
 				auto_update = true,
@@ -1154,6 +1176,28 @@ local lazy_plugins = {
 						local widgets = require'dap.ui.widgets'
 						widgets.centered_float(widgets.scopes)
 					end, {desc='DAP view current scope'})
+
+					local dap = require"dap"
+					if has_the_command_that_some_call"godot" then
+						-- copied directly from
+						-- https://github.com/niscolas/nvim-godot/blob/main/nvim_config/lua/package_manager_config.lua
+						-- so this godot dap config is under MIT
+						dap.adapters.godot = {
+							type = "server",
+							host = "127.0.0.1",
+							port = 6006,
+						}
+						dap.configurations.gdscript = {
+							{
+								launch_game_instance = false,
+								launch_scene = false,
+								name = "Launch scene",
+								project = "${workspaceFolder}",
+								request = "launch",
+								type = "godot",
+							},
+						}
+					end
 				end
 			}
 		},
