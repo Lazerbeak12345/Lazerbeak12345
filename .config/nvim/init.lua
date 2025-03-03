@@ -698,7 +698,20 @@ local lazy_plugins = {
 	{ 'airblade/vim-rooter',
 		init = function ()
 			vim.g.rooter_change_directory_for_non_project_files = 'current'
-			-- vim.g.rooter_patterns = ['.git', 'mod.conf', 'modpack.conf','game.conf','texture_pack.conf']
+			vim.g.rooter_patterns = tbflatten{
+				has_the_command_that_some_call"git" and { '.git' } or {},
+				has_the_command_that_some_call"npm" and { 'package.json' } or {},
+				has_the_command_that_some_call"make" and { 'Makefile' } or {},
+				has_the_command_that_some_call"luanti" and {
+					'mod.conf',
+					'modpack.conf',
+					'game.conf',
+					'texture_pack.conf',
+				} or {},
+				has_the_command_that_some_call"godot" and {
+					"project.godot" -- I must have this one, at least.
+				} or {}
+			}
 		end,
 		cond = function ()
 			-- dont load if we are in neovimpager
