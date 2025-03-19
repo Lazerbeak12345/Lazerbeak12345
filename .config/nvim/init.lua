@@ -198,7 +198,8 @@ end
 -- TODO: consider checking for npm, pnpm and  yarn.
 -- TODO: consider just checking for node
 local function has_npm()
-	return has_the_command_that_some_call"npm"
+	return has_the_command_that_some_call"npm" and
+		has_the_command_that_some_call"node"
 end
 
 local function inside_neovimpager()
