@@ -873,7 +873,9 @@ local lazy_plugins = {
 					--	--"java-language-server",
 					--},
 					"jdtls", -- developed by eclipse
-					"gradle_ls",
+					has_the_command_that_some_call"unzip" and {
+						"gradle_ls",
+					} or {},
 
 					"checkstyle",
 					-- This is sumneko_lua. Not my favorite.
