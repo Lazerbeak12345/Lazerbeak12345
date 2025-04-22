@@ -881,7 +881,11 @@ local lazy_plugins = {
 					-- This is sumneko_lua. Not my favorite.
 					"lua_ls",
 					-- TODO: broken
-					"ruff-lsp", -- Super fast python linting & etc.
+					"ruff", -- Super fast python linting & etc.
+					"mypy", -- python type linting
+					"django-template-lsp",
+					--"curlylint", -- django & etc html template linting
+					"djlint", -- django & etc html template linting
 					"rust_analyzer",
 					"taplo", -- For TOML
 					"marksman", -- For markdown
@@ -919,14 +923,15 @@ local lazy_plugins = {
 			mason_lspconfig.setup{
 				handlers = {
 					lsp_zero.default_setup,
-					-- TODO: broken
-					ruff_lsp = function ()
-						lsp_zero.use('ruff_lsp', {
+					ruff = function () -- python
+						lsp_zero.use('ruff', {
 							capabilities = {
+								-- disable in favor of pyright
 								hoverProvider = false
 							}
 						})
 					end,
+					-- BUG: doesn't seem to start, these days
 					efm = function()
 						local function formater(name)
 							return require("efmls-configs.formatters." .. name)
@@ -947,8 +952,10 @@ local lazy_plugins = {
 							rust = { formater"rustfmt" },
 							sh = { formater"shellharden" },
 							fish = { linter"fish", formater"fish_indent" },
+							python = { linter"mypy", linter"ruff", formater"ruff" },
+							htmldjango = { linter"djlint", formater"djlint" },
 							-- BUG: doesn't work. I don't think efm works at all right now, actually
-							java = { formater"google_java_format" } -- For Java
+							java = { formater"google_java_format" }
 						}
 						lsp_zero.use('efm', {
 							settings = {
