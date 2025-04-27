@@ -148,6 +148,7 @@
 
 # Arguments to pass yay (or paru) when updating packages
 # yay_arguments = "--nodevel"
+yay_arguments = "--devel" # I like my artix like I like my funtoo (I maintain darling-git right now)
 
 # Arguments to pass dnf when updating packages
 # dnf_arguments = "--refresh"
