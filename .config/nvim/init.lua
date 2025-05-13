@@ -517,9 +517,8 @@ local lazy_plugins = {
 		end
 	},
 	-- Super fancy coloring
-	{
-		-- A companion to windwp/nvim-autopairs that does xml
-		"windwp/nvim-ts-autotag",
+	--  A companion to windwp/nvim-autopairs that does xml
+	{ "windwp/nvim-ts-autotag",
 		event = "InsertEnter",
 		opts = {}
 	},
@@ -647,6 +646,7 @@ local lazy_plugins = {
 		},
 		event = "BufEnter"
 	},
+	"MunifTanjim/nui.nvim",
 	-- Even nicer file management
 	{ 'nvim-neo-tree/neo-tree.nvim',
 		--branch = "v3.x",
@@ -655,7 +655,7 @@ local lazy_plugins = {
 			--"nvim-lua/plenary.nvim",
 			--"nvim-tree/nvim-web-devicons",
 			--"MunifTanjim/nui.nvim",
-			--'airblade/vim-rooter'
+			'vim-rooter'
 		},
 		init = function ()
 			vim.g.neo_tree_remove_legacy_commands = 1
@@ -664,8 +664,7 @@ local lazy_plugins = {
 		opts = { window = { position = "current" } },
 		lazy = false
 	},
-	{
-		'justinhj/battery.nvim',
+	{ 'justinhj/battery.nvim',
 		--dependencies = {'nvim-tree/nvim-web-devicons', 'nvim-lua/plenary.nvim'},
 		opts = {},
 		event = "VeryLazy" -- TODO: better lazyness?
@@ -746,7 +745,7 @@ local lazy_plugins = {
 	{ 'elkowar/yuck.vim', event = "BufEnter" },
 	{ "folke/todo-comments.nvim",
 		-- TODO: is it possible to replace this with something that uses treesitter or LSP?
-		dependencies = "nvim-lua/plenary.nvim",
+		--dependencies = "plenary.nvim",
 		event = "VeryLazy", -- TODO: better lazyness?
 		config = function ()
 			local tc = require'todo-comments'
@@ -780,7 +779,7 @@ local lazy_plugins = {
 
 	-- Language-server protocol
 	-- Must be after language specific things
-	{'VonHeikemen/lsp-zero.nvim', --- TODO: migrate to 4.x
+	{ 'VonHeikemen/lsp-zero.nvim', --- TODO: migrate to 4.x
 		branch = 'v3.x',
 		init = function ()
 			-- Disable automatic setup, we are doing it manually
@@ -870,16 +869,16 @@ local lazy_plugins = {
 					'rustfmt', -- WARNING: reccomends rustup instead of whatever it's doing now (deprecation)
 					-- For Java
 					--'vscode-java-decompiler',
-					"google-java-format",
+					--"google-java-format",
 					-- "java-debug-adapter"
 					--has_the_command_that_some_call"mvn" and {
 					--	-- TODO: Blocked by https://github.com/georgewfraser/java-language-server/issues/283
 					--	--"java-language-server",
 					--},
-					"jdtls", -- developed by eclipse
-					has_the_command_that_some_call"unzip" and {
-						"gradle_ls",
-					} or {},
+					--"jdtls", -- developed by eclipse
+					--has_the_command_that_some_call"unzip" and {
+					--	"gradle_ls",
+					--} or {},
 
 					"checkstyle",
 					-- This is sumneko_lua. Not my favorite.
@@ -955,7 +954,7 @@ local lazy_plugins = {
 					python = { linter"mypy", linter"ruff", formater"ruff" },
 					htmldjango = { linter"djlint", formater"djlint" },
 					-- BUG: doesn't work. I don't think efm works at all right now, actually
-					java = { formater"google_java_format" }
+					--java = { formater"google_java_format" }
 				}
 				vim.lsp.config('efm', {
 					settings = {
@@ -1262,7 +1261,7 @@ local lazy_plugins = {
 			}
 		end
 	},
-	{ 'mfussenegger/nvim-jdtls', ft = "java", dependencies = 'nvim-cmp' },
+	--{ 'mfussenegger/nvim-jdtls', ft = "java", dependencies = 'nvim-cmp' },
 	--[[{
 		-- This plugin does work, however it is made for modifying pairs in pre-exsisting code. Very nice, but doesn't do cmp
 		-- things.
