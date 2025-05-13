@@ -213,6 +213,9 @@ local function inside_neovimpager()
 end
 
 local function configure_lualine()
+	-- BUG: lualine or one of it's deps is using deprecated features
+	---@deprecated lsp-zero is unmaintained
+	local lsp_zero = require'lsp-zero'
 	--                                        █ 🙽 🙼 🙿   🙾
 	-- https://github.com/ryanoasis/nerd-fonts/issues/1190
 	vim.opt.shortmess:append'S' -- Do not show search count message when searching e.g. '[1/5]'
@@ -292,6 +295,10 @@ local function configure_lualine()
 		extensions = { 'fugitive', 'lazy', 'neo-tree' }
 	}
 	vim.opt.showtabline = 1 --(visible if more than 1 tab)
+	-- Here we are getting the icons from the lualine default settings. If you change lualine's config, these icons will
+	-- not change with it.
+	-- This is horrible. Despicible. Don't do it. It WILL break.
+	lsp_zero.set_sign_icons(require"lualine.components.diagnostics.config".symbols.icons)
 end
 
 local function tbflatten(tb)
@@ -518,7 +525,7 @@ local lazy_plugins = {
 	},
 	{ 'nvim-treesitter/nvim-treesitter',
 		-- TODO: only load this if tree-sitter is installed
-		dependencies = "windwp/nvim-ts-autotag",
+		--dependencies = "windwp/nvim-ts-autotag",
 		main = 'nvim-treesitter.configs',
 		opts = {
 			sync_install = true,
@@ -645,10 +652,10 @@ local lazy_plugins = {
 		--branch = "v3.x",
 		branch = "main",
 		dependencies = {
-			"nvim-lua/plenary.nvim",
-			"nvim-tree/nvim-web-devicons",
-			"MunifTanjim/nui.nvim",
-			'airblade/vim-rooter'
+			--"nvim-lua/plenary.nvim",
+			--"nvim-tree/nvim-web-devicons",
+			--"MunifTanjim/nui.nvim",
+			--'airblade/vim-rooter'
 		},
 		init = function ()
 			vim.g.neo_tree_remove_legacy_commands = 1
@@ -659,7 +666,7 @@ local lazy_plugins = {
 	},
 	{
 		'justinhj/battery.nvim',
-		dependencies = {'nvim-tree/nvim-web-devicons', 'nvim-lua/plenary.nvim'},
+		--dependencies = {'nvim-tree/nvim-web-devicons', 'nvim-lua/plenary.nvim'},
 		opts = {},
 		event = "VeryLazy" -- TODO: better lazyness?
 	},
@@ -678,6 +685,7 @@ local lazy_plugins = {
 	{ 'vimlab/split-term.vim', cmd = { "Term", "VTerm", "TTerm" } },
 	-- un-recursor
 	{ "samjwill/nvim-unception",
+		-- BUG: if dbus doesn't know this user is logged in, this plugin breaks
 		init = function()
 			vim.g.unception_block_while_host_edits = 1
 			vim.g.unception_enable_flavor_text = 1
@@ -709,10 +717,10 @@ local lazy_plugins = {
 	},
 	--  Start Screen
 	{ 'goolord/alpha-nvim',
-		dependencies = {
-			'nvim-tree/nvim-web-devicons',
-			'airblade/vim-rooter'
-		},
+		--dependencies = {
+		--	'nvim-tree/nvim-web-devicons',
+		--	'airblade/vim-rooter'
+		--},
 		lazy = false,
 		config = function ()
 			require'alpha'.setup(require'alpha.themes.startify'.config)
@@ -795,6 +803,8 @@ local lazy_plugins = {
 			}
 		}
 	},
+	{ 'WhoIsSethDaniel/mason-tool-installer.nvim', dependencies = 'mason.nvim' },
+	'mason-org/mason-lspconfig.nvim',
 	{ 'neovim/nvim-lspconfig',
 		event = {"BufReadPre", "BufNewFile"},
 		cmd = {"LspInfo", "LspInstall", "LspStart"},
@@ -807,10 +817,10 @@ local lazy_plugins = {
 			--'mason-org/mason-lspconfig.nvim',
 			--'creativenull/efmls-configs-nvim',
 			-- TODO: make these into soft dependencies
-			'nvim-lua/lsp-status.nvim',
-			'nvim-lualine/lualine.nvim',
-			'airblade/vim-rooter',
-			'pierreglaser/folding-nvim',
+			--'nvim-lua/lsp-status.nvim',
+			--'nvim-lualine/lualine.nvim',
+			--'airblade/vim-rooter',
+			--'pierreglaser/folding-nvim',
 		},
 		config = function()
 			---@deprecated lsp-zero is unmaintained
@@ -839,11 +849,7 @@ local lazy_plugins = {
 				--capabilities = require'lspconfig'.util.default_config
 				capabilities = lsp_zero.get_capabilities()
 			})
-			-- Here we are getting the icons from the lualine default settings. If you change lualine's config, these icons will
-			-- not change with it.
-			-- This is horrible. Despicible. Don't do it. It WILL break.
-			lsp_zero.set_sign_icons(require"lualine.components.diagnostics.config".symbols.icons)
-			
+
 			-- Installed manually in system.
 			vim.lsp.enable'racket_langserver'
 			do
@@ -967,12 +973,15 @@ local lazy_plugins = {
 			require'mason-lspconfig'.setup {
 				automatic_enable = {
 					exclude = { "jdtls" }
-				}
+				},
+				-- if this is present, it fools this tool to automatic_enable anything
+				-- installed - even if it's installed by something else
+				ensure_installed = {},
 			}
 		end
 	},
 	{ 'nvim-lua/lsp-status.nvim',
-		dependencies = 'onsails/lspkind-nvim',
+		--dependencies = 'onsails/lspkind-nvim',
 		config = function()
 			require'lsp-status'.config{
 				status_symbol = '', -- The default V breaks some layout stuff.  was the next I used, but it's not needed
@@ -1020,17 +1029,18 @@ local lazy_plugins = {
 	},
 
 	-- Completion details (uses LSP)
+	'rafamadriz/friendly-snippets',
 	{ 'L3MON4D3/LuaSnip',
 		config = function ()
 			-- Grab things from rafamadriz/friendly-snippets & etc.
 			require"luasnip.loaders.from_vscode".lazy_load()
 		end,
 		--  Pre-configured snippits
-		dependencies = 'rafamadriz/friendly-snippets'
+		dependencies = 'friendly-snippets'
 	},
 	{ 'saadparwaiz1/cmp_luasnip',
 		-- Snippet source. (There's others out there too)
-		dependencies = 'L3MON4D3/LuaSnip',
+		dependencies = 'LuaSnip',
 	},
 	{ 'uga-rosa/cmp-dictionary',
 		enabled = false,
@@ -1084,12 +1094,14 @@ local lazy_plugins = {
 		dependencies = 'nvim-cmp'
 	},
 	-- Use LSP symbols for buffer-style search
+	'hrsh7th/cmp-nvim-lsp',
 	{ 'hrsh7th/cmp-nvim-lsp-document-symbol',
 		event = "VeryLazy", -- TODO: better lazyness?
-		dependencies = { 'hrsh7th/cmp-nvim-lsp', 'nvim-cmp' }
+		dependencies = { 'cmp-nvim-lsp', 'nvim-cmp' }
 	},
 	-- Git completion source
 	{ 'petertriho/cmp-git',
+		-- BUG: slows things down a ton when I type : in the commit box
 		event = "VeryLazy", -- TODO: better lazyness?
 		dependencies = 'nvim-cmp',
 		opts = {}
@@ -1154,77 +1166,77 @@ local lazy_plugins = {
 	},
 	-- conjure intractive eval completion
 	--use 'PaterJason/cmp-conjure' -- TODO: add this to cmp -- this might be a problem 987632498629765296987492
+	{ 'mfussenegger/nvim-dap',
+		config = function ()
+			vim.keymap.set('n', '<F5>', function()
+				require'dap'.continue()
+			end, {desc="DAP continue"})
+			vim.keymap.set('n', '<F10>', function()
+				require'dap'.step_over()
+			end, {desc="DAP step over"})
+			vim.keymap.set('n', '<F11>', function()
+				require'dap'.step_into()
+			end, {desc="DAP step into"})
+			vim.keymap.set('n', '<F12>', function()
+				require'dap'.step_out()
+			end, {desc="DAP step out"})
+			vim.keymap.set('n', '<Leader>b', function()
+				require'dap'.toggle_breakpoint()
+			end, {desc="DAP toggle breakpoint"})
+			vim.keymap.set('n', '<Leader>B', function()
+				require'dap'.set_breakpoint()
+			end, {desc="DAP set breakpoint"})
+			vim.keymap.set('n', '<Leader>lp', function()
+				require'dap'.set_breakpoint(nil, nil, vim.fn.input('Log point message: '))
+			end, {desc="DAP set logging breakpoint"})
+			vim.keymap.set('n', '<Leader>dr', function()
+				require'dap'.repl.open()
+			end, {desc="DAP open REPL"})
+			vim.keymap.set('n', '<Leader>dl', function()
+				require'dap'.run_last()
+			end, {desc="DAP run last"})
+			vim.keymap.set({'n', 'v'}, '<Leader>dh', function()
+				require'dap.ui.widgets'.hover()
+			end, {desc="DAP eval under the cursor into hover."})
+			vim.keymap.set({'n', 'v'}, '<Leader>dp', function()
+				require'dap.ui.widgets'.preview()
+			end, {desc="DAP eval under the cursor into window."})
+			vim.keymap.set('n', '<Leader>df', function()
+				local widgets = require'dap.ui.widgets'
+				widgets.centered_float(widgets.frames)
+			end, {desc='DAP view stack frames'})
+			vim.keymap.set('n', '<Leader>ds', function()
+				local widgets = require'dap.ui.widgets'
+				widgets.centered_float(widgets.scopes)
+			end, {desc='DAP view current scope'})
+
+			local dap = require"dap"
+			if has_the_command_that_some_call"godot" then
+				-- copied directly from
+				-- https://github.com/niscolas/nvim-godot/blob/main/nvim_config/lua/package_manager_config.lua
+				-- so this godot dap config is under MIT
+				dap.adapters.godot = {
+					type = "server",
+					host = "127.0.0.1",
+					port = 6006,
+				}
+				dap.configurations.gdscript = {
+					{
+						launch_game_instance = false,
+						launch_scene = false,
+						name = "Launch scene",
+						project = "${workspaceFolder}",
+						request = "launch",
+						type = "godot",
+					},
+				}
+			end
+		end
+	},
 	{ "jay-babu/mason-nvim-dap.nvim",
 		dependencies = {
-			'neovim/nvim-lspconfig', -- Mason needs to be setup first
-			{
-				'mfussenegger/nvim-dap',
-				config = function ()
-					vim.keymap.set('n', '<F5>', function()
-						require'dap'.continue()
-					end, {desc="DAP continue"})
-					vim.keymap.set('n', '<F10>', function()
-						require'dap'.step_over()
-					end, {desc="DAP step over"})
-					vim.keymap.set('n', '<F11>', function()
-						require'dap'.step_into()
-					end, {desc="DAP step into"})
-					vim.keymap.set('n', '<F12>', function()
-						require'dap'.step_out()
-					end, {desc="DAP step out"})
-					vim.keymap.set('n', '<Leader>b', function()
-						require'dap'.toggle_breakpoint()
-					end, {desc="DAP toggle breakpoint"})
-					vim.keymap.set('n', '<Leader>B', function()
-						require'dap'.set_breakpoint()
-					end, {desc="DAP set breakpoint"})
-					vim.keymap.set('n', '<Leader>lp', function()
-						require'dap'.set_breakpoint(nil, nil, vim.fn.input('Log point message: '))
-					end, {desc="DAP set logging breakpoint"})
-					vim.keymap.set('n', '<Leader>dr', function()
-						require'dap'.repl.open()
-					end, {desc="DAP open REPL"})
-					vim.keymap.set('n', '<Leader>dl', function()
-						require'dap'.run_last()
-					end, {desc="DAP run last"})
-					vim.keymap.set({'n', 'v'}, '<Leader>dh', function()
-						require'dap.ui.widgets'.hover()
-					end, {desc="DAP eval under the cursor into hover."})
-					vim.keymap.set({'n', 'v'}, '<Leader>dp', function()
-						require'dap.ui.widgets'.preview()
-					end, {desc="DAP eval under the cursor into window."})
-					vim.keymap.set('n', '<Leader>df', function()
-						local widgets = require'dap.ui.widgets'
-						widgets.centered_float(widgets.frames)
-					end, {desc='DAP view stack frames'})
-					vim.keymap.set('n', '<Leader>ds', function()
-						local widgets = require'dap.ui.widgets'
-						widgets.centered_float(widgets.scopes)
-					end, {desc='DAP view current scope'})
-
-					local dap = require"dap"
-					if has_the_command_that_some_call"godot" then
-						-- copied directly from
-						-- https://github.com/niscolas/nvim-godot/blob/main/nvim_config/lua/package_manager_config.lua
-						-- so this godot dap config is under MIT
-						dap.adapters.godot = {
-							type = "server",
-							host = "127.0.0.1",
-							port = 6006,
-						}
-						dap.configurations.gdscript = {
-							{
-								launch_game_instance = false,
-								launch_scene = false,
-								name = "Launch scene",
-								project = "${workspaceFolder}",
-								request = "launch",
-								type = "godot",
-							},
-						}
-					end
-				end
-			}
+			'nvim-lspconfig', -- Mason needs to be setup first
+			'nvim-dap',
 		},
 		--event = 'BufEnter',
 		event = "VeryLazy", -- TODO: better lazyness?
@@ -1250,10 +1262,7 @@ local lazy_plugins = {
 			}
 		end
 	},
-	{'mfussenegger/nvim-jdtls',
-		ft = "java",
-		dependencies = 'hrsh7th/nvim-cmp',
-	},
+	{ 'mfussenegger/nvim-jdtls', ft = "java", dependencies = 'nvim-cmp' },
 	--[[{
 		-- This plugin does work, however it is made for modifying pairs in pre-exsisting code. Very nice, but doesn't do cmp
 		-- things.
