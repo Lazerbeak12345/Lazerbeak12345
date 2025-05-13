@@ -44,19 +44,19 @@ vim.opt.rtp:prepend(lazypath)
 
 local function configure_nvim_cmp()
 	local cmp = require'cmp'
-	local lsp_zero = require'lsp-zero'
-	local cmp_action = lsp_zero.cmp_action()
-	local cmp_format = lsp_zero.cmp_format{details = true}
-	local lspkind = require'lspkind'
-	lsp_zero.extend_cmp()
+	vim.lsp.config('*', {
+		capabilities = require'cmp_nvim_lsp'.default_capabilities(),
+	})
 	--[[local function has_words_before()
 
 		return col ~= 0 and vim.api.nvim_buf_get_lines(0, line - 1, line, true)[1]:sub(col, col):match("%s") == nil
 	end]]
-	local formatting = lsp_zero.cmp_format{}
+	---@deprecated
+	local lsp_zero = require'lsp-zero'
+	local formatting = lsp_zero.cmp_format{} -- TODO: move away from lsp_zero here
 	do -- We still like lspkind in this house. format with zero, then lspkind. Best of both, hardly any manual config
 		local zero_format_fn = formatting.format
-		formatting.format = lspkind.cmp_format{
+		formatting.format = require'lspkind'.cmp_format{
 			mode = 'symbol_text',
 			before = function (entry, vim_item)
 				return zero_format_fn(entry, vim_item)
@@ -212,17 +212,6 @@ local function inside_neovimpager()
 	return result
 end
 
--- TODO: Ignore duplicate keys for this table (only)
---
--- Hooks for everything around the lspconfig function
---     Heh. Remember back when I thought it was only going to do lspconfig? Yeah, me neither.
-local setup_configure_lspconfig = {
-	lsp_on_attach = function () end,
-	make_capabilities = function ()
-		return require'lsp-zero'.get_capabilities()
-	end
-}
-
 local function configure_lualine()
 	--                                        █ 🙽 🙼 🙿   🙾
 	-- https://github.com/ryanoasis/nerd-fonts/issues/1190
@@ -338,7 +327,9 @@ do -- Keymaps and the like
 	-- Reccomended keymaps from nvim-lspconfig
 	-- https://github.com/neovim/nvim-lspconfig#suggested-configuration
 	vim.keymap.set('n', '<space>e', vim.diagnostic.open_float, { noremap=true, silent=true, desc="diagnostic open float" })
+	-- TODO: deprecated
 	vim.keymap.set('n', '[d', vim.diagnostic.goto_prev, { noremap=true, silent=true, desc="diagnostic goto prev" })
+	-- TODO: deprecated
 	vim.keymap.set('n', ']d', vim.diagnostic.goto_next, { noremap=true, silent=true, desc="diagnostic goto next" })
 	vim.keymap.set('n', '<space>q', vim.diagnostic.setloclist, {
 		noremap=true,
@@ -481,11 +472,7 @@ local lazy_plugins = {
 	-- - Powerline
 	-- - Airline
 	-- - And the well-known, formerly first-place Lightline
-	{ 'nvim-lualine/lualine.nvim',
-		config = configure_lualine,
-		event = "BufEnter",
-		dependencies = 'nvim-lua/lsp-status.nvim'
-	},
+	{ 'nvim-lualine/lualine.nvim', config = configure_lualine, event = "BufEnter" },
 	-- The looks of Powerline, but faster
 	-- use{
 	-- 	'itchyny/lightline.vim',
@@ -523,14 +510,15 @@ local lazy_plugins = {
 		end
 	},
 	-- Super fancy coloring
+	{
+		-- A companion to windwp/nvim-autopairs that does xml
+		"windwp/nvim-ts-autotag",
+		event = "InsertEnter",
+		opts = {}
+	},
 	{ 'nvim-treesitter/nvim-treesitter',
 		-- TODO: only load this if tree-sitter is installed
-		dependencies = {
-			-- A companion to windwp/nvim-autopairs that does xml
-			"windwp/nvim-ts-autotag",
-			event = "InsertEnter",
-			opts = {}
-		},
+		dependencies = "windwp/nvim-ts-autotag",
 		main = 'nvim-treesitter.configs',
 		opts = {
 			sync_install = true,
@@ -794,7 +782,7 @@ local lazy_plugins = {
 		lazy = true,
 		config = false
 	},
-	{ 'williamboman/mason.nvim',
+	{ 'mason-org/mason.nvim',
 		lazy = false,
 		opts = {
 			max_concurrent_installers = require'luv'.available_parallelism(),
@@ -811,12 +799,13 @@ local lazy_plugins = {
 		event = {"BufReadPre", "BufNewFile"},
 		cmd = {"LspInfo", "LspInstall", "LspStart"},
 		dependencies = {
-			'VonHeikemen/lsp-zero.nvim',
-			'hrsh7th/cmp-nvim-lsp',
-			'williamboman/mason.nvim',
-			'WhoIsSethDaniel/mason-tool-installer.nvim',
-			'williamboman/mason-lspconfig.nvim',
-			'creativenull/efmls-configs-nvim',
+			-- TODO: https://lazy.folke.io/developers#best-practices
+			--'VonHeikemen/lsp-zero.nvim',
+			--'hrsh7th/cmp-nvim-lsp',
+			--'mason-org/mason.nvim',
+			--'WhoIsSethDaniel/mason-tool-installer.nvim',
+			--'mason-org/mason-lspconfig.nvim',
+			--'creativenull/efmls-configs-nvim',
 			-- TODO: make these into soft dependencies
 			'nvim-lua/lsp-status.nvim',
 			'nvim-lualine/lualine.nvim',
@@ -824,44 +813,53 @@ local lazy_plugins = {
 			'pierreglaser/folding-nvim',
 		},
 		config = function()
+			---@deprecated lsp-zero is unmaintained
 			local lsp_zero = require'lsp-zero'
-			local mason_tool_installer = require'mason-tool-installer'
-			local mason_lspconfig = require'mason-lspconfig'
-			lsp_zero.extend_lspconfig() -- Ensures that the below settings are applied to lspconfig generally
 
-			do
-				local lsp_on_attach = setup_configure_lspconfig.lsp_on_attach
-				setup_configure_lspconfig.lsp_on_attach = nil
-				lsp_zero.on_attach(function (client, bufnr)
-					-- lsp-zero's keymaps are close enough to what I like
-					-- Not a surpise. Mine are from a template.
-					lsp_zero.default_keymaps{buffer = bufnr}
-					lsp_on_attach(client, bufnr)
+			vim.api.nvim_create_autocmd('LspAttach', {
+				desc = 'LSP actions',
+				callback = function(event)
 					-- TODO: https://lsp-zero.netlify.app/v3.x/language-server-configuration.html#format-using-a-keybinding
-				end)
-			end
+					vim.keymap.set('n', 'K', vim.lsp.buf.hover, { buffer = event.buf, desc = "LSP hover" })
+					vim.keymap.set('n', 'gd', vim.lsp.buf.definition, { buffer = event.buf, desc = "LSP definition" })
+					vim.keymap.set('n', 'gD', vim.lsp.buf.declaration, { buffer = event.buf, desc = "LSP declaration" })
+					vim.keymap.set('n', 'gi', vim.lsp.buf.implementation, { buffer = event.buf, desc = "LSP implementation" })
+					vim.keymap.set('n', 'go', vim.lsp.buf.type_definition, { buffer = event.buf, desc = "LSP type_definition" })
+					vim.keymap.set('n', 'gr', vim.lsp.buf.references, { buffer = event.buf, desc = "LSP references" })
+					vim.keymap.set('n', 'gs', vim.lsp.buf.signature_help, { buffer = event.buf, desc = "LSP signature_help" })
+					vim.keymap.set('n', '<F2>', vim.lsp.buf.rename, { buffer = event.buf, desc = "LSP rename" })
+					vim.keymap.set({'n', 'x'}, '<F3>', function ()
+						vim.lsp.buf.format{ async = true }
+					end, { buffer = event.buf, desc = "LSP format" })
+					vim.keymap.set('n', '<F4>', vim.lsp.buf.code_action, { buffer = event.buf, desc = "LSP code_action" })
+				end,
+			})
 
-			lsp_zero.set_server_config{
-				capabilities = setup_configure_lspconfig.make_capabilities()
-			}
-			setup_configure_lspconfig.make_capabilities = nil
+			vim.lsp.config('*', {
+				--capabilities = require'lspconfig'.util.default_config
+				capabilities = lsp_zero.get_capabilities()
+			})
 			-- Here we are getting the icons from the lualine default settings. If you change lualine's config, these icons will
 			-- not change with it.
 			-- This is horrible. Despicible. Don't do it. It WILL break.
 			lsp_zero.set_sign_icons(require"lualine.components.diagnostics.config".symbols.icons)
+			
 			-- Installed manually in system.
-			lsp_zero.use'racket_langserver'
-			lsp_zero.use('clangd', {
-				capabilities = {
-					handlers = require'lsp-status'.extensions.clangd.setup(),
-					init_options = { clangdFileStatus = true }
-				}
-			})
+			vim.lsp.enable'racket_langserver'
+			do
+				vim.lsp.config('clangd', {
+					capabilities = {
+						handlers = require'lsp-status'.extensions.clangd.setup(),
+						init_options = { clangdFileStatus = true }
+					}
+				})
+				vim.lsp.enable'clangd'
+			end
 
 			-- Installed through mason
 			-- TODO: assert that all requirements in `:h mason-requirements` are met
 			-- https://github.com/nvimdev/guard.nvim -- Linter chains (for if efm doesn't work)
-			mason_tool_installer.setup{
+			require'mason-tool-installer'.setup{
 				ensure_installed = tbflatten{
 					'rustfmt', -- WARNING: reccomends rustup instead of whatever it's doing now (deprecation)
 					-- For Java
@@ -920,57 +918,55 @@ local lazy_plugins = {
 				},
 				auto_update = true,
 			}
-			mason_lspconfig.setup{
-				handlers = {
-					lsp_zero.default_setup,
-					ruff = function () -- python
-						lsp_zero.use('ruff', {
-							capabilities = {
-								-- disable in favor of pyright
-								hoverProvider = false
-							}
-						})
-					end,
-					-- BUG: doesn't seem to start, these days
-					efm = function()
-						local function formater(name)
-							return require("efmls-configs.formatters." .. name)
-						end
-						local function linter(name)
-							return require("efmls-configs.linters." .. name)
-						end
-						local prettier = formater"prettier"
-						local css = { linter"stylelint", prettier }
-						local prettier_only = { prettier } -- eslint isn't needed - we have the lsp
-						local languages = {
-							css = css, less = css, scss = css, sass = css,
-							javascript = prettier_only, javascriptreact = prettier_only,
-							typescript = prettier_only, typescriptreact = prettier_only,
-							html = prettier_only,
-							lua = { linter"luacheck", formater"stylua"--[[, efm_linter"selene"]] },
-							vim = { linter"vint" }, -- TODO: what does this require
-							rust = { formater"rustfmt" },
-							sh = { formater"shellharden" },
-							fish = { linter"fish", formater"fish_indent" },
-							python = { linter"mypy", linter"ruff", formater"ruff" },
-							htmldjango = { linter"djlint", formater"djlint" },
-							-- BUG: doesn't work. I don't think efm works at all right now, actually
-							java = { formater"google_java_format" }
-						}
-						lsp_zero.use('efm', {
-							settings = {
-								-- This is, certianly, the way to go for other things, assuming this even works
-								-- TODO: modify rooter_patterns to be the union of all of these language root patterns?
-								rootMarkers = vim.g.rooter_patterns,
-								languages = languages
-							},
-							filetypes = vim.tbl_keys(languages)
-						})
-					end,
-					lua_ls = function()
-						lsp_zero.use('lua_ls', lsp_zero.nvim_lua_ls())
-					end,
-					jdtls = lsp_zero.noop
+			-- python
+			vim.lsp.config('ruff', {
+				capabilities = {
+					-- disable in favor of pyright
+					hoverProvider = false
+				}
+			})
+			-- BUG: doesn't seem to start, these days
+			do
+				local function formater(name)
+					return require("efmls-configs.formatters." .. name)
+				end
+				local function linter(name)
+					return require("efmls-configs.linters." .. name)
+				end
+				local prettier = formater"prettier"
+				local css = { linter"stylelint", prettier }
+				local prettier_only = { prettier } -- eslint isn't needed - we have the lsp
+				local languages = {
+					css = css, less = css, scss = css, sass = css,
+					javascript = prettier_only, javascriptreact = prettier_only,
+					typescript = prettier_only, typescriptreact = prettier_only,
+					html = prettier_only,
+					lua = { linter"luacheck", formater"stylua"--[[, linter"selene"]] },
+					vim = { linter"vint" }, -- TODO: what does this require
+					rust = { formater"rustfmt" },
+					sh = { formater"shellharden" },
+					fish = { linter"fish", formater"fish_indent" },
+					python = { linter"mypy", linter"ruff", formater"ruff" },
+					htmldjango = { linter"djlint", formater"djlint" },
+					-- BUG: doesn't work. I don't think efm works at all right now, actually
+					java = { formater"google_java_format" }
+				}
+				vim.lsp.config('efm', {
+					settings = {
+						-- This is, certianly, the way to go for other things, assuming this even works
+						-- TODO: modify rooter_patterns to be the union of all of these language root patterns?
+						rootMarkers = vim.g.rooter_patterns,
+						languages = languages
+					},
+					filetypes = vim.tbl_keys(languages)
+				})
+			end
+			-- lua
+			vim.lsp.config('lua_ls', lsp_zero.nvim_lua_ls())
+
+			require'mason-lspconfig'.setup {
+				automatic_enable = {
+					exclude = { "jdtls" }
 				}
 			}
 		end
@@ -978,23 +974,23 @@ local lazy_plugins = {
 	{ 'nvim-lua/lsp-status.nvim',
 		dependencies = 'onsails/lspkind-nvim',
 		config = function()
-			local lsp_status = require'lsp-status'
-			lsp_status.config{
+			require'lsp-status'.config{
 				status_symbol = '', -- The default V breaks some layout stuff.  was the next I used, but it's not needed
 				show_filename = false, -- Takes up too much space, redundant
 				diagnostics = false, -- lualine actually already displays this information
 				kind_labels = require'lspkind'.symbol_map,
 			}
-			lsp_status.register_progress()
-			local lsp_on_attach = assert(setup_configure_lspconfig.lsp_on_attach, "lsp-status is before lsp-zero")
-			setup_configure_lspconfig.lsp_on_attach = function (...)
-				lsp_on_attach(...)
-				lsp_status.on_attach(...)
-			end
-			local make_capabilities = assert(setup_configure_lspconfig.make_capabilities, "lsp-status is before lspconfig")
-			setup_configure_lspconfig.make_capabilities = function ()
-				return vim.tbl_extend('keep', make_capabilities(), lsp_status.capabilities)
-			end
+			require'lsp-status'.register_progress()
+			vim.api.nvim_create_autocmd('LspAttach', {
+				callback = function(args)
+					local client = vim.lsp.get_client_by_id(args.data.client_id)
+					local bufnr = args.buf
+					require'lsp-status'.on_attach(client, bufnr)
+				end
+			})
+			vim.lsp.config('*', {
+				capabilities = require'lsp-status'.capabilities
+			})
 		end,
 		module = 'lsp-status'
 	},
@@ -1003,57 +999,63 @@ local lazy_plugins = {
 	{ 'RubixDev/mason-update-all',
 		opts = {},
 		cmd = "MasonUpdateAll",
-		dependencies = 'williamboman/mason.nvim'
+		dependencies = 'mason-org/mason.nvim'
 	},
 	-- Better folding
 	{ 'pierreglaser/folding-nvim',
-		-- TODO: this plugin makes use of deprecated functionality
+		-- TODO: this plugin makes use of deprecated functionality?
 		config = function()
-			local lsp_on_attach = assert(setup_configure_lspconfig.lsp_on_attach, "folding-nvim is before lsp-zero")
-			local folding = require'folding'
-			setup_configure_lspconfig.lsp_on_attach = function (client, bufnr)
-				lsp_on_attach(client, bufnr)
-				-- This is what it's doing internally. It's very dumb. it should be using capabilities
-				-- I have to do it this way otherwise it complains
-				if folding.servers_supporting_folding[client.name] then
-					folding.on_attach()
+			vim.api.nvim_create_autocmd('LspAttach', {
+				callback = function(args)
+					local client = vim.lsp.get_client_by_id(args.data.client_id)
+					-- This is what it's doing internally. It's very dumb. TODO: it should be using capabilities
+					-- I have to do it this way otherwise it complains
+					if require'folding'.servers_supporting_folding[client.name] then
+						require'folding'.on_attach()
+					end
 				end
-			end
+			})
 		end,
 		event = "VeryLazy" -- TODO: better lazyness?
 	},
 
 	-- Completion details (uses LSP)
+	{ 'L3MON4D3/LuaSnip',
+		config = function ()
+			-- Grab things from rafamadriz/friendly-snippets & etc.
+			require"luasnip.loaders.from_vscode".lazy_load()
+		end,
+		--  Pre-configured snippits
+		dependencies = 'rafamadriz/friendly-snippets'
+	},
+	{ 'saadparwaiz1/cmp_luasnip',
+		-- Snippet source. (There's others out there too)
+		dependencies = 'L3MON4D3/LuaSnip',
+	},
+	{ 'uga-rosa/cmp-dictionary',
+		enabled = false,
+		config = function ()
+			local dict = require"cmp_dictionary"
+			dict.setup{ debug = true }
+			dict.switcher{ spelling = { en = "/usr/share/dict/words" } }
+		end
+	},
+	-- Lower the text sorting of completions starting with _
+	'lukas-reineke/cmp-under-comparator',
+	-- Use /usr/share/dict/words for completion
 	{ 'hrsh7th/nvim-cmp',
 		config = configure_nvim_cmp,
 		event = 'InsertEnter',
-		dependencies  = {
-			'onsails/lspkind-nvim',
-			'nvim-lspconfig',
-			"nvim-lua/plenary.nvim",
-			{ 'saadparwaiz1/cmp_luasnip',
-				-- Snippet source. (There's others out there too)
-				dependencies = { 'L3MON4D3/LuaSnip',
-					config = function ()
-						-- Grab things from rafamadriz/friendly-snippets & etc.
-						require"luasnip.loaders.from_vscode".lazy_load()
-					end,
-					--  Pre-configured snippits
-					dependencies = 'rafamadriz/friendly-snippets'
-				},
-			},
-			-- Lower the text sorting of completions starting with _
-			'lukas-reineke/cmp-under-comparator',
-			-- Use /usr/share/dict/words for completion
-			{ 'uga-rosa/cmp-dictionary',
-				enabled = false,
-				config = function ()
-					local dict = require"cmp_dictionary"
-					dict.setup{ debug = true }
-					dict.switcher{ spelling = { en = "/usr/share/dict/words" } }
-				end
-			}
-		}
+		--dependencies  = {
+		--	'onsails/lspkind-nvim',
+		--	'nvim-lspconfig',
+		--	"nvim-lua/plenary.nvim",
+		--	'saadparwaiz1/cmp_luasnip',
+		--	-- Lower the text sorting of completions starting with _
+		--	'lukas-reineke/cmp-under-comparator',
+		--	-- Use /usr/share/dict/words for completion
+		--	'uga-rosa/cmp-dictionary'
+		--}
 	},
 	-- cmdline history completion
 	{ 'dmitmel/cmp-cmdline-history',
