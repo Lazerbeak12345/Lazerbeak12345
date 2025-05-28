@@ -526,6 +526,7 @@ local lazy_plugins = {
 		-- TODO: only load this if tree-sitter is installed
 		--dependencies = "windwp/nvim-ts-autotag",
 		main = 'nvim-treesitter.configs',
+		branch = 'master', -- TODO: move to incompatible main branch
 		opts = {
 			sync_install = true,
 			auto_install = true -- With this, I don't actually need any list. It lazy-installs this way.
