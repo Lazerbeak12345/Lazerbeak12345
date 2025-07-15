@@ -906,7 +906,8 @@ local lazy_plugins = {
 						"ast-grep", -- Rewriting for lots of stuff
 						"css-lsp",
 						"css-variables-language-server", -- Till css-lsp supports variables, this is needed
-						"cssmodules-language-server" -- For when we import css files in react, etc.
+						"cssmodules-language-server", -- For when we import css files in react, etc.
+						"dot-language-server"
 					} or {},
 					has_the_command_that_some_call"unzip" and {
 						"stylua",
@@ -1316,6 +1317,7 @@ local lazy_plugins = {
 		end,
 		cond = function () return has_the_command_that_some_call"deno" end
 	},]]
+	{ 'liuchengxu/graphviz.vim', lazy = false }, -- This package is already lazy
 }
 require("lazy").setup(lazy_plugins, lazy_config)
 -- vim.o.ambiwidth="double" -- use this if the arrows are cut off
