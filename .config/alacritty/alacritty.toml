@@ -2,3 +2,12 @@
 family = "FiraCodeNerdFont"
 [cursor.style]
 blinking = "Always"
+#[general]
+#import = [
+#    #"~/.config/alacritty/themes/themes/kanagawa_wave.toml"
+#    "~/.config/alacritty/themes/themes/gruvbox_light.toml"
+#    #"~/.config/alacritty/themes/themes/selenized_light.toml"
+#    #"~/.config/alacritty/themes/themes/solarized_light.toml"
+#]
+# TODO: send an issue to get the below working
+#vim.cmd.colorscheme'kanagawa-lotus'
