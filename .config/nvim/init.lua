@@ -900,6 +900,7 @@ local lazy_plugins = {
 						"eslint",
 						"html",
 						"jsonls",
+						"yaml-language-server",
 						"ts_ls",
 						"pyright", -- Everything else python LSP
 						"svelte",
