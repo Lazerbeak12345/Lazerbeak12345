@@ -39,6 +39,7 @@ end
 function workonc -d "Open up an editor on the given configuration dir"
 	nvim ~/.config/$argv[1]
 end
+alias ip "ip -color=auto"
 alias dotfiles "/usr/bin/git --git-dir=$HOME/.dotfiles --work-tree=$HOME"
 if status is-interactive
 	if type -q nvimpager
