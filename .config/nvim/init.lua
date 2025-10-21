@@ -334,10 +334,6 @@ do -- Keymaps and the like
 	-- Reccomended keymaps from nvim-lspconfig
 	-- https://github.com/neovim/nvim-lspconfig#suggested-configuration
 	vim.keymap.set('n', '<space>e', vim.diagnostic.open_float, { noremap=true, silent=true, desc="diagnostic open float" })
-	-- TODO: deprecated
-	vim.keymap.set('n', '[d', vim.diagnostic.goto_prev, { noremap=true, silent=true, desc="diagnostic goto prev" })
-	-- TODO: deprecated
-	vim.keymap.set('n', ']d', vim.diagnostic.goto_next, { noremap=true, silent=true, desc="diagnostic goto next" })
 	vim.keymap.set('n', '<space>q', vim.diagnostic.setloclist, {
 		noremap=true,
 		silent=true,
@@ -1119,14 +1115,8 @@ local lazy_plugins = {
 		dependencies = 'nvim-cmp',
 		event = "BufRead Cargo.toml",
 		config = function()
-			require'crates'.setup{ src = { cmp = { enabled = true } } }
-			vim.api.nvim_create_autocmd("BufRead", {
-				group = vim.api.nvim_create_augroup("CmpSourceCargo", { clear = true }),
-				pattern = "Cargo.toml",
-				callback = function()
-					--require'cmp'.setup.buffer{ sources = { { name = "crates" } } }
-				end
-			})
+			require'crates'.setup()
+			require'crates.completion.cmp'.setup()
 		end
 	},
 	-- package.json completion source
