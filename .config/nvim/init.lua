@@ -214,7 +214,7 @@ end
 
 local function configure_lualine()
 	-- BUG: lualine or one of it's deps is using deprecated features
-	---@deprecated lsp-zero is unmaintained
+	---@deprecated  TODO: lsp-zero is unmaintained
 	local lsp_zero = require'lsp-zero'
 	--                                        █ 🙽 🙼 🙿   🙾
 	-- https://github.com/ryanoasis/nerd-fonts/issues/1190
@@ -372,13 +372,9 @@ do -- Keymaps and the like
 	-- milliseconds, and defaults to 4000
 	vim.o.updatetime = 1000
 
-	-- Enable folding
-	--vim.o.foldmethod = 'syntax'
+	-- Enable folding (treesitter changes this)
+	vim.o.foldmethod = 'syntax'
 	----vim.o.foldmethod = 'indent'
-	--- TODO: what about for when treesitter _doesnt_ work? (this should also only load if treesitter is installed as a
-	--  system)
-	vim.wo.foldmethod= 'expr'
-	vim.wo.foldexpr = 'v:lua.vim.treesitter.foldexpr()'
 	vim.wo.foldlevel=99
 	vim.wo.foldminlines = 3
 
@@ -523,11 +519,15 @@ local lazy_plugins = {
 		--dependencies = "windwp/nvim-ts-autotag",
 		main = 'nvim-treesitter.configs',
 		branch = 'master', -- TODO: move to incompatible main branch
-		opts = {
-			sync_install = true,
-			auto_install = true -- With this, I don't actually need any list. It lazy-installs this way.
-			-- TODO: require `tree-sitter` cli program
-		},
+		config = function ()
+			require'nvim-treesitter'.setup{
+				sync_install = true,
+				auto_install = true -- With this, I don't actually need any list. It lazy-installs this way.
+				-- TODO: require `tree-sitter` cli program
+			}
+			vim.wo.foldmethod= 'expr'
+			vim.wo.foldexpr = 'v:lua.vim.treesitter.foldexpr()'
+		end,
 		build = ':TSUpdateSync',
 		event = 'VeryLazy' -- TODO: better lazyness?
 	},
