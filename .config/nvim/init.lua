@@ -502,6 +502,7 @@ local lazy_plugins = {
 				end
 			)
 			-- Line indent markers
+			-- TODO: this is a bad place for this config stuff. It should work without IBL
 			vim.opt.listchars:append"lead:⋅"
 			vim.opt.listchars:append"nbsp:⚬"
 			vim.opt.listchars:append"tab:  " -- No > chars when ibl is slow
@@ -1311,5 +1312,5 @@ local lazy_plugins = {
 	},]]
 	{ 'liuchengxu/graphviz.vim', lazy = false }, -- This package is already lazy
 }
-require("lazy").setup(lazy_plugins, lazy_config)
+require"lazy".setup(lazy_plugins, lazy_config)
 -- vim.o.ambiwidth="double" -- use this if the arrows are cut off
