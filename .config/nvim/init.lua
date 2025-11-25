@@ -906,7 +906,8 @@ local lazy_plugins = {
 						"css-lsp",
 						"css-variables-language-server", -- Till css-lsp supports variables, this is needed
 						"cssmodules-language-server", -- For when we import css files in react, etc.
-						"dot-language-server"
+						"dot-language-server",
+						"vue-language-server", --"vue_ls",-- 
 					} or {},
 					has_the_command_that_some_call"unzip" and {
 						"stylua",
