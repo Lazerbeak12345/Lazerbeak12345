@@ -39,6 +39,9 @@ end
 function workonc -d "Open up an editor on the given configuration dir"
 	nvim ~/.config/$argv[1]
 end
+function workons -d "Open up an editor on the given class"
+	nvim ~/Documents/school/Fall 2025/$argv[1]
+end
 alias ip "ip -color=auto"
 alias dotfiles "/usr/bin/git --git-dir=$HOME/.dotfiles --work-tree=$HOME"
 if status is-interactive
@@ -62,6 +65,7 @@ if status is-interactive
 	abbr --add vnim nvim
 	abbr --add wo workon
 	abbr --add woc workonc
+	abbr --add wos workons
 	abbr --add dotf dotfiles
 	abbr --add dof dotfiles
 end
