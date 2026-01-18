@@ -537,6 +537,7 @@ local lazy_plugins = {
 		lazy = false,
 		priority = 1000,
 		config = function ()
+			-- NOTE: when kanagawa is in use directly, it starts as dark, then auto detects the ideal theme. This is a bit slow, so there's a blink.
 			vim.cmd.colorscheme'kanagawa'
 			--vim.cmd.colorscheme'kanagawa-lotus'
 		end
