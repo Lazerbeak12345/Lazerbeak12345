@@ -51,18 +51,21 @@ local function configure_nvim_cmp()
 
 		return col ~= 0 and vim.api.nvim_buf_get_lines(0, line - 1, line, true)[1]:sub(col, col):match("%s") == nil
 	end]]
+
 	---@deprecated
 	local lsp_zero = require'lsp-zero'
 	local formatting = lsp_zero.cmp_format{} -- TODO: move away from lsp_zero here
 	do -- We still like lspkind in this house. format with zero, then lspkind. Best of both, hardly any manual config
 		local zero_format_fn = formatting.format
+		formatting.fields = { 'abbr', 'menu', 'icon', 'kind', }
 		formatting.format = require'lspkind'.cmp_format{
-			mode = 'symbol_text',
 			before = function (entry, vim_item)
+				-- lsp_zero tells us which completion plugin it is coming from
 				return zero_format_fn(entry, vim_item)
 			end
 		}
 	end
+
 	cmp.setup{
 		--Defaults:https://github.com/hrsh7th/nvim-cmp/blob/main/lua/cmp/config/default.lua
 		snippet = {
