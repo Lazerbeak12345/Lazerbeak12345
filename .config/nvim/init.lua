@@ -398,6 +398,7 @@ do -- Keymaps and the like
 	vim.api.nvim_create_autocmd("TextYankPost", {
 		pattern = "*",
 		callback = function()
+			-- TODO: deprecated
 			vim.highlight.on_yank()
 		end
 	})
@@ -1282,26 +1283,18 @@ local lazy_plugins = {
 			}
 		}
 	},
-	(
-		-- TODO: merge these tables, reduce redundant code
-		-- TODO: unmaintained.
-		has_npm() and {
-			-- install with npm
-			"iamcco/markdown-preview.nvim",
-			cmd = { "MarkdownPreviewToggle", "MarkdownPreview", "MarkdownPreviewStop" },
-			build = "cd app && npm i && git restore .",
-			init = function()
-				vim.g.mkdp_filetypes = { "markdown" }
-			end,
-			ft = { "markdown" },
-		} or {
-			-- install without yarn or npm
-			"iamcco/markdown-preview.nvim",
-			cmd = { "MarkdownPreviewToggle", "MarkdownPreview", "MarkdownPreviewStop" },
-			ft = { "markdown" },
-			build = function() vim.fn["mkdp#util#install"]() end,
-		}
-	),
+	{
+		'brianhuster/live-preview.nvim',
+		event = "VeryLazy", -- TODO: better lazyness?
+		-- TODO: figure out pickers
+		---dependencies = {
+		---	-- You can choose one of the following pickers
+		---	'nvim-telescope/telescope.nvim',
+		---	'ibhagwan/fzf-lua',
+		---	'echasnovski/mini.pick',
+		---	'folke/snacks.nvim',
+		---},
+	},
 	--[[
 	{
 		-- TODO: could support more filetypes
