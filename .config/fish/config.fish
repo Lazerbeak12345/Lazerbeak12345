@@ -58,8 +58,10 @@ if status is-interactive
 	alias more less
 	alias vim nvim
 	alias pnpx 'pnpm dlx'
-	alias ls lsd
-	alias tree 'lsd --tree'
+	if type -q lsd
+		alias ls lsd
+		alias tree 'lsd --tree'
+	end
 	alias cls clear
 	abbr --add nivm nvim
 	abbr --add vnim nvim
