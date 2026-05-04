@@ -4,6 +4,7 @@ local lazypath = vim.fn.stdpath'data' .. "/lazy/lazy.nvim"
 -- TODO: mark PHP and composer as not needed?
 -- TODO: mark perl as not needed?
 -- TODO: these need to be marked as auto-install
+-- TODO: support for just in lsp & etc.
 -- - prettier
 -- - stylelint
 -- - vint
