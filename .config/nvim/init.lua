@@ -669,6 +669,26 @@ local lazy_plugins = {
 		opts = { window = { position = "current" } },
 		lazy = false
 	},
+	{
+		"hedyhli/outline.nvim",
+		lazy = true,
+		cmd = { "Outline", "OutlineOpen" },
+		keys = { -- Example mapping to toggle outline
+			{ "<leader>o", "<cmd>Outline<CR>", desc = "Toggle outline" },
+		},
+		opts = {
+			auto_width = {
+				enabled = true,
+				include_symbol_details = true
+			},
+			symbols = {
+				-- TODO: figure out icons (this looks fine but I'm not sure)
+				icon_source = 'lspkind'
+			}
+			-- TODO: figure out the treesitter provider (there's two ways documented to do this)
+		}
+	},
+
 	{ 'justinhj/battery.nvim',
 		--dependencies = {'nvim-tree/nvim-web-devicons', 'nvim-lua/plenary.nvim'},
 		opts = {},
