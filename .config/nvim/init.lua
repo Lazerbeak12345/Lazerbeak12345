@@ -116,7 +116,7 @@ local function configure_nvim_cmp()
 			{ name = 'latex_symbols' }, -- can be lazy
 			{ name = 'emoji', insert = true }, -- can be lazy
 		--}, {
-			{ name = "git" }, -- can be lazy loaded
+			--{ name = "git" }, -- can be lazy loaded
 			{ name = "crates" }, -- can be lazy
 			{ name = 'npm', keyword_length = 4 }, -- can be lazy
 			{ name = 'nvim_lsp_document_symbol' }, -- can be lazy
@@ -1127,16 +1127,30 @@ local lazy_plugins = {
 		dependencies = { 'cmp-nvim-lsp', 'nvim-cmp' }
 	},
 	-- Git completion source
-	{ 'petertriho/cmp-git',
+	--{ 'petertriho/cmp-git',
+	--	event = "VeryLazy", -- TODO: better lazyness?
+	--	dependencies = 'nvim-cmp',
+	--	opts = {}
+	--	--[[config = function ()
+	--		require'cmp_git'.setup{}
+	--		-- TODO: this is per-buffer
+	--		--require'cmp'.setup.buffer{ sources = { { name = "git" } } }
+	--	end]]
+	--},
+	{
+		"petertriho/cmp-git",
 		-- BUG: slows things down a ton when I type : in the commit box
 		event = "VeryLazy", -- TODO: better lazyness?
 		dependencies = 'nvim-cmp',
-		opts = {}
-		--[[config = function ()
-			require'cmp_git'.setup{}
-			-- TODO: this is per-buffer
-			--require'cmp'.setup.buffer{ sources = { { name = "git" } } }
-		end]]
+		init = function()
+			-- TODO: do this for all other cmps
+			table.insert(
+				require("cmp")
+					.get_config()
+					.sources,
+				{ name = "git" }
+			)
+		end
 	},
 	-- crates.io completion source
 	{ 'saecki/crates.nvim',
