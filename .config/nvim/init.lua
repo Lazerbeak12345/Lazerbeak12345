@@ -49,23 +49,8 @@ local function configure_nvim_cmp()
 		capabilities = require'cmp_nvim_lsp'.default_capabilities(),
 	})
 	--[[local function has_words_before()
-
 		return col ~= 0 and vim.api.nvim_buf_get_lines(0, line - 1, line, true)[1]:sub(col, col):match("%s") == nil
 	end]]
-
-	---@deprecated
-	local lsp_zero = require'lsp-zero'
-	local formatting = lsp_zero.cmp_format{} -- TODO: move away from lsp_zero here
-	do -- We still like lspkind in this house. format with zero, then lspkind. Best of both, hardly any manual config
-		local zero_format_fn = formatting.format
-		formatting.fields = { 'abbr', 'menu', 'icon', 'kind', }
-		formatting.format = require'lspkind'.cmp_format{
-			before = function (entry, vim_item)
-				-- lsp_zero tells us which completion plugin it is coming from
-				return zero_format_fn(entry, vim_item)
-			end
-		}
-	end
 
 	cmp.setup{
 		--Defaults:https://github.com/hrsh7th/nvim-cmp/blob/main/lua/cmp/config/default.lua
@@ -143,7 +128,6 @@ local function configure_nvim_cmp()
 				cmp.config.compare.order,
 			},
 		},
-		formatting = formatting
 	}
 	-- Use buffer source (then history) for `/` and `?` (if you enabled `native_menu`, this won't work anymore).
 	cmp.setup.cmdline({'/', '?'}, {
@@ -217,9 +201,8 @@ local function inside_neovimpager()
 end
 
 local function configure_lualine()
-	-- BUG: lualine or one of it's deps is using deprecated features
-	---@deprecated  TODO: lsp-zero is unmaintained
-	local lsp_zero = require'lsp-zero'
+	-- BUG: lualine or one of its deps is using deprecated features
+	
 	--                                        █ 🙽 🙼 🙿   🙾
 	-- https://github.com/ryanoasis/nerd-fonts/issues/1190
 	vim.opt.shortmess:append'S' -- Do not show search count message when searching e.g. '[1/5]'
@@ -299,10 +282,6 @@ local function configure_lualine()
 		extensions = { 'fugitive', 'lazy', 'neo-tree' }
 	}
 	vim.opt.showtabline = 1 --(visible if more than 1 tab)
-	-- Here we are getting the icons from the lualine default settings. If you change lualine's config, these icons will
-	-- not change with it.
-	-- This is horrible. Despicible. Don't do it. It WILL break.
-	lsp_zero.set_sign_icons(require"lualine.components.diagnostics.config".symbols.icons)
 end
 
 local function tbflatten(tb)
@@ -459,7 +438,6 @@ do -- Keymaps and the like
 			assert(false)
 			require'jdtls'.start_or_attach(vim.tbl_extend(
 				'force',
-				require'lsp-zero.server'.default_config,
 				require'lspconfig'.jdtls.config_def.default_config
 			))
 		end
@@ -804,16 +782,6 @@ local lazy_plugins = {
 
 	-- Language-server protocol
 	-- Must be after language specific things
-	{ 'VonHeikemen/lsp-zero.nvim', --- TODO: migrate to 4.x
-		branch = 'v3.x',
-		init = function ()
-			-- Disable automatic setup, we are doing it manually
-			vim.g.lsp_zero_extend_cmp = false
-			vim.g.lsp_zero_extend_lspconfig = false
-		end,
-		lazy = true,
-		config = false
-	},
 	{ 'mason-org/mason.nvim',
 		lazy = false,
 		opts = {
@@ -847,9 +815,6 @@ local lazy_plugins = {
 			--'pierreglaser/folding-nvim',
 		},
 		config = function()
-			---@deprecated lsp-zero is unmaintained
-			local lsp_zero = require'lsp-zero'
-
 			vim.api.nvim_create_autocmd('LspAttach', {
 				desc = 'LSP actions',
 				callback = function(event)
@@ -869,14 +834,9 @@ local lazy_plugins = {
 				end,
 			})
 
-			vim.lsp.config('*', {
-				--capabilities = require'lspconfig'.util.default_config
-				capabilities = lsp_zero.get_capabilities()
-			})
-
 			-- Installed manually in system.
-			vim.lsp.enable'racket_langserver'
-			do
+			--vim.lsp.enable'racket_langserver'
+			do -- clangd
 				vim.lsp.config('clangd', {
 					capabilities = {
 						handlers = require'lsp-status'.extensions.clangd.setup(),
@@ -891,7 +851,6 @@ local lazy_plugins = {
 			-- https://github.com/nvimdev/guard.nvim -- Linter chains (for if efm doesn't work)
 			require'mason-tool-installer'.setup{
 				ensure_installed = tbflatten{
-					'rustfmt', -- WARNING: reccomends rustup instead of whatever it's doing now (deprecation)
 					-- For Java
 					--'vscode-java-decompiler',
 					--"google-java-format",
@@ -994,8 +953,6 @@ local lazy_plugins = {
 					filetypes = vim.tbl_keys(languages)
 				})
 			end
-			-- lua
-			vim.lsp.config('lua_ls', lsp_zero.nvim_lua_ls())
 
 			require'mason-lspconfig'.setup {
 				automatic_enable = {
