@@ -8,12 +8,86 @@ if status is-login
 		echo "Bass isn't installed - you might have a hard time with the /etc/profile"
 	end
 end
-set -x GOPATH $HOME/.config/go
-fish_add_path -a $HOME/.cargo/bin
-fish_add_path -a $HOME/.radicle/bin
-fish_add_path -a $HOME/.luarocks/bin
-fish_add_path -a $HOME/.bin
-fish_add_path -a $GOPATH/bin
+
+function _migrate_old_path
+	set from $argv[1]
+	set to $argv[2]
+	if not test -d "$from"
+		#echo "$from did not exist! migration done!"
+		return 0
+	end
+	if not command -q rsync
+		echo "install rsync to auto migrate from $from to $to"
+		return 1
+	end
+	echo "Migrating contents from $from to $to"
+
+	rsync \
+		--archive \
+		--verbose \
+		--remove-source-files \
+		--mkpath \
+		--human-readable \
+		--progress \
+		"$from" "$to"
+
+	if test $status -ne 0
+		return $status
+	end
+
+	# Remove the empty directory structure that remains
+	find "$from" -depth -type d -empty -delete
+
+	return $status
+end
+
+set -q XDG_DATA_HOME; or set -x XDG_DATA_HOME "$HOME/.local/share"
+set -q XDG_CONFIG_HOME; or set -x XDG_CONFIG_HOME "$HOME/.config"
+set -q XDG_CACHE_HOME; or set -x XDG_CACHE_HOME "$HOME/.cache"
+set -q XDG_BIN_HOME; or set -x XDG_BIN_HOME "$HOME/.local/bin"
+# TODO: projects -> Projects
+
+# Below, we force things to use XDG locations, if possible.
+
+set -x GOPATH "$XDG_DATA_HOME/go"
+_migrate_old_path "$HOME/go/" "$GOPATH"
+set -x GOBIN "$XDG_BIN_HOME"
+_migrate_old_path "$GOPATH/bin/" "$GOBIN"
+
+set -x CARGO_HOME "$XDG_DATA_HOME/cargo"
+_migrate_old_path "$HOME/.cargo/" "$CARGO_HOME"
+if command -q cargo
+	fish_add_path "$CARGO_HOME/bin"
+end
+
+set -x RUSTUP_HOME "$XDG_DATA_HOME/rustup"
+_migrate_old_path "$HOME/.rustup/" "$RUSTUP_HOME"
+
+# Luarocks stupidly doesn't support XDG and isn't ENV-configurable.
+if command -q luarocks
+	fish_add_path "$HOME/.luarocks/bin"
+end
+
+if command -q pnpm
+	fish_add_path "$XDG_DATA_HOME/pnpm/bin"
+end
+
+set -x WASMTIME_HOME "$XDG_DATA_HOME/wasmtime"
+_migrate_old_path "$HOME/.wasmtime/" "$WASMTIME_HOME"
+if command -q wasmtime
+	fish_add_path "$WASMTIME_HOME/bin"
+end
+
+set -x GEM_HOME "$XDG_DATA_HOME/gem"
+_migrate_old_path "$HOME/.gem/" "$GEM_HOME"
+if command -q gem
+	fish_add_path "$GEM_HOME/bin"
+end
+
+_migrate_old_path "$HOME/.bin/" "$XDG_BIN_HOME"
+_migrate_old_path "$HOME/bin/" "$XDG_BIN_HOME"
+fish_add_path "$XDG_BIN_HOME"
+
 function update_nvim -d "Update all nvim packages"
 	# https://github.com/RubixDev/mason-update-all#updating-from-cli
 	echo Update lazy.nvim plugins
@@ -25,7 +99,9 @@ end
 function make_eww_abbrs
 	abbr -ag ewd eww daemon
 	abbr -ag ewdd eww daemon --debug
-	abbr -ag ewl eww logs abbr -ag ewld eww logs --debug abbr -ag ewk eww kill
+	abbr -ag ewl eww logs
+	abbr -ag ewld eww logs --debug
+	abbr -ag ewk eww kill
 	abbr -ag ewkd eww kill --debug
 	abbr -ag ewot eww open taskbar
 	abbr -ag ewotd eww open taskbar --debug
@@ -83,9 +159,6 @@ function fish_greeting
 	echo -e \n$fish_greeting
 end
 
-set -gx WASMTIME_HOME "$HOME/.wasmtime"
-
-string match -r ".wasmtime" "$PATH" > /dev/null; or set -gx PATH "$WASMTIME_HOME/bin" $PATH
 if type -q nvim
 	set -x VISUAL nvim # Full screen editor
 	#set -x EDITOR "nvim -e" # Non-visual editor
@@ -104,10 +177,6 @@ end
 if type -q starship
 	starship completions fish > ~/.config/fish/completions/starship.fish
 	starship init fish | source
-end
-if type -q pnpm
-	set -gx PNPM_HOME "$HOME/.local/share/pnpm"
-	set -gx PATH "$PNPM_HOME" $PATH
 end
 if type -q poetry
 	poetry completions fish > ~/.config/fish/completions/poetry.fish
