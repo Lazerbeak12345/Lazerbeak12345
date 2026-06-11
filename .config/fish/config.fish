@@ -158,6 +158,27 @@ function fish_greeting
 	head $todofile
 	echo -e \n$fish_greeting
 end
+function git-sync-tags-offline
+	set remote $1
+	echo "deleting all local tags"
+	git tag --delete (git tag --list)
+	echo "replacing them with tags"
+	for line in (git ls-remote --tags --refs $remote)
+		if string match --quiet '*^{}' $line
+			# Skip dangling refs
+			continue
+		end
+		set parts (string split \t $line)
+		set hash $parts[1]
+		set ref $parts[2]
+		set tag_name (string replace 'refs/tags/' '' $ref)
+		git tag $tag_name $hash
+	end
+end
+function git-sync-tags
+	set remote $1
+	git fetch $remote --prune --prune-tags --force
+end
 
 if type -q nvim
 	set -x VISUAL nvim # Full screen editor
