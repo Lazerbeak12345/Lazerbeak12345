@@ -22,14 +22,7 @@ function _migrate_old_path
 	end
 	echo "Migrating contents from $from to $to"
 
-	rsync \
-		--archive \
-		--verbose \
-		--remove-source-files \
-		--mkpath \
-		--human-readable \
-		--progress \
-		"$from" "$to"
+	rsync --archive --verbose --remove-source-files --mkpath --human-readable --progress "$from" "$to"
 
 	if test $status -ne 0
 		return $status
