@@ -797,6 +797,7 @@ local lazy_plugins = {
 	},
 	{ 'WhoIsSethDaniel/mason-tool-installer.nvim', dependencies = 'mason.nvim' },
 	'mason-org/mason-lspconfig.nvim',
+	-- TODO: use opts here.
 	{ 'neovim/nvim-lspconfig',
 		event = {"BufReadPre", "BufNewFile"},
 		cmd = {"LspInfo", "LspInstall", "LspStart"},
@@ -915,6 +916,17 @@ local lazy_plugins = {
 				capabilities = {
 					-- disable in favor of pyright
 					hoverProvider = false
+				}
+			})
+			-- Append vue support to ts_ls
+			vim.lsp.config('ts_ls', {
+				filetypes = { 'vue' },
+				init_options = {
+					plugins = { {
+						name = '@vue/typescript-plugin',
+						location = vim.fn.expand"$MASON" .. '/packages/vue-language-server/node_modules/@vue/language-server',
+						languages = { 'vue' },
+					} }
 				}
 			})
 			-- BUG: doesn't seem to start, these days
