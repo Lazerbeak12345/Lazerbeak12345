@@ -81,6 +81,8 @@ _migrate_old_path "$HOME/.bin/" "$XDG_BIN_HOME"
 _migrate_old_path "$HOME/bin/" "$XDG_BIN_HOME"
 fish_add_path "$XDG_BIN_HOME"
 
+fish_add_path /home/linuxbrew/.linuxbrew/bin
+
 function update_nvim -d "Update all nvim packages"
 	# https://github.com/RubixDev/mason-update-all#updating-from-cli
 	echo Update lazy.nvim plugins
