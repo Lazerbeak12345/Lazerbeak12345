@@ -877,7 +877,9 @@ local lazy_plugins = {
 					"rust_analyzer",
 					"taplo", -- For TOML
 					"marksman", -- For markdown
-					"efm",
+					"ansiblels",
+					"ansible-lint",
+					"efm", -- General purpose adapter tool as a LSP
 					has_npm() and {
 						"stylelint", "prettier",
 						"eslint",
